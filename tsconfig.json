@@ -5,6 +5,12 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@shared/*": [
+        "./app/modules/shared/*"
+      ],
+      "@modules/*": [
+        "./app/modules/*"
       ]
     }
   },
