@@ -12,12 +12,20 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
+      // Puedes mantener la lógica de autenticación si la necesitas
+      // O simplemente navegar directamente para pruebas
+      
+      // Comenta o elimina la lógica de API temporalmente
+      /*
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
       const data = await response.json();
@@ -26,13 +34,12 @@ export default function LoginScreen() {
         setError(data.error);
         return;
       }
+      */
 
-      if (data.info) {
-        setError(data.info);
-        return;
-      }
-
-      router.replace('/(tabs)');
+      // Navega directamente a la ruta home
+      router.replace('/(tabs)');  // Esto te llevará a las tabs principales, donde está home
+      // Alternativamente, si quieres ir específicamente a home:
+      // router.replace('/(tabs)/index');
     } catch (err) {
       setError('Error al intentar iniciar sesión');
     }

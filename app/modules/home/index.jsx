@@ -1,299 +1,132 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, View, ActivityIndicator, TextInput, TouchableOpacity, Modal, Alert } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { ThemedText } from '../shared/components/ThemedText';
 import { ThemedView } from '../shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import homeData from './mocks/home.json';
+import DraggableFlatList from 'react-native-draggable-flatlist';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Home() {
-    const [dreams, setDreams] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const [title, setTitle] = useState('');
-    const [text, setText] = useState('');
-
-    const [modalVisible, setModalVisible] = useState(false);
-    const [editingDream, setEditingDream] = useState(null);
-
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3002/api';
-
-    useEffect(() => {
-        fetchDreams();
-    }, []);
-
-    const fetchDreams = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch(`${apiUrl}/dream`);
-
-            console.log('Response status:', response.status);
-            console.log('Response headers:', JSON.stringify(response.headers.map));
-
-            const responseClone = response.clone();
-            const textResponse = await responseClone.text();
-            console.log('Raw response text (first 200 chars):', textResponse.substring(0, 200));
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch dreams: ${response.status}`);
-            }
-
-            if (textResponse.trim().startsWith('[') || textResponse.trim().startsWith('{')) {
-                const data = JSON.parse(textResponse);
-                console.log('Parsed data:', data);
-                setDreams(data);
-            } else {
-                throw new Error('Response is not valid JSON');
-            }
-        } catch (err) {
-            setError(err.message);
-            console.error('Error fetching dreams:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const createDream = async () => {
-        if (!title.trim() || !text.trim()) {
-            Alert.alert('Error', 'Por favor rellena todos los campos');
-            return;
-        }
-
-        try {
-            const userId = 'clzv3yty00004ayzxex37f5nb'; // This should come from your auth state
-
-            const response = await fetch(`${apiUrl}/dream`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ title, text, userId }),
-            });
-
-            console.log('Create dream response status:', response.status);
-            const textResponse = await response.text();
-            console.log('Create dream raw response:', textResponse);
-
-            if (!response.ok) {
-                throw new Error('Failed to create dream');
-            }
-
-            // Reset form
-            setTitle('');
-            setText('');
-
-            // Refresh dreams list
-            fetchDreams();
-
-        } catch (err) {
-            setError(err.message);
-            Alert.alert('Error', 'No se pudo crear el sueño');
-        }
-    };
-
-    const updateDream = async () => {
-        if (!title.trim() || !text.trim() || !editingDream) {
-            Alert.alert('Error', 'Por favor rellena todos los campos');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${apiUrl}/api/dream`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: editingDream.id,
-                    title,
-                    text
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update dream');
-            }
-
-            // Reset form and close modal
-            setTitle('');
-            setText('');
-            setEditingDream(null);
-            setModalVisible(false);
-
-            // Refresh dreams list
-            fetchDreams();
-
-        } catch (err) {
-            setError(err.message);
-            Alert.alert('Error', 'No se pudo actualizar el sueño');
-        }
-    };
-
-    const deleteDream = async (id) => {
-        try {
-            const response = await fetch(`${apiUrl}/api/dream`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete dream');
-            }
-
-            // Refresh dreams list
-            fetchDreams();
-
-        } catch (err) {
-            setError(err.message);
-            Alert.alert('Error', 'No se pudo eliminar el sueño');
-        }
-    };
-
-    const openEditModal = (dream) => {
-        setEditingDream(dream);
-        setTitle(dream.title);
-        setText(dream.text);
-        setModalVisible(true);
-    };
-
-    const renderDreamItem = ({ item }) => (
-        <ThemedView style={styles.dreamItem}>
-            <View style={styles.dreamContent}>
-                <ThemedText type="subtitle">{item.title}</ThemedText>
-                <ThemedText>{item.text}</ThemedText>
-            </View>
-            <View style={styles.actionButtons}>
-                <TouchableOpacity
-                    style={styles.editButton}
-                    onPress={() => openEditModal(item)}
-                >
-                    <Ionicons name="pencil" size={20} color="#4CAF50" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => {
-                        Alert.alert(
-                            "Eliminar Sueño",
-                            "¿Estás seguro que deseas eliminar este sueño?",
-                            [
-                                { text: "Cancelar" },
-                                { text: "Eliminar", onPress: () => deleteDream(item.id) }
-                            ]
-                        );
-                    }}
-                >
-                    <Ionicons name="trash" size={20} color="#F44336" />
-                </TouchableOpacity>
-            </View>
-        </ThemedView>
-    );
-
-    if (loading && dreams.length === 0) {
-        return (
-            <ThemedView style={styles.container}>
-                <ActivityIndicator size="large" color="#A1CEDC" />
-            </ThemedView>
-        );
+    // Log para verificar datos
+    console.log('JSON data:', homeData);
+    
+    if (!homeData || !homeData.home_screen) {
+        console.error('Data structure is invalid:', homeData);
+        return <ThemedView><ThemedText>Error loading data</ThemedText></ThemedView>;
     }
+    
+    const { reading, routines, goals } = homeData.home_screen;
+    
+    // Estado para controlar el orden de las secciones
+    const [sections, setSections] = useState([
+        { id: 'reading', title: 'Lectura Diaria', visible: true, type: 'reading', data: reading },
+        { id: 'routines', title: 'Tus Rutinas', visible: true, type: 'routines', data: routines },
+        { id: 'goals', title: 'Tus Objetivos', visible: true, type: 'goals', data: goals }
+    ]);
+    
+    // Función para actualizar la visibilidad de una sección
+    const toggleSectionVisibility = (sectionId) => {
+        setSections(sections.map(section => 
+            section.id === sectionId 
+                ? { ...section, visible: !section.visible } 
+                : section
+        ));
+    };
+    
+    // Renderizar contenido según el tipo de sección
+    const renderSectionContent = (section) => {
+        if (!section.visible) return null;
+        
+        switch (section.type) {
+            case 'reading':
+                return (
+                    <ThemedView style={styles.readingCard}>
+                        <ThemedText style={styles.readingTitle}>{section.data.title}</ThemedText>
+                        <ThemedText style={styles.readingContent}>{section.data.content}</ThemedText>
+                    </ThemedView>
+                );
+                
+            case 'routines':
+                return section.data.map((routine) => (
+                    <ThemedView key={routine.id} style={styles.itemCard}>
+                        <View style={styles.itemHeader}>
+                            <ThemedText style={styles.itemTitle}>{routine.name}</ThemedText>
+                            <ThemedText style={styles.itemTime}>{routine.time}</ThemedText>
+                        </View>
+                        <ThemedText style={styles.itemDescription}>{routine.description}</ThemedText>
+                    </ThemedView>
+                ));
+                
+            case 'goals':
+                return section.data.map((goal) => (
+                    <ThemedView key={goal.id} style={styles.itemCard}>
+                        <ThemedText style={styles.itemTitle}>{goal.title}</ThemedText>
+                        <ThemedText style={styles.itemDescription}>{goal.description}</ThemedText>
+                    </ThemedView>
+                ));
+                
+            default:
+                return null;
+        }
+    };
+    
+    // Renderizar un elemento de la lista arrastrable
+    const renderDraggableItem = ({ item, drag, isActive }) => (
+        <TouchableOpacity
+            onLongPress={drag}
+            disabled={!item.visible}
+            style={[
+                styles.draggableSection,
+                isActive && styles.draggableSectionActive
+            ]}
+        >
+            <ThemedView style={styles.sectionContainer}>
+                <View style={styles.sectionHeader}>
+                    <View style={styles.sectionTitleContainer}>
+                        <Ionicons name="menu" size={20} color="#888" style={styles.dragIcon} />
+                        <ThemedText style={styles.sectionTitle}>{item.title}</ThemedText>
+                    </View>
+                    
+                    <TouchableOpacity 
+                        onPress={() => toggleSectionVisibility(item.id)}
+                        style={styles.toggleButton}
+                    >
+                        <Ionicons 
+                            name={item.visible ? "eye-off-outline" : "eye-outline"} 
+                            size={24} 
+                            color="#888" 
+                        />
+                    </TouchableOpacity>
+                </View>
+                
+                {renderSectionContent(item)}
+            </ThemedView>
+        </TouchableOpacity>
+    );
 
     return (
-        <ThemedView style={styles.container}>
-            <ThemedText type="title" style={styles.pageTitle}>Mis Objetivos</ThemedText>
-
-            {error && (
-                <ThemedView style={styles.errorContainer}>
-                    <ThemedText style={styles.errorText}>{error}</ThemedText>
-                </ThemedView>
-            )}
-
-            {/* Create new dream form */}
-            <ThemedView style={styles.formContainer}>
-                <ThemedText type="subtitle">Nuevo Objetivo</ThemedText>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Título"
-                    value={title}
-                    onChangeText={setTitle}
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemedView style={styles.container}>
+                <ThemedText style={styles.pageTitle}>Home</ThemedText>
+                
+                <ThemedText style={styles.instructions}>
+                    Mantén presionado para reordenar secciones. Toca el ícono del ojo para mostrar/ocultar.
+                </ThemedText>
+                
+                <DraggableFlatList
+                    data={sections}
+                    renderItem={renderDraggableItem}
+                    keyExtractor={(item) => item.id}
+                    onDragEnd={({ data }) => setSections(data)}
+                    contentContainerStyle={styles.listContainer}
                 />
-                <TextInput
-                    style={[styles.input, styles.textArea]}
-                    placeholder="Descripción"
-                    multiline
-                    numberOfLines={4}
-                    value={text}
-                    onChangeText={setText}
-                />
-                <TouchableOpacity style={styles.addButton} onPress={createDream}>
-                    <ThemedText style={styles.buttonText}>Agregar</ThemedText>
-                </TouchableOpacity>
             </ThemedView>
-
-            {/* Dreams list */}
-            <ThemedText type="subtitle" style={styles.listTitle}>Tus Objetivos</ThemedText>
-            {dreams.length === 0 ? (
-                <ThemedText>No has creado ningún objetivo todavía</ThemedText>
-            ) : (
-                <FlatList
-                    data={dreams}
-                    renderItem={renderDreamItem}
-                    keyExtractor={item => item.id}
-                    style={styles.dreamsList}
-                />
-            )}
-
-            {/* Edit modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.centeredView}>
-                    <ThemedView style={styles.modalView}>
-                        <ThemedText type="subtitle">Editar Objetivo</ThemedText>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Título"
-                            value={title}
-                            onChangeText={setTitle}
-                        />
-                        <TextInput
-                            style={[styles.input, styles.textArea]}
-                            placeholder="Descripción"
-                            multiline
-                            numberOfLines={4}
-                            value={text}
-                            onChangeText={setText}
-                        />
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonClose]}
-                                onPress={() => {
-                                    setModalVisible(!modalVisible);
-                                    setEditingDream(null);
-                                    setTitle('');
-                                    setText('');
-                                }}
-                            >
-                                <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonSave]}
-                                onPress={updateDream}
-                            >
-                                <ThemedText style={styles.buttonText}>Guardar</ThemedText>
-                            </TouchableOpacity>
-                        </View>
-                    </ThemedView>
-                </View>
-            </Modal>
-        </ThemedView>
+        </GestureHandlerRootView>
     );
 }
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
     container: {
@@ -301,104 +134,113 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     pageTitle: {
-        marginBottom: 20,
+        marginBottom: 10,
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
     },
-    errorContainer: {
-        padding: 10,
-        backgroundColor: '#FFEBEE',
-        marginBottom: 15,
-        borderRadius: 5,
-    },
-    errorText: {
-        color: '#D32F2F',
-    },
-    formContainer: {
-        padding: 15,
-        borderRadius: 10,
+    instructions: {
+        textAlign: 'center',
         marginBottom: 20,
+        fontSize: 14,
+        fontStyle: 'italic',
+        opacity: 0.7,
     },
-    listTitle: {
-        marginBottom: 10,
+    listContainer: {
+        paddingBottom: 20,
     },
-    input: {
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        borderRadius: 5,
-        padding: 10,
-        marginVertical: 8,
-        backgroundColor: '#FFFFFF',
+    draggableSection: {
+        width: width - 32, // Adjust for container padding
+        marginBottom: 16,
+        borderRadius: 12,
+        overflow: 'hidden',
     },
-    textArea: {
-        minHeight: 80,
-        textAlignVertical: 'top',
+    draggableSectionActive: {
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        zIndex: 999,
+        transform: [{ scale: 1.02 }],
     },
-    addButton: {
-        backgroundColor: '#4CAF50',
-        paddingVertical: 12,
-        borderRadius: 5,
-        alignItems: 'center',
-        marginTop: 10,
+    sectionContainer: {
+        borderRadius: 12,
+        overflow: 'hidden',
     },
-    buttonText: {
-        color: '#FFFFFF',
-        fontWeight: 'bold',
-    },
-    dreamsList: {
-        flex: 1,
-    },
-    dreamItem: {
-        flexDirection: 'row',
-        padding: 15,
-        borderRadius: 8,
-        marginVertical: 8,
-        elevation: 2,
-    },
-    dreamContent: {
-        flex: 1,
-    },
-    actionButtons: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    editButton: {
-        padding: 8,
-        marginRight: 5,
-    },
-    deleteButton: {
-        padding: 8,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalView: {
-        width: '80%',
-        borderRadius: 10,
-        padding: 20,
-        elevation: 5,
-    },
-    modalButtons: {
+    sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 15,
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0,0,0,0.1)',
     },
-    button: {
-        borderRadius: 5,
-        padding: 10,
-        elevation: 2,
-        flex: 1,
-        marginHorizontal: 5,
+    sectionTitleContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
     },
-    buttonClose: {
-        backgroundColor: '#9E9E9E',
+    dragIcon: {
+        marginRight: 8,
     },
-    buttonSave: {
-        backgroundColor: '#2196F3',
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    toggleButton: {
+        padding: 5,
+    },
+    section: {
+        marginBottom: 24,
+    },
+    readingCard: {
+        padding: 16,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        margin: 8,
+    },
+    readingTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    readingContent: {
+        fontSize: 16,
+        lineHeight: 24,
+    },
+    itemCard: {
+        marginHorizontal: 8,
+        marginVertical: 4,
+        padding: 16,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    itemHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    itemTitle: {
+        fontSize: 17,
+        fontWeight: 'bold',
+        flex: 1,
+    },
+    itemTime: {
+        fontSize: 14,
+        opacity: 0.7,
+    },
+    itemDescription: {
+        fontSize: 15,
+        lineHeight: 22,
     },
 });
