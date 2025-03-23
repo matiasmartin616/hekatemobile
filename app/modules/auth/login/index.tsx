@@ -1,47 +1,36 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View, Image } from 'react-native';
 import { Link, router } from 'expo-router';
-import { ThemedText } from '@shared/components/ThemedText';
-import { ThemedView } from '@shared/components/ThemedView';
+import ThemedText from '@shared/components/ThemedText';
+import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useAuth } from '@shared/context/AuthContext';
+import { authApi } from '@modules/auth/api/auth-api';
 
 export default function LoginScreen() {
+  console.log('LoginScreen iniciado');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     try {
-      // Puedes mantener la lógica de autenticación si la necesitas
-      // O simplemente navegar directamente para pruebas
-      
-      // Comenta o elimina la lógica de API temporalmente
-      /*
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      setLoading(true);
+      setError('');
 
-      const data = await response.json();
+      const data = await authApi.login({ email, password });
 
-      if (data.error) {
-        setError(data.error);
-        return;
-      }
-      */
+      // Use the login function from context
+      await login(data.token, data.user);
 
-      // Navega directamente a la ruta home
-      router.replace('/(tabs)');  // Esto te llevará a las tabs principales, donde está home
-      // Alternativamente, si quieres ir específicamente a home:
-      // router.replace('/(tabs)/index');
+      // Navigate to main app
+      router.replace('/(tabs)');
     } catch (err) {
-      setError('Error al intentar iniciar sesión');
+      setError(err instanceof Error ? err.message : 'Error al intentar iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,8 +85,14 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <ThemedText style={styles.buttonText}>Iniciar sesión</ThemedText>
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <ThemedText style={styles.buttonText}>
+            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+          </ThemedText>
         </TouchableOpacity>
 
         <Link href="/auth/register" asChild>
@@ -227,5 +222,8 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginBottom: 15,
+  },
+  buttonDisabled: {
+    backgroundColor: '#7D9AA0',
   },
 });

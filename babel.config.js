@@ -8,6 +8,8 @@ module.exports = function (api) {
         {
           alias: {
             '@shared': './app/modules/shared',
+            '@assets': './assets',
+            '@modules': './app/modules',
           },
         },
       ],

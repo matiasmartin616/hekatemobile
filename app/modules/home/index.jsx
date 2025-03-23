@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import { ThemedText } from '../shared/components/ThemedText';
-import { ThemedView } from '../shared/components/ThemedView';
+import { useState } from 'react';
+import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
+import ThemedText from '../shared/components/ThemedText';
+import ThemedView from '../shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import homeData from './mocks/home.json';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -10,34 +10,34 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 export default function Home() {
     // Log para verificar datos
     console.log('JSON data:', homeData);
-    
+
     if (!homeData || !homeData.home_screen) {
         console.error('Data structure is invalid:', homeData);
         return <ThemedView><ThemedText>Error loading data</ThemedText></ThemedView>;
     }
-    
+
     const { reading, routines, goals } = homeData.home_screen;
-    
+
     // Estado para controlar el orden de las secciones
     const [sections, setSections] = useState([
         { id: 'reading', title: 'Lectura Diaria', visible: true, type: 'reading', data: reading },
         { id: 'routines', title: 'Tus Rutinas', visible: true, type: 'routines', data: routines },
         { id: 'goals', title: 'Tus Objetivos', visible: true, type: 'goals', data: goals }
     ]);
-    
+
     // Función para actualizar la visibilidad de una sección
     const toggleSectionVisibility = (sectionId) => {
-        setSections(sections.map(section => 
-            section.id === sectionId 
-                ? { ...section, visible: !section.visible } 
+        setSections(sections.map(section =>
+            section.id === sectionId
+                ? { ...section, visible: !section.visible }
                 : section
         ));
     };
-    
+
     // Renderizar contenido según el tipo de sección
     const renderSectionContent = (section) => {
         if (!section.visible) return null;
-        
+
         switch (section.type) {
             case 'reading':
                 return (
@@ -46,7 +46,7 @@ export default function Home() {
                         <ThemedText style={styles.readingContent}>{section.data.content}</ThemedText>
                     </ThemedView>
                 );
-                
+
             case 'routines':
                 return section.data.map((routine) => (
                     <ThemedView key={routine.id} style={styles.itemCard}>
@@ -57,7 +57,7 @@ export default function Home() {
                         <ThemedText style={styles.itemDescription}>{routine.description}</ThemedText>
                     </ThemedView>
                 ));
-                
+
             case 'goals':
                 return section.data.map((goal) => (
                     <ThemedView key={goal.id} style={styles.itemCard}>
@@ -65,12 +65,12 @@ export default function Home() {
                         <ThemedText style={styles.itemDescription}>{goal.description}</ThemedText>
                     </ThemedView>
                 ));
-                
+
             default:
                 return null;
         }
     };
-    
+
     // Renderizar un elemento de la lista arrastrable
     const renderDraggableItem = ({ item, drag, isActive }) => (
         <TouchableOpacity
@@ -87,19 +87,19 @@ export default function Home() {
                         <Ionicons name="menu" size={20} color="#888" style={styles.dragIcon} />
                         <ThemedText style={styles.sectionTitle}>{item.title}</ThemedText>
                     </View>
-                    
-                    <TouchableOpacity 
+
+                    <TouchableOpacity
                         onPress={() => toggleSectionVisibility(item.id)}
                         style={styles.toggleButton}
                     >
-                        <Ionicons 
-                            name={item.visible ? "eye-off-outline" : "eye-outline"} 
-                            size={24} 
-                            color="#888" 
+                        <Ionicons
+                            name={item.visible ? "eye-off-outline" : "eye-outline"}
+                            size={24}
+                            color="#888"
                         />
                     </TouchableOpacity>
                 </View>
-                
+
                 {renderSectionContent(item)}
             </ThemedView>
         </TouchableOpacity>
@@ -109,11 +109,11 @@ export default function Home() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <ThemedView style={styles.container}>
                 <ThemedText style={styles.pageTitle}>Home</ThemedText>
-                
+
                 <ThemedText style={styles.instructions}>
                     Mantén presionado para reordenar secciones. Toca el ícono del ojo para mostrar/ocultar.
                 </ThemedText>
-                
+
                 <DraggableFlatList
                     data={sections}
                     renderItem={renderDraggableItem}
