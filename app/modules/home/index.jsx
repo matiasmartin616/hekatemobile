@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, View, ActivityIndicator, TextInput, TouchableOpacity, Modal, Alert } from 'react-native';
-import { ThemedText } from '../shared/components/ThemedText';
-import { ThemedView } from '../shared/components/ThemedView';
+import ThemedText from '../shared/components/ThemedText';
+import ThemedView from '../shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function Home() {

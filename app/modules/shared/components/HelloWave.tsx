@@ -7,9 +7,9 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 
-import { ThemedText } from '@shared/components/ThemedText';
+import ThemedText from '@shared/components/ThemedText';
 
-export function HelloWave() {
+export default function HelloWave() {
   const rotationAnimation = useSharedValue(0);
 
   rotationAnimation.value = withRepeat(

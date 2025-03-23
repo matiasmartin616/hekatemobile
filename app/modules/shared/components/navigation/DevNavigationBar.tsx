@@ -11,15 +11,15 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { ThemedText } from '@shared/components/ThemedText';
-import { useThemeColor } from '@shared/hooks/useThemeColor';
+import ThemedText from '@shared/components/ThemedText';
+import useThemeColor from '@shared/hooks/useThemeColor';
 
-export function DevNavigationBar() {
+export default function DevNavigationBar() {
     const [route, setRoute] = useState('');
     const [isVisible, setIsVisible] = useState(false);
     const slideAnim = useState(new Animated.Value(-100))[0];
 
-    const backgroundColor = useThemeColor({}, 'card');
+    const backgroundColor = useThemeColor({}, 'background');
     const textColor = useThemeColor({}, 'text');
 
     const toggleVisibility = () => {
@@ -41,9 +41,8 @@ export function DevNavigationBar() {
 
     const handleNavigate = () => {
         if (route) {
-            // Asegúrate de que la ruta comience con "/"
             const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-            router.push(formattedRoute);
+            router.push(formattedRoute as any);
             Keyboard.dismiss();
             setRoute('');
         }

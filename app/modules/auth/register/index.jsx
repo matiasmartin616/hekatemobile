@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View, Image } from 'react-native';
 import { Link, router } from 'expo-router';
-import { ThemedText } from '@shared/components/ThemedText';
-import { ThemedView } from '@shared/components/ThemedView';
+import ThemedText from '@shared/components/ThemedText';
+import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useAuth } from '@shared/context/AuthContext';
+import { authApi } from '../api/auth-api';
 
 export default function RegisterScreen() {
     const [name, setName] = useState('');
@@ -11,6 +13,8 @@ export default function RegisterScreen() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
 
     const handleRegister = async () => {
         if (password !== confirmPassword) {
@@ -19,30 +23,25 @@ export default function RegisterScreen() {
         }
 
         try {
-            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    confirmPassword
-                }),
+            setLoading(true);
+            setError('');
+
+            const data = await authApi.register({
+                name,
+                email,
+                password
             });
 
-            const data = await response.json();
-
-            if (data.error) {
-                setError(data.error);
-                return;
-            }
-
-            if (data.success) {
+            if (data.token) {
+                await login(data.token, data.user);
                 router.replace('/(tabs)');
+            } else {
+                setError('Registro exitoso, pero no se recibió token');
             }
         } catch (err) {
-            setError('Error al intentar registrarse');
+            setError(err instanceof Error ? err.message : 'Error al intentar registrarse');
+        } finally {
+            setLoading(false);
         }
     };
 
