@@ -1,20 +1,26 @@
 import { Tabs } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import useAuth from '@modules/auth/hooks/useAuth';
 import { Platform } from 'react-native';
 
 import TabBarIcon from '@shared/components/navigation/TabBarIcon';
 import UserMenu from '@shared/components/navigation/UserMenu';
+import SideMenu from '@shared/components/navigation/SideMenu';
 import {Colors} from '@shared/constants/Colors';
 import useColorScheme from '@shared/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated } = useAuth();
-  console.log('Tab layout iniciado');
+  const [sideMenuVisible, setSideMenuVisible] = useState(false);
+
   return (
     <>
-      <UserMenu />
+      <UserMenu onMenuPress={() => setSideMenuVisible(true)} />
+      <SideMenu 
+        visible={sideMenuVisible} 
+        onClose={() => setSideMenuVisible(false)} 
+      />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
@@ -23,7 +29,6 @@ export default function TabLayout() {
             height: Platform.OS === 'ios' ? 120 : 120,
           },
         }}>
-
         <Tabs.Screen
           name="index"
           options={{
@@ -44,6 +49,5 @@ export default function TabLayout() {
         />
       </Tabs>
     </>
-
   );
 }

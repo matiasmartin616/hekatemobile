@@ -6,7 +6,11 @@ import { useAuth } from '@shared/context/AuthContext';
 import ThemedText from '../ThemedText';
 import useThemeColor from '@shared/hooks/useThemeColor';
 
-export default function UserMenu() {
+interface UserMenuProps {
+    onMenuPress: () => void;
+}
+
+export default function UserMenu({ onMenuPress }: UserMenuProps) {
     const [visible, setVisible] = useState(false);
     const { user, logout } = useAuth();
     const backgroundColor = useThemeColor({}, 'background');
@@ -25,11 +29,20 @@ export default function UserMenu() {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor }]}>
+            {/* Side Menu Button */}
+            <TouchableOpacity 
+                onPress={onMenuPress} 
+                style={styles.sideMenuButton}
+            >
+                <Ionicons name="menu-outline" size={24} color={textColor} />
+            </TouchableOpacity>
+
+            {/* User Menu */}
             <Menu
                 visible={visible}
                 anchor={
-                    <TouchableOpacity onPress={showMenu} style={styles.button}>
+                    <TouchableOpacity onPress={showMenu} style={styles.userMenuButton}>
                         <Ionicons name="person-circle-outline" size={24} color={textColor} />
                         <ThemedText style={styles.username} numberOfLines={1}>
                             {user?.name || 'Usuario'}
@@ -59,10 +72,15 @@ const styles = StyleSheet.create({
     container: {
         paddingTop: 40,
         height: 120,
-        alignItems: 'flex-start',
-        justifyContent: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
     },
-    button: {
+    sideMenuButton: {
+        padding: 8,
+    },
+    userMenuButton: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 8,
