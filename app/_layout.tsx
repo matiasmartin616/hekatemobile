@@ -4,7 +4,7 @@ import { Stack, ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { View, LogBox, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, LogBox, Text, TouchableOpacity, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import useColorScheme from '@shared/hooks/useColorScheme';
 import DevNavigationBar from '@shared/components/navigation/DevNavigationBar';
 import { AuthProvider } from '@shared/context/AuthContext';
@@ -43,9 +43,8 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    // Hide splash screen even if font fails to load
     const hideSplash = async () => {
-      if (loaded || Platform.OS === 'ios') { // Always hide on iOS
+      if (loaded || Platform.OS === 'ios') {
         try {
           await SplashScreen.hideAsync();
         } catch (e) {
@@ -57,21 +56,24 @@ export default function RootLayout() {
     hideSplash();
   }, [loaded]);
 
-  // Continue with app rendering even if font fails on iOS
   if (!loaded && Platform.OS !== 'ios') {
     return null;
   }
 
   return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(routes)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-        <DevNavigationBar />
-      </ThemeProvider>
-    </AuthProvider>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={{ flex: 1 }}>
+        <AuthProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="(routes)" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+            <DevNavigationBar />
+          </ThemeProvider>
+        </AuthProvider>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

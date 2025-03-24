@@ -11,17 +11,12 @@ export default function RegisterScreen() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
 
     const handleRegister = async () => {
-        if (password !== confirmPassword) {
-            setError('Las contraseñas no coinciden');
-            return;
-        }
-
         try {
             setLoading(true);
             setError('');
@@ -79,14 +74,26 @@ export default function RegisterScreen() {
                     keyboardType="email-address"
                 />
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Contraseña"
-                    placeholderTextColor="#999999"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                />
+                <View style={{ position: 'relative' }}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Contraseña"
+                        placeholderTextColor="#999999"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                    />
+                    <TouchableOpacity
+                        style={styles.eyeIcon}
+                        onPress={() => setShowPassword(!showPassword)}
+                    >
+                        <Ionicons
+                            name={showPassword ? "eye-outline" : "eye-off-outline"}
+                            size={24}
+                            color="#999999"
+                        />
+                    </TouchableOpacity>
+                </View>
 
                 <View style={styles.registerOptions}>
                     <ThemedText style={styles.registerWithText}>Registrarse con:</ThemedText>
@@ -115,8 +122,8 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'flex-end',
+        backgroundColor: '#E0F4FF',
+        justifyContent: 'center',
     },
     circlesContainer: {
         position: 'absolute',
@@ -238,5 +245,10 @@ const styles = StyleSheet.create({
         color: 'red',
         textAlign: 'center',
         marginBottom: 15,
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: 15,
+        top: 12,
     },
 });

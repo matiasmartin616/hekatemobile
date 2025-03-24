@@ -11,6 +11,7 @@ export default function LoginScreen() {
   console.log('LoginScreen iniciado');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -67,14 +68,26 @@ export default function LoginScreen() {
           keyboardType="email-address"
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          placeholderTextColor="#999999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={{ position: 'relative' }}>
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#999999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Ionicons
+              name={showPassword ? "eye-outline" : "eye-off-outline"}
+              size={24}
+              color="#999999"
+            />
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.forgotPassword}>
           <ThemedText style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</ThemedText>
@@ -113,8 +126,8 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'flex-end',
+    backgroundColor: '#E0F4FF',
+    justifyContent: 'center',
   },
   circlesContainer: {
     position: 'absolute',
@@ -253,5 +266,10 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: '#80D1F0',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 15,
+    top: 12,
   },
 });
