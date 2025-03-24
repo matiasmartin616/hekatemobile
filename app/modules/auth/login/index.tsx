@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
         <View style={styles.logoContainer}>
           <Image
-            source={require('@/assets/images/icon.png')}
+            source={require('@/assets/images/logo-hekate-circle.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -60,6 +60,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
+          placeholderTextColor="#999999"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -69,6 +70,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
+          placeholderTextColor="#999999"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -81,7 +83,7 @@ export default function LoginScreen() {
         <View style={styles.loginOptions}>
           <ThemedText style={styles.loginWithText}>Iniciar sesión con:</ThemedText>
           <TouchableOpacity style={styles.googleButton}>
-            <Ionicons name="logo-google" size={24} color="#DB4437" />
+            <Ionicons name="logo-google" size={24} color="#1253AA" />
           </TouchableOpacity>
         </View>
 
@@ -97,7 +99,10 @@ export default function LoginScreen() {
 
         <Link href="/auth/register" asChild>
           <TouchableOpacity style={styles.linkButton}>
-            <ThemedText style={styles.linkText}>¿No tienes cuenta? Regístrate</ThemedText>
+            <ThemedText>
+              <ThemedText style={styles.normalText}>¿No tienes cuenta? </ThemedText>
+              <ThemedText style={styles.registerText}>Regístrate</ThemedText>
+            </ThemedText>
           </TouchableOpacity>
         </Link>
       </View>
@@ -108,42 +113,49 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FF',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'flex-end',
   },
   circlesContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 250,
+    height: 300,
+    overflow: 'hidden',
   },
   circle: {
     position: 'absolute',
     borderRadius: 200,
-    backgroundColor: '#A1CEDC',
+    backgroundColor: '#1253AA',
   },
   circle1: {
-    width: 300,
-    height: 300,
-    top: -150,
-    left: -100,
+    width: 200,
+    height: 200,
+    top: -110,
+    left: -20,
+    opacity: 0.7,
+    transform: [{ rotate: '-15deg' }],
   },
   circle2: {
     width: 200,
     height: 200,
     top: -50,
-    right: -50,
+    left: -90,
+    opacity: 0.7,
+    backgroundColor: '#1253AA',
+    transform: [{ rotate: '15deg' }],
   },
   content: {
-    flex: 1,
     padding: 20,
-    paddingTop: 60,
+    paddingBottom: 40,
   },
   title: {
     textAlign: 'center',
     marginBottom: 30,
     fontSize: 28,
-    color: '#1D3D47',
+    color: '#003A5C',
+    fontWeight: '600',
   },
   logoContainer: {
     alignItems: 'center',
@@ -155,11 +167,13 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   input: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 25,
     marginBottom: 15,
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -167,14 +181,14 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 2,
   },
   forgotPassword: {
     alignItems: 'flex-end',
     marginBottom: 20,
   },
   forgotPasswordText: {
-    color: '#0a7ea4',
+    color: '#1253AA',
     fontSize: 14,
   },
   loginOptions: {
@@ -188,7 +202,7 @@ const styles = StyleSheet.create({
   googleButton: {
     padding: 10,
     borderRadius: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -196,34 +210,48 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 2,
   },
   button: {
-    backgroundColor: '#1D3D47',
+    backgroundColor: '#1253AA',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   linkButton: {
     marginTop: 20,
     alignItems: 'center',
   },
-  linkText: {
-    color: '#0a7ea4',
+  normalText: {
+    color: '#000000',
     fontSize: 16,
   },
+  registerText: {
+    color: '#1253AA',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   error: {
-    color: 'red',
+    color: '#E74C3C',
     textAlign: 'center',
     marginBottom: 15,
+    fontSize: 14,
   },
   buttonDisabled: {
-    backgroundColor: '#7D9AA0',
+    backgroundColor: '#80D1F0',
   },
 });

@@ -54,7 +54,7 @@ export default function RegisterScreen() {
             </View>
 
             <View style={styles.content}>
-                <ThemedText type="title" style={styles.title}>¡Conecta con un nuevo comienzo!</ThemedText>
+                <ThemedText type="title" style={styles.title}>Conecta con un nuevo comienzo</ThemedText>
                 <ThemedText style={styles.subtitle}>Empieza a diseñar el presente que sueñas</ThemedText>
 
                 {error ? (
@@ -64,6 +64,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Nombre completo"
+                    placeholderTextColor="#999999"
                     value={name}
                     onChangeText={setName}
                 />
@@ -71,6 +72,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Correo electrónico"
+                    placeholderTextColor="#999999"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -80,23 +82,16 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Contraseña"
+                    placeholderTextColor="#999999"
                     value={password}
                     onChangeText={setPassword}
-                    secureTextEntry
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Confirma contraseña"
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
                     secureTextEntry
                 />
 
                 <View style={styles.registerOptions}>
                     <ThemedText style={styles.registerWithText}>Registrarse con:</ThemedText>
                     <TouchableOpacity style={styles.googleButton}>
-                        <Ionicons name="logo-google" size={24} color="#DB4437" />
+                        <Ionicons name="logo-google" size={24} color="#1253AA" />
                     </TouchableOpacity>
                 </View>
 
@@ -106,7 +101,10 @@ export default function RegisterScreen() {
 
                 <Link href="/auth/login" asChild>
                     <TouchableOpacity style={styles.linkButton}>
-                        <ThemedText style={styles.linkText}>¿Ya tienes una cuenta? Inicia sesión</ThemedText>
+                        <ThemedText>
+                            <ThemedText style={styles.normalText}>¿Ya tienes una cuenta? </ThemedText>
+                            <ThemedText style={styles.loginText}>Inicia sesión</ThemedText>
+                        </ThemedText>
                     </TouchableOpacity>
                 </Link>
             </View>
@@ -117,36 +115,42 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F7FF',
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'flex-end',
     },
     circlesContainer: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        height: 250,
+        height: 300,
+        overflow: 'hidden',
     },
     circle: {
         position: 'absolute',
         borderRadius: 200,
-        backgroundColor: '#A1CEDC',
+        backgroundColor: '#1253AA',
     },
     circle1: {
-        width: 300,
-        height: 300,
-        top: -150,
-        left: -100,
+        width: 200,
+        height: 200,
+        top: -110,
+        left: -20,
+        opacity: 0.7,
+        transform: [{ rotate: '-15deg' }],
     },
     circle2: {
         width: 200,
         height: 200,
         top: -50,
-        right: -50,
+        left: -90,
+        opacity: 0.7,
+        backgroundColor: '#1253AA',
+        transform: [{ rotate: '15deg' }],
     },
     content: {
-        flex: 1,
         padding: 20,
-        paddingTop: 60,
+        paddingBottom: 40,
     },
     title: {
         textAlign: 'center',
@@ -160,11 +164,13 @@ const styles = StyleSheet.create({
         marginBottom: 30,
     },
     input: {
-        backgroundColor: 'white',
+        backgroundColor: '#FFFFFF',
         padding: 15,
-        borderRadius: 10,
+        borderRadius: 25,
         marginBottom: 15,
         fontSize: 16,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -172,7 +178,7 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.05,
         shadowRadius: 3.84,
-        elevation: 5,
+        elevation: 2,
     },
     registerOptions: {
         alignItems: 'center',
@@ -196,10 +202,19 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     button: {
-        backgroundColor: '#1D3D47',
+        backgroundColor: '#1253AA',
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
+        marginTop: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     buttonText: {
         color: 'white',
@@ -210,9 +225,14 @@ const styles = StyleSheet.create({
         marginTop: 20,
         alignItems: 'center',
     },
-    linkText: {
-        color: '#0a7ea4',
+    normalText: {
+        color: '#000000',
         fontSize: 16,
+    },
+    loginText: {
+        color: '#1253AA',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     error: {
         color: 'red',
