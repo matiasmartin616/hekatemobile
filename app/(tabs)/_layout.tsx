@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 
 import TabBarIcon from '@shared/components/navigation/TabBarIcon';
 import UserMenu from '@shared/components/navigation/UserMenu';
-import Colors from '@shared/constants/Colors';
+import {Colors} from '@shared/constants/Colors';
 import useColorScheme from '@shared/hooks/useColorScheme';
 
 export default function TabLayout() {
