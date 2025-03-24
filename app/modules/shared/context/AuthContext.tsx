@@ -1,11 +1,18 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
-interface AuthContextType {
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+}
+
+export interface AuthContextType {
     token: string | null;
-    user: any | null;
+    user: User | null;
     isLoading: boolean;
-    login: (token: string, userData: any) => Promise<void>;
+    login: (token: string, userData: User) => Promise<void>;
     logout: () => Promise<void>;
     isAuthenticated: boolean;
 }
@@ -14,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [token, setToken] = useState<string | null>(null);
-    const [user, setUser] = useState<any | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -38,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loadAuthData();
     }, []);
 
-    const login = async (newToken: string, userData: any) => {
+    const login = async (newToken: string, userData: User) => {
         try {
             await AsyncStorage.setItem('auth_token', newToken);
             await AsyncStorage.setItem('user_data', JSON.stringify(userData || {}));
@@ -58,6 +65,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             setToken(null);
             setUser(null);
+
+            // Redirigir al login después de cerrar sesión
+            router.replace('/(routes)/auth/login');
         } catch (error) {
             console.error('Error clearing auth data:', error);
             throw error;
