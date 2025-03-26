@@ -5,13 +5,13 @@ import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { dreamsApi, Dream } from './api/dreams';
 
-
 export default function DreamSection() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [dreams, setDreams] = useState<Dream[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     const [newDream, setNewDream] = useState({ title: '', text: '' });
+    const [editingDream, setEditingDream] = useState<Dream | null>(null);
 
     useEffect(() => {
         loadDreams();
@@ -53,6 +53,27 @@ export default function DreamSection() {
         }
     };
 
+    const handleEditDream = async () => {
+        if (!editingDream) return;
+        
+        try {
+            await dreamsApi.updateDream(editingDream.id, {
+                title: editingDream.title,
+                text: editingDream.text
+            });
+            setModalVisible(false);
+            setEditingDream(null);
+            loadDreams();
+        } catch (error) {
+            console.error('Error updating dream:', error);
+        }
+    };
+
+    const openEditModal = (dream: Dream) => {
+        setEditingDream(dream);
+        setModalVisible(true);
+    };
+
     return (
         <ThemedView style={styles.container}>
             <View style={styles.headerContainer}>
@@ -70,7 +91,11 @@ export default function DreamSection() {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.addButton}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => {
+                        setEditingDream(null);
+                        setNewDream({ title: '', text: '' });
+                        setModalVisible(true);
+                    }}
                 >
                     <Ionicons name="add" size={24} color="#1253AA" />
                 </TouchableOpacity>
@@ -85,7 +110,12 @@ export default function DreamSection() {
                     ) : (
                         dreams.map((dream) => (
                             <View key={dream.id} style={styles.dreamItem}>
-                                <ThemedText style={styles.dreamTitle}>{dream.title}</ThemedText>
+                                <TouchableOpacity 
+                                    style={styles.dreamTextContainer}
+                                    onPress={() => openEditModal(dream)}
+                                >
+                                    <ThemedText style={styles.dreamTitle}>{dream.title}</ThemedText>
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => handleVisualize(dream.id)}
                                     disabled={!dream.canVisualize}
@@ -106,37 +136,59 @@ export default function DreamSection() {
                 visible={modalVisible}
                 transparent={true}
                 animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
+                onRequestClose={() => {
+                    setModalVisible(false);
+                    setEditingDream(null);
+                }}
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <ThemedText style={styles.modalTitle}>Nuevo Sueño</ThemedText>
+                        <ThemedText style={styles.modalTitle}>
+                            {editingDream ? 'Editar Sueño' : 'Nuevo Sueño'}
+                        </ThemedText>
                         <TextInput
                             style={styles.input}
                             placeholder="Título del sueño"
-                            value={newDream.title}
-                            onChangeText={(text) => setNewDream(prev => ({ ...prev, title: text }))}
+                            value={editingDream ? editingDream.title : newDream.title}
+                            onChangeText={(text) => {
+                                if (editingDream) {
+                                    setEditingDream({ ...editingDream, title: text });
+                                } else {
+                                    setNewDream(prev => ({ ...prev, title: text }));
+                                }
+                            }}
                         />
                         <TextInput
                             style={[styles.input, styles.textArea]}
                             placeholder="Descripción"
-                            value={newDream.text}
-                            onChangeText={(text) => setNewDream(prev => ({ ...prev, text: text }))}
+                            value={editingDream ? editingDream.text : newDream.text}
+                            onChangeText={(text) => {
+                                if (editingDream) {
+                                    setEditingDream({ ...editingDream, text: text });
+                                } else {
+                                    setNewDream(prev => ({ ...prev, text: text }));
+                                }
+                            }}
                             multiline
                             numberOfLines={4}
                         />
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
                                 style={[styles.button, styles.cancelButton]}
-                                onPress={() => setModalVisible(false)}
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    setEditingDream(null);
+                                }}
                             >
                                 <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.button, styles.createButton]}
-                                onPress={handleCreateDream}
+                                onPress={editingDream ? handleEditDream : handleCreateDream}
                             >
-                                <ThemedText style={styles.buttonText}>Crear</ThemedText>
+                                <ThemedText style={styles.buttonText}>
+                                    {editingDream ? 'Guardar' : 'Crear'}
+                                </ThemedText>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -192,10 +244,13 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#E0E0E0',
     },
+    dreamTextContainer: {
+        flex: 1,
+        marginRight: 10,
+    },
     dreamTitle: {
         fontSize: 14,
         color: '#000000',
-        flex: 1,
     },
     addButton: {
         padding: 5,

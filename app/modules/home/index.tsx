@@ -18,6 +18,12 @@ export default function HomeScreen() {
 
     return (
         <ThemedView style={styles.container}>
+           
+            {/* Círculos decorativos */}
+            <View style={styles.circlesContainer}>
+                <View style={[styles.circle, styles.circle1]} />
+                <View style={[styles.circle, styles.circle2]} />
+            </View>
             {/* Header con logo y botón de recarga */}
             <View style={styles.header}>
                 <TouchableOpacity
@@ -35,19 +41,8 @@ export default function HomeScreen() {
                         ]}
                     />
                 </TouchableOpacity>
-                <Image
-                    source={require('@/assets/images/logo-hekate-circle.png')}
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
                 <View style={styles.refreshButton} /> {/* Espaciador para centrar el logo */}
             </View>
-            {/* Círculos decorativos */}
-            <View style={styles.circlesContainer}>
-                <View style={[styles.circle, styles.circle1]} />
-                <View style={[styles.circle, styles.circle2]} />
-            </View>
-
 
 
             {/* Contenido principal */}
@@ -112,7 +107,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingTop: 40,
         paddingHorizontal: 20,
-        backgroundColor: '#3478BE', // Azul más claro que el original
+        //backgroundColor: '#3478BE', // Azul más claro que el original
         paddingBottom: 15,
     },
     logo: {

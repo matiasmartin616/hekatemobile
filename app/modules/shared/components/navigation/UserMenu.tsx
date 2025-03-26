@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, View, StyleSheet, Platform } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Platform, Image } from 'react-native';
 import { Menu, MenuDivider } from 'react-native-material-menu';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@shared/context/AuthContext';
 import ThemedText from '../ThemedText';
+import ThemedView from '../ThemedView';
 import useThemeColor from '@shared/hooks/useThemeColor';
 
 interface UserMenuProps {
@@ -29,66 +30,117 @@ export default function UserMenu({ onMenuPress }: UserMenuProps) {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor }]}>
-            {/* Side Menu Button */}
-            <TouchableOpacity 
-                onPress={onMenuPress} 
-                style={styles.sideMenuButton}
-            >
-                <Ionicons name="menu-outline" size={24} color={textColor} />
-            </TouchableOpacity>
+        <ThemedView style={styles.mainContainer}>
+            {/* Círculos decorativos */}
+            <View style={styles.circlesContainer}>
+                <View style={[styles.circle, styles.circle1]} />
+                <View style={[styles.circle, styles.circle2]} />
+            </View>
 
-            {/* User Menu */}
-            <Menu
-                visible={visible}
-                anchor={
-                    <TouchableOpacity onPress={showMenu} style={styles.userMenuButton}>
-                        <Ionicons name="person-circle-outline" size={24} color={textColor} />
-                        <ThemedText style={styles.username} numberOfLines={1}>
-                            {user?.name || 'Usuario'}
-                        </ThemedText>
-                    </TouchableOpacity>
-                }
-                onRequestClose={hideMenu}
-                style={[styles.menu, { backgroundColor }]}
-            >
-                <View style={styles.menuContent}>
-                    <ThemedText style={styles.menuHeader}>{user?.email}</ThemedText>
-                    <MenuDivider />
-                    <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={handleLogout}
-                    >
-                        <Ionicons name="log-out-outline" size={20} color={textColor} />
-                        <ThemedText style={styles.menuItemText}>Cerrar sesión</ThemedText>
-                    </TouchableOpacity>
-                </View>
-            </Menu>
-        </View>
+            <View style={styles.header}>
+                <TouchableOpacity 
+                    onPress={onMenuPress} 
+                    style={styles.menuButton}
+                >
+                    <Ionicons name="menu-outline" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+
+                <Image
+                    source={require('@/assets/images/logo-hekate-circle.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
+
+                <Menu
+                    visible={visible}
+                    anchor={
+                        <TouchableOpacity onPress={showMenu} style={styles.userButton}>
+                            <Ionicons name="person-circle-outline" size={24} color="#FFFFFF" />
+                        </TouchableOpacity>
+                    }
+                    onRequestClose={hideMenu}
+                    style={{ ...styles.menu, backgroundColor }}
+                >
+                    <View style={styles.menuContent}>
+                        <ThemedText style={styles.menuName}>{user?.name || 'Usuario'}</ThemedText>
+                        <ThemedText style={styles.menuEmail}>{user?.email}</ThemedText>
+                        <MenuDivider />
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={handleLogout}
+                        >
+                            <Ionicons name="log-out-outline" size={20} color={textColor} />
+                            <ThemedText style={styles.menuItemText}>Cerrar sesión</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                </Menu>
+            </View>
+        </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        paddingTop: 40,
-        height: 120,
+    mainContainer: {
+        position: 'relative',
+    },
+    circlesContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 300,
+        overflow: 'hidden',
+    },
+    circle: {
+        position: 'absolute',
+        borderRadius: 200,
+        backgroundColor: '#1253AA',
+    },
+    circle1: {
+        width: 200,
+        height: 200,
+        top: -110,
+        left: -20,
+        opacity: 0.7,
+        transform: [{ rotate: '-15deg' }],
+    },
+    circle2: {
+        width: 200,
+        height: 200,
+        top: -50,
+        left: -90,
+        opacity: 0.7,
+        transform: [{ rotate: '15deg' }],
+    },
+    header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        paddingTop: Platform.OS === 'ios' ? 50 : 30,
         paddingHorizontal: 16,
+        paddingBottom: 16,
+        backgroundColor: '#1253AA',
     },
-    sideMenuButton: {
+    menuButton: {
         padding: 8,
-    },
-    userMenuButton: {
-        flexDirection: 'row',
+        width: 40,
         alignItems: 'center',
-        padding: 8,
+        justifyContent: 'center',
     },
-    username: {
-        marginLeft: 8,
-        fontSize: 16,
-        maxWidth: 120,
+    logo: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignSelf: 'center',
+        position: 'absolute',
+        left: '50%',
+        marginLeft: -20,
+    },
+    userButton: {
+        padding: 8,
+        width: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     menu: {
         marginTop: Platform.OS === 'ios' ? 45 : 35,
@@ -109,9 +161,16 @@ const styles = StyleSheet.create({
         padding: 8,
         minWidth: 200,
     },
-    menuHeader: {
+    menuName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        paddingVertical: 4,
+        paddingHorizontal: 16,
+    },
+    menuEmail: {
         fontSize: 14,
-        paddingVertical: 8,
+        color: '#666666',
+        paddingVertical: 4,
         paddingHorizontal: 16,
     },
     menuItem: {
