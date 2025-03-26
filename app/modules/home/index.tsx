@@ -1,246 +1,161 @@
-import { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
-import ThemedText from '../shared/components/ThemedText';
-import ThemedView from '../shared/components/ThemedView';
+import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
+import { Link } from 'expo-router';
+import ThemedText from '@shared/components/ThemedText';
+import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import homeData from './mocks/home.json';
-import DraggableFlatList from 'react-native-draggable-flatlist';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import DreamSection from './sections/dreams/dream-section';
+import { useState } from 'react';
 
-export default function Home() {
-    // Log para verificar datos
-    console.log('JSON data:', homeData);
+export default function HomeScreen() {
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    if (!homeData || !homeData.home_screen) {
-        console.error('Data structure is invalid:', homeData);
-        return <ThemedView><ThemedText>Error loading data</ThemedText></ThemedView>;
-    }
-
-    const { reading, routines, goals } = homeData.home_screen;
-
-    // Estado para controlar el orden de las secciones
-    const [sections, setSections] = useState([
-        { id: 'reading', title: 'Lectura Diaria', visible: true, type: 'reading', data: reading },
-        { id: 'routines', title: 'Tus Rutinas', visible: true, type: 'routines', data: routines },
-        { id: 'goals', title: 'Tus Objetivos', visible: true, type: 'goals', data: goals }
-    ]);
-
-    // Función para actualizar la visibilidad de una sección
-    const toggleSectionVisibility = (sectionId) => {
-        setSections(sections.map(section =>
-            section.id === sectionId
-                ? { ...section, visible: !section.visible }
-                : section
-        ));
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        // Esperar un poco para dar feedback visual
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setIsRefreshing(false);
     };
-
-    // Renderizar contenido según el tipo de sección
-    const renderSectionContent = (section) => {
-        if (!section.visible) return null;
-
-        switch (section.type) {
-            case 'reading':
-                return (
-                    <ThemedView style={styles.readingCard}>
-                        <ThemedText style={styles.readingTitle}>{section.data.title}</ThemedText>
-                        <ThemedText style={styles.readingContent}>{section.data.content}</ThemedText>
-                    </ThemedView>
-                );
-
-            case 'routines':
-                return section.data.map((routine) => (
-                    <ThemedView key={routine.id} style={styles.itemCard}>
-                        <View style={styles.itemHeader}>
-                            <ThemedText style={styles.itemTitle}>{routine.name}</ThemedText>
-                            <ThemedText style={styles.itemTime}>{routine.time}</ThemedText>
-                        </View>
-                        <ThemedText style={styles.itemDescription}>{routine.description}</ThemedText>
-                    </ThemedView>
-                ));
-
-            case 'goals':
-                return section.data.map((goal) => (
-                    <ThemedView key={goal.id} style={styles.itemCard}>
-                        <ThemedText style={styles.itemTitle}>{goal.title}</ThemedText>
-                        <ThemedText style={styles.itemDescription}>{goal.description}</ThemedText>
-                    </ThemedView>
-                ));
-
-            default:
-                return null;
-        }
-    };
-
-    // Renderizar un elemento de la lista arrastrable
-    const renderDraggableItem = ({ item, drag, isActive }) => (
-        <TouchableOpacity
-            onLongPress={drag}
-            disabled={!item.visible}
-            style={[
-                styles.draggableSection,
-                isActive && styles.draggableSectionActive
-            ]}
-        >
-            <ThemedView style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
-                    <View style={styles.sectionTitleContainer}>
-                        <Ionicons name="menu" size={20} color="#888" style={styles.dragIcon} />
-                        <ThemedText style={styles.sectionTitle}>{item.title}</ThemedText>
-                    </View>
-
-                    <TouchableOpacity
-                        onPress={() => toggleSectionVisibility(item.id)}
-                        style={styles.toggleButton}
-                    >
-                        <Ionicons
-                            name={item.visible ? "eye-off-outline" : "eye-outline"}
-                            size={24}
-                            color="#888"
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                {renderSectionContent(item)}
-            </ThemedView>
-        </TouchableOpacity>
-    );
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <ThemedView style={styles.container}>
-                <ThemedText style={styles.pageTitle}>Home</ThemedText>
-
-                <ThemedText style={styles.instructions}>
-                    Mantén presionado para reordenar secciones. Toca el ícono del ojo para mostrar/ocultar.
-                </ThemedText>
-
-                <DraggableFlatList
-                    data={sections}
-                    renderItem={renderDraggableItem}
-                    keyExtractor={(item) => item.id}
-                    onDragEnd={({ data }) => setSections(data)}
-                    contentContainerStyle={styles.listContainer}
+        <ThemedView style={styles.container}>
+            {/* Header con logo y botón de recarga */}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    onPress={handleRefresh}
+                    disabled={isRefreshing}
+                    style={styles.refreshButton}
+                >
+                    <Ionicons
+                        name="refresh"
+                        size={24}
+                        color="#FFFFFF"
+                        style={[
+                            styles.refreshIcon,
+                            isRefreshing && styles.refreshing
+                        ]}
+                    />
+                </TouchableOpacity>
+                <Image
+                    source={require('@/assets/images/logo-hekate-circle.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
                 />
-            </ThemedView>
-        </GestureHandlerRootView>
+                <View style={styles.refreshButton} /> {/* Espaciador para centrar el logo */}
+            </View>
+            {/* Círculos decorativos */}
+            <View style={styles.circlesContainer}>
+                <View style={[styles.circle, styles.circle1]} />
+                <View style={[styles.circle, styles.circle2]} />
+            </View>
+
+
+
+            {/* Contenido principal */}
+            <View style={styles.content}>
+                <DreamSection />
+
+                <Link href="/routine" asChild>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <ThemedText style={styles.menuText}>Rutina</ThemedText>
+                        <Ionicons name="chevron-forward" size={24} color="#1253AA" />
+                    </TouchableOpacity>
+                </Link>
+
+                <Link href="/daily-reading" asChild>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <ThemedText style={styles.menuText}>Lectura diaria</ThemedText>
+                        <Ionicons name="chevron-forward" size={24} color="#1253AA" />
+                    </TouchableOpacity>
+                </Link>
+            </View>
+        </ThemedView>
     );
 }
-
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        backgroundColor: '#FFFFFF',
     },
-    pageTitle: {
-        marginBottom: 10,
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
+    circlesContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 300,
+        overflow: 'hidden',
     },
-    instructions: {
-        textAlign: 'center',
-        marginBottom: 20,
-        fontSize: 14,
-        fontStyle: 'italic',
+    circle: {
+        position: 'absolute',
+        borderRadius: 200,
+        backgroundColor: '#1253AA',
+    },
+    circle1: {
+        width: 200,
+        height: 200,
+        top: -110,
+        left: -20,
         opacity: 0.7,
+        transform: [{ rotate: '-15deg' }],
     },
-    listContainer: {
-        paddingBottom: 20,
+    circle2: {
+        width: 200,
+        height: 200,
+        top: -50,
+        left: -90,
+        opacity: 0.7,
+        transform: [{ rotate: '15deg' }],
     },
-    draggableSection: {
-        width: width - 32, // Adjust for container padding
-        marginBottom: 16,
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    draggableSectionActive: {
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        zIndex: 999,
-        transform: [{ scale: 1.02 }],
-    },
-    sectionContainer: {
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    sectionHeader: {
+    header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.1)',
+        paddingTop: 40,
+        paddingHorizontal: 20,
+        backgroundColor: '#3478BE', // Azul más claro que el original
+        paddingBottom: 15,
     },
-    sectionTitleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    logo: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
     },
-    dragIcon: {
-        marginRight: 8,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    toggleButton: {
-        padding: 5,
-    },
-    section: {
-        marginBottom: 24,
-    },
-    readingCard: {
-        padding: 16,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        margin: 8,
-    },
-    readingTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    readingContent: {
-        fontSize: 16,
-        lineHeight: 24,
-    },
-    itemCard: {
-        marginHorizontal: 8,
-        marginVertical: 4,
-        padding: 16,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    itemHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    itemTitle: {
-        fontSize: 17,
-        fontWeight: 'bold',
+    content: {
         flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 40,
     },
-    itemTime: {
-        fontSize: 14,
-        opacity: 0.7,
+    menuItem: {
+        backgroundColor: '#FFFFFF',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 15,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 3.84,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
     },
-    itemDescription: {
-        fontSize: 15,
-        lineHeight: 22,
+    menuText: {
+        fontSize: 16,
+        color: '#000000',
+    },
+    refreshButton: {
+        padding: 8,
+    },
+    refreshIcon: {
+        opacity: 1,
+    },
+    refreshing: {
+        opacity: 0.5,
+        transform: [{ rotate: '180deg' }],
     },
 });

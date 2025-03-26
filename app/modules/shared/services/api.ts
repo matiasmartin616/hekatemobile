@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
-type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 interface RequestOptions {
   method?: RequestMethod;
@@ -62,6 +62,9 @@ export const api = {
   
   put: <T>(endpoint: string, body: any, options?: Omit<RequestOptions, 'method' | 'body'>) =>
     apiRequest<T>(endpoint, { ...options, method: 'PUT', body }),
+  
+  patch: <T>(endpoint: string, body: any, options?: Omit<RequestOptions, 'method' | 'body'>) =>
+    apiRequest<T>(endpoint, { ...options, method: 'PATCH', body }),
   
   delete: <T>(endpoint: string, options?: Omit<RequestOptions, 'method'>) =>
     apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
