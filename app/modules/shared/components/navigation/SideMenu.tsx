@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform, Animated, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ThemedText from '../ThemedText';
-import useThemeColor from '@shared/hooks/useThemeColor';
+import { Link } from 'expo-router';
+import ThemedText from '../../components/ThemedText';
+import useThemeColor from '../../hooks/useThemeColor';
 
 interface SideMenuProps {
     visible: boolean;
@@ -19,17 +20,13 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
             duration: 300,
             useNativeDriver: true,
         }).start();
-    }, [visible]);
+    }, [visible, slideAnim]);
+
+    if (!visible) return null;
 
     return (
-        <>
-            {visible && (
-                <TouchableOpacity 
-                    style={styles.overlay} 
-                    activeOpacity={1} 
-                    onPress={onClose}
-                />
-            )}
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.overlay} onPress={onClose} />
             <Animated.View 
                 style={[
                     styles.sideMenu,
@@ -39,26 +36,45 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                     }
                 ]}
             >
-                <View style={styles.sideMenuContent}>
-                    <TouchableOpacity style={styles.sideMenuItem}>
-                        <Ionicons name="home-outline" size={24} color="#FFFFFF" />
-                        <ThemedText style={[styles.sideMenuItemText, { color: '#FFFFFF' }]}>Inicio</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.sideMenuItem}>
-                        <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
-                        <ThemedText style={[styles.sideMenuItemText, { color: '#FFFFFF' }]}>Configuración</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.sideMenuItem}>
-                        <Ionicons name="help-circle-outline" size={24} color="#FFFFFF" />
-                        <ThemedText style={[styles.sideMenuItemText, { color: '#FFFFFF' }]}>Ayuda</ThemedText>
+                <View style={styles.menuHeader}>
+                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <Ionicons name="close" size={24} color="#FFFFFF" />
                     </TouchableOpacity>
                 </View>
+                <View style={styles.menuItems}>
+                    <Link href="/" asChild>
+                        <TouchableOpacity style={styles.menuItem}>
+                            <Ionicons name="home-outline" size={24} color="#FFFFFF" />
+                            <ThemedText style={styles.menuItemText}>Inicio</ThemedText>
+                        </TouchableOpacity>
+                    </Link>
+                    <Link href="../settings" asChild>
+                        <TouchableOpacity style={styles.menuItem}>
+                            <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
+                            <ThemedText style={styles.menuItemText}>Configuración</ThemedText>
+                        </TouchableOpacity>
+                    </Link>
+                    <Link href="../help" asChild>
+                        <TouchableOpacity style={styles.menuItem}>
+                            <Ionicons name="help-circle-outline" size={24} color="#FFFFFF" />
+                            <ThemedText style={styles.menuItemText}>Ayuda</ThemedText>
+                        </TouchableOpacity>
+                    </Link>
+                </View>
             </Animated.View>
-        </>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1000,
+    },
     overlay: {
         position: 'absolute',
         top: 0,
@@ -66,7 +82,6 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         backgroundColor: 'rgba(0,0,0,0.5)',
-        zIndex: 999,
     },
     sideMenu: {
         position: 'absolute',
@@ -74,7 +89,7 @@ const styles = StyleSheet.create({
         left: 0,
         bottom: 0,
         width: 300,
-        zIndex: 1000,
+        paddingTop: 20,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -87,19 +102,28 @@ const styles = StyleSheet.create({
             },
         }),
     },
-    sideMenuContent: {
-        paddingTop: 120,
-        paddingHorizontal: 16,
+    menuHeader: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        paddingHorizontal: 20,
+        marginBottom: 20,
     },
-    sideMenuItem: {
+    closeButton: {
+        padding: 8,
+    },
+    menuItems: {
+        paddingHorizontal: 20,
+    },
+    menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
+        paddingVertical: 15,
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(255,255,255,0.1)',
     },
-    sideMenuItemText: {
-        marginLeft: 16,
+    menuItemText: {
+        marginLeft: 15,
         fontSize: 16,
+        color: '#FFFFFF',
     },
 }); 

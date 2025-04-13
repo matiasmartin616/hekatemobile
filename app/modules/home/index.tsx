@@ -18,32 +18,6 @@ export default function HomeScreen() {
 
     return (
         <ThemedView style={styles.container}>
-           
-            {/* Círculos decorativos */}
-            <View style={styles.circlesContainer}>
-                <View style={[styles.circle, styles.circle1]} />
-                <View style={[styles.circle, styles.circle2]} />
-            </View>
-            {/* Header con logo y botón de recarga */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={handleRefresh}
-                    disabled={isRefreshing}
-                    style={styles.refreshButton}
-                >
-                    <Ionicons
-                        name="refresh"
-                        size={24}
-                        color="#FFFFFF"
-                        style={[
-                            styles.refreshIcon,
-                            isRefreshing && styles.refreshing
-                        ]}
-                    />
-                </TouchableOpacity>
-                <View style={styles.refreshButton} /> {/* Espaciador para centrar el logo */}
-            </View>
-
 
             {/* Contenido principal */}
             <View style={styles.content}>

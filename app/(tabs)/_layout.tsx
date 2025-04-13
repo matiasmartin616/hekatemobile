@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React, { useState } from 'react';
 import useAuth from '@modules/auth/hooks/useAuth';
-import { Platform } from 'react-native';
+import { Platform, Text } from 'react-native';
 
 import TabBarIcon from '@shared/components/navigation/TabBarIcon';
 import UserMenu from '@shared/components/navigation/UserMenu';
@@ -23,27 +23,79 @@ export default function TabLayout() {
       />
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarActiveTintColor: '#000000',
+          tabBarInactiveTintColor: '#000000',
           headerShown: false,
-          headerStyle: {
-            height: Platform.OS === 'ios' ? 120 : 120,
+          tabBarStyle: {
+            height: 60,
+            paddingBottom: 8,
+            paddingTop: 8,
+            backgroundColor: '#b9d4f7',
           },
+          tabBarLabel: ({ focused }) => (
+            <Text style={{ 
+              color: '#000000',
+              fontWeight: focused ? 'bold' : 'normal'
+            }} />
+          ),
         }}>
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+              <TabBarIcon 
+                name={focused ? 'home' : 'home-outline'} 
+                color={color}
+                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+              />
             ),
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="routine"
           options={{
-            title: 'Explore',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+              <TabBarIcon 
+                name={focused ? 'folder' : 'folder-outline'} 
+                color={color}
+                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="dreams"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon 
+                name={focused ? 'moon' : 'moon-outline'} 
+                color={color}
+                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="improve"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon 
+                name={focused ? 'heart' : 'heart-outline'} 
+                color={color}
+                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="reading"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon 
+                name={focused ? 'book' : 'book-outline'} 
+                color={color}
+                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+              />
             ),
           }}
         />
