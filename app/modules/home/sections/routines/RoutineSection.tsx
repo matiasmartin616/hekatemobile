@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Modal, TextInput, Platform } from 'react-native';
-import ThemedText from '../../../shared/components/ThemedText';
+import { StyleSheet, View, TouchableOpacity, Text, Modal, TextInput, Platform, Alert } from 'react-native';
+import ThemedText from '@shared/components/ThemedText';
 import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import useThemeColor from '../../../shared/hooks/useThemeColor';
+import useThemeColor from '@shared/hooks/useThemeColor';
+import { Swipeable } from 'react-native-gesture-handler';
 
 interface Routine {
     id: string;
@@ -17,7 +18,7 @@ interface RoutineSectionProps {
     // Add any props if needed
 }
 
-export const RoutineSection: React.FC<RoutineSectionProps> = () => {
+export default function RoutineSection() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -33,13 +34,13 @@ export const RoutineSection: React.FC<RoutineSectionProps> = () => {
         { id: '3', time: '10:00', description: 'OFI', completed: false },
     ]);
 
-    const backgroundColor = useThemeColor('background');
+    const backgroundColor = useThemeColor({}, 'background');
 
     const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', {
+        return date.toLocaleTimeString('es-ES', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true,
+            hour12: false,
         });
     };
 
@@ -68,25 +69,61 @@ export const RoutineSection: React.FC<RoutineSectionProps> = () => {
     };
 
     const handleCreateRoutine = () => {
-        if (newRoutine.timeString && newRoutine.description.trim()) {
+        if (newRoutine.timeString || formatTime(selectedTime)) {
             const newId = (routines.length + 1).toString();
-            setRoutines(currentRoutines => [
-                ...currentRoutines,
-                {
-                    id: newId,
-                    time: newRoutine.timeString,
-                    description: newRoutine.description.toUpperCase(),
-                    completed: false
-                }
-            ]);
-            setModalVisible(false);
-            setShowTimePicker(false);
-            setNewRoutine({
-                time: new Date(),
-                timeString: '',
-                description: ''
-            });
+            const timeToUse = newRoutine.timeString || formatTime(selectedTime);
+            
+            if (newRoutine.description.trim()) {
+                setRoutines(currentRoutines => [
+                    ...currentRoutines,
+                    {
+                        id: newId,
+                        time: timeToUse,
+                        description: newRoutine.description.toUpperCase(),
+                        completed: false
+                    }
+                ]);
+                
+                setModalVisible(false);
+                setShowTimePicker(false);
+                setNewRoutine({
+                    time: new Date(),
+                    timeString: '',
+                    description: ''
+                });
+            }
         }
+    };
+
+    const renderLeftActions = (routineId: string, dragX: any) => {
+        return (
+            <TouchableOpacity
+                style={styles.deleteAction}
+                onPress={() => {
+                    Alert.alert(
+                        'Confirmar',
+                        '¿Eliminar este elemento?',
+                        [
+                            {
+                                text: 'Cancelar',
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'Eliminar',
+                                onPress: () => {
+                                    setRoutines(currentRoutines =>
+                                        currentRoutines.filter(routine => routine.id !== routineId)
+                                    );
+                                },
+                                style: 'destructive'
+                            }
+                        ]
+                    );
+                }}
+            >
+                <Ionicons name="trash-outline" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+        );
     };
 
     return (
@@ -114,24 +151,34 @@ export const RoutineSection: React.FC<RoutineSectionProps> = () => {
             {isExpanded && (
                 <View style={styles.content}>
                     {routines.map((routine) => (
-                        <View key={routine.id} style={styles.routineItem}>
-                            <View style={styles.routineInfo}>
-                                <ThemedText style={styles.routineTime}>{routine.time}</ThemedText>
-                                <ThemedText style={styles.routineDescription}>
-                                    {routine.description}
-                                </ThemedText>
+                        <Swipeable
+                            key={routine.id}
+                            renderLeftActions={(progress, dragX) => 
+                                renderLeftActions(routine.id, dragX)
+                            }
+                            leftThreshold={40}
+                            friction={2}
+                            overshootLeft={false}
+                        >
+                            <View style={styles.routineItem}>
+                                <View style={styles.routineInfo}>
+                                    <ThemedText style={styles.routineTime}>{routine.time}</ThemedText>
+                                    <ThemedText style={styles.routineDescription}>
+                                        {routine.description}
+                                    </ThemedText>
+                                </View>
+                                <TouchableOpacity 
+                                    onPress={() => toggleRoutineStatus(routine.id)}
+                                    style={styles.checkbox}
+                                >
+                                    <Ionicons 
+                                        name={routine.completed ? "checkmark-circle" : "ellipse-outline"} 
+                                        size={24} 
+                                        color={routine.completed ? "#1253AA" : "#999999"}
+                                    />
+                                </TouchableOpacity>
                             </View>
-                            <TouchableOpacity 
-                                onPress={() => toggleRoutineStatus(routine.id)}
-                                style={styles.checkbox}
-                            >
-                                <Ionicons 
-                                    name={routine.completed ? "checkmark-circle" : "ellipse-outline"} 
-                                    size={24} 
-                                    color={routine.completed ? "#1253AA" : "#999999"}
-                                />
-                            </TouchableOpacity>
-                        </View>
+                        </Swipeable>
                     ))}
                 </View>
             )}
@@ -150,9 +197,12 @@ export const RoutineSection: React.FC<RoutineSectionProps> = () => {
                             style={styles.timeInput}
                             onPress={() => setShowTimePicker(true)}
                         >
-                            <ThemedText>
-                                {formatTime(selectedTime)}
-                            </ThemedText>
+                            <View style={styles.timeInputContent}>
+                                <Ionicons name="time-outline" size={24} color="#666666" />
+                                <ThemedText style={styles.timeText}>
+                                    {newRoutine.timeString || formatTime(selectedTime)}
+                                </ThemedText>
+                            </View>
                         </TouchableOpacity>
 
                         {showTimePicker && (
@@ -247,7 +297,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 10,
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
     },
     routineInfo: {
         flex: 1,
@@ -255,14 +309,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     routineTime: {
-        fontSize: 14,
-        color: '#000000',
+        fontSize: 16,
+        color: '#333333',
+        width: 60,
         marginRight: 15,
-        width: 50,
     },
     routineDescription: {
-        fontSize: 14,
-        color: '#000000',
+        fontSize: 16,
+        color: '#333333',
+        flex: 1,
     },
     checkbox: {
         padding: 5,
@@ -320,13 +375,30 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E0E0E0',
         borderRadius: 8,
-        padding: 10,
         marginBottom: 15,
-        height: 40,
+        height: 50,
         justifyContent: 'center',
+        paddingHorizontal: 15,
+        backgroundColor: '#F8F8F8',
+    },
+    timeInputContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    timeText: {
+        fontSize: 16,
+        color: '#333333',
     },
     timePicker: {
         height: 200,
         marginBottom: 15,
+    },
+    deleteAction: {
+        backgroundColor: '#FF3B30',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 80,
+        height: '100%',
     },
 }); 

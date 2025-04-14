@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import React, { useState } from 'react';
 import useAuth from '@modules/auth/hooks/useAuth';
 import { Platform, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import TabBarIcon from '@shared/components/navigation/TabBarIcon';
 import UserMenu from '@shared/components/navigation/UserMenu';
@@ -15,7 +16,7 @@ export default function TabLayout() {
   const [sideMenuVisible, setSideMenuVisible] = useState(false);
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <UserMenu onMenuPress={() => setSideMenuVisible(true)} />
       <SideMenu 
         visible={sideMenuVisible} 
@@ -100,6 +101,6 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </>
+    </GestureHandlerRootView>
   );
 }

@@ -143,6 +143,23 @@ export const dreamsApi = {
       }
       throw new Error('Error al obtener el historial de visualizaciones');
     }
+  },
+
+  /**
+   * Delete a dream
+   */
+  deleteDream: async (dreamId: string): Promise<void> => {
+    try {
+      console.log('Making DELETE request to:', `/dreams/${dreamId}`);
+      await api.delete(`/dreams/${dreamId}`);
+      console.log('Delete request completed');
+    } catch (error) {
+      console.error('API Delete Error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Error al eliminar el sueño');
+    }
   }
 };
 

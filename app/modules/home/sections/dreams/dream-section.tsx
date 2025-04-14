@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Modal, TextInput, Text } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Modal, TextInput, Text, Alert } from 'react-native';
 import ThemedText from '@shared/components/ThemedText';
 import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Swipeable } from 'react-native-gesture-handler';
 import { dreamsApi, Dream } from './api/dreams';
 
 export default function DreamSection() {
@@ -74,6 +75,49 @@ export default function DreamSection() {
         setModalVisible(true);
     };
 
+    const handleDeleteDream = async (dreamId: string) => {
+        try {
+            console.log('Attempting to delete dream with ID:', dreamId);
+            await dreamsApi.deleteDream(dreamId);
+            console.log('Dream deleted successfully');
+            setDreams(currentDreams => currentDreams.filter(dream => dream.id !== dreamId));
+        } catch (error) {
+            console.error('Error deleting dream:', error);
+            Alert.alert(
+                'Error',
+                'No se pudo eliminar el sueño. Por favor, inténtalo de nuevo.',
+                [{ text: 'OK' }]
+            );
+        }
+    };
+
+    const renderLeftActions = (dreamId: string, dragX: any) => {
+        return (
+            <TouchableOpacity
+                style={styles.deleteAction}
+                onPress={() => {
+                    Alert.alert(
+                        'Confirmar',
+                        '¿Eliminar este elemento?',
+                        [
+                            {
+                                text: 'Cancelar',
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'Eliminar',
+                                onPress: () => handleDeleteDream(dreamId),
+                                style: 'destructive'
+                            }
+                        ]
+                    );
+                }}
+            >
+                <Ionicons name="trash-outline" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <ThemedView style={styles.container}>
             <TouchableOpacity 
@@ -108,24 +152,34 @@ export default function DreamSection() {
                         <ThemedText>No hay sueños disponibles</ThemedText>
                     ) : (
                         dreams.map((dream) => (
-                            <View key={dream.id} style={styles.dreamItem}>
-                                <TouchableOpacity 
-                                    style={styles.dreamTextContainer}
-                                    onPress={() => openEditModal(dream)}
-                                >
-                                    <ThemedText style={styles.dreamTitle}>{dream.title}</ThemedText>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleVisualize(dream.id)}
-                                    disabled={!dream.canVisualize}
-                                >
-                                    <Ionicons
-                                        name={dream.slotVisualized ? "eye" : "eye-outline"}
-                                        size={24}
-                                        color={dream.canVisualize ? "#1253AA" : "#999999"}
-                                    />
-                                </TouchableOpacity>
-                            </View>
+                            <Swipeable
+                                key={dream.id}
+                                renderLeftActions={(progress, dragX) => 
+                                    renderLeftActions(dream.id, dragX)
+                                }
+                                leftThreshold={40}
+                                friction={2}
+                                overshootLeft={false}
+                            >
+                                <View style={styles.dreamItem}>
+                                    <TouchableOpacity 
+                                        style={styles.dreamTextContainer}
+                                        onPress={() => openEditModal(dream)}
+                                    >
+                                        <ThemedText style={styles.dreamTitle}>{dream.title}</ThemedText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => handleVisualize(dream.id)}
+                                        disabled={!dream.canVisualize}
+                                    >
+                                        <Ionicons
+                                            name={dream.slotVisualized ? "eye" : "eye-outline"}
+                                            size={24}
+                                            color={dream.canVisualize ? "#1253AA" : "#999999"}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </Swipeable>
                         ))
                     )}
                 </View>
@@ -241,7 +295,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 10,
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
     },
     dreamTextContainer: {
         flex: 1,
@@ -301,5 +359,12 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'white',
         fontWeight: '500',
+    },
+    deleteAction: {
+        backgroundColor: '#FF3B30',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 80,
+        height: '100%',
     },
 }); 

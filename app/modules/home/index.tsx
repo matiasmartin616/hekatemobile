@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
 import ThemedText from '@shared/components/ThemedText';
 import ThemedView from '@shared/components/ThemedView';
@@ -10,8 +10,11 @@ import InspirationCard from './components/InspirationCard';
 export default function HomeScreen() {
     return (
         <ThemedView style={styles.container}>
-            {/* Contenido principal */}
-            <View style={styles.content}>
+            <ScrollView 
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollViewContent}
+                showsVerticalScrollIndicator={false}
+            >
                 <InspirationCard
                     message="Cree en ti mismo y todo será posible"
                     onShare={() => {}}
@@ -28,7 +31,7 @@ export default function HomeScreen() {
                         <Ionicons name="chevron-forward" size={24} color="#1253AA" />
                     </TouchableOpacity>
                 </Link>
-            </View>
+            </ScrollView>
         </ThemedView>
     );
 }
@@ -38,10 +41,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
-    content: {
+    scrollView: {
         flex: 1,
+    },
+    scrollViewContent: {
         paddingHorizontal: 20,
         paddingTop: 40,
+        paddingBottom: 20,
     },
     menuItem: {
         backgroundColor: '#FFFFFF',
