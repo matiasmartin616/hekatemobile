@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Modal, TextInput, Text } from 'react-native';
 import ThemedText from '@shared/components/ThemedText';
 import ThemedView from '@shared/components/ThemedView';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -76,20 +76,19 @@ export default function DreamSection() {
 
     return (
         <ThemedView style={styles.container}>
-            <View style={styles.headerContainer}>
-                <TouchableOpacity
-                    style={styles.header}
-                    onPress={() => setIsExpanded(!isExpanded)}
-                >
-                    <Ionicons
-                        name={isExpanded ? "chevron-up" : "chevron-down"}
-                        size={24}
-                        color="#1253AA"
+            <TouchableOpacity 
+                style={styles.headerContainer}
+                onPress={() => setIsExpanded(!isExpanded)}
+            >
+                <View style={styles.titleContainer}>
+                    <Ionicons 
+                        name={isExpanded ? "chevron-down" : "chevron-forward"} 
+                        size={20} 
+                        color="#000000" 
                     />
-                    <ThemedText style={styles.title}>Sueños</ThemedText>
-
-                </TouchableOpacity>
-                <TouchableOpacity
+                    <Text style={styles.title}>Sueños</Text>
+                </View>
+                <TouchableOpacity 
                     style={styles.addButton}
                     onPress={() => {
                         setEditingDream(null);
@@ -99,7 +98,7 @@ export default function DreamSection() {
                 >
                     <Ionicons name="add" size={24} color="#1253AA" />
                 </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
 
             {isExpanded && (
                 <View style={styles.content}>
@@ -220,16 +219,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 15,
     },
-    header: {
+    titleContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 15,
     },
     title: {
         fontSize: 16,
         fontWeight: '500',
+        marginLeft: 8,
         color: '#000000',
+    },
+    addButton: {
+        padding: 5,
     },
     content: {
         padding: 15,
@@ -241,8 +242,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
     },
     dreamTextContainer: {
         flex: 1,
@@ -251,9 +250,6 @@ const styles = StyleSheet.create({
     dreamTitle: {
         fontSize: 14,
         color: '#000000',
-    },
-    addButton: {
-        padding: 5,
     },
     modalContainer: {
         flex: 1,
