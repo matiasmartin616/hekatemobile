@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TabBarIcon from '@shared/components/navigation/TabBarIcon';
 import UserMenu from '@shared/components/navigation/UserMenu';
 import SideMenu from '@shared/components/navigation/SideMenu';
-import {Colors} from '@shared/constants/Colors';
+import Colors from '@shared/constants/Colors';
 import useColorScheme from '@shared/hooks/useColorScheme';
 
 export default function TabLayout() {

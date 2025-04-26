@@ -4,7 +4,7 @@ import { Stack, ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import useColorScheme from '@shared/hooks/useColorScheme';
 import { AuthProvider } from '@shared/context/AuthContext';
@@ -16,6 +16,7 @@ SplashScreen.preventAutoHideAsync();
 //LogBox.ignoreAllLogs(false);
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  console.log('ErrorBoundary');
   return (
     <View style={styles.errorContainer}>
       <Text style={styles.errorTitle}>¡Algo salió mal!</Text>
@@ -28,32 +29,20 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 }
 
 export default function RootLayout() {
+  SplashScreen.hideAsync();
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    'SpaceMono': require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
+    <AuthProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(routes)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
         </ThemeProvider>
-      </AuthProvider>
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
+    </AuthProvider>
   );
 }
 

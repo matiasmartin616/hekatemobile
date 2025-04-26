@@ -1,4 +1,4 @@
-export const Colors = {
+const Colors = {
   light: {
     primary: '#00A3E0',     // Azul brillante del logo
     secondary: '#0076A3',   // Azul más oscuro para contraste
@@ -16,3 +16,5 @@ export const Colors = {
     border: '#1A3F5C',     // Bordes en tono azul oscuro
   }
 };
+
+export default Colors;
