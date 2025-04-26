@@ -4,10 +4,9 @@ import { Stack, ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { View, LogBox, Text, TouchableOpacity, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import useColorScheme from '@shared/hooks/useColorScheme';
-import DevNavigationBar from '@shared/components/navigation/DevNavigationBar';
 import { AuthProvider } from '@shared/context/AuthContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -15,7 +14,6 @@ SplashScreen.preventAutoHideAsync();
 
 // For development, enable all logs
 //LogBox.ignoreAllLogs(false);
-
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return (
@@ -31,51 +29,30 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
-  // Try to load fonts with improved error handling
-  const [loaded, fontError] = useFonts({
+  const [loaded] = useFonts({
     'SpaceMono': require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  console.log('Font loading attempt:', {
-    loaded,
-    error: fontError,
-    platform: Platform.OS
-  });
-
   useEffect(() => {
-    const hideSplash = async () => {
-      if (loaded || Platform.OS === 'ios') {
-        try {
-          await SplashScreen.hideAsync();
-        } catch (e) {
-          console.error('Error hiding splash:', e);
-        }
-      }
-    };
-
-    hideSplash();
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
   }, [loaded]);
 
-  if (!loaded && Platform.OS !== 'ios') {
+  if (!loaded) {
     return null;
   }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={{ flex: 1 }}>
-          <AuthProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Stack>
-                <Stack.Screen name="(routes)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              </Stack>
-              <DevNavigationBar />
-            </ThemeProvider>
-          </AuthProvider>
-        </View>
-      </TouchableWithoutFeedback>
+      <AuthProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(routes)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </ThemeProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }
