@@ -1,19 +1,17 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack, ErrorBoundaryProps } from 'expo-router';
+import { Stack, ErrorBoundaryProps, Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { View, Text, TouchableOpacity, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import useColorScheme from '@shared/hooks/useColorScheme';
-import { AuthProvider } from '@shared/context/AuthContext';
+import useColorScheme from '@modules/shared/hooks/use-color-scheme';
+import { AuthProvider } from '@/app/modules/shared/context/auth-context';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 // For development, enable all logs
-//LogBox.ignoreAllLogs(false);
+LogBox.ignoreAllLogs(false);
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   console.log('ErrorBoundary');
@@ -36,9 +34,8 @@ export default function RootLayout() {
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(routes)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Slot />
           </Stack>
         </ThemeProvider>
       </GestureHandlerRootView>
