@@ -16,5 +16,7 @@ export default function PrivateLayout() {
     if (isLoading) return <ActivityIndicator size="large" />;
     if (!user) return null; // Redirección en progreso
 
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return (
+        <Stack screenOptions={{ headerShown: false }}/>
+    );
 }
