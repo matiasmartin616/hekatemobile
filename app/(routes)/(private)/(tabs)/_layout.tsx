@@ -8,7 +8,6 @@ import { useAuth } from '@/app/modules/shared/context/auth-context';
 export default function TabLayout() {
   const [sideMenuVisible, setSideMenuVisible] = useState(false);
   const { user } = useAuth();
-  console.log('TabLayout', user);
   return (
     <>
       <Tabs

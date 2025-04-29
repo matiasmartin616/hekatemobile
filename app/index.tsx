@@ -6,8 +6,6 @@ import { View } from 'react-native';
 export default function EntryPoint() {
   const { user, isLoading } = useAuth();
 
-  console.log('EntryPoint', user);
-
   if (isLoading) {
     return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator size="large" color="#0000ff" />

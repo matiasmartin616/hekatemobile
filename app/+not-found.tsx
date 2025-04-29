@@ -5,7 +5,6 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 
 export default function NotFoundScreen() {
-  console.log('NotFoundScreen iniciando');
   return (
     <>
       <Stack.Screen options={{ title: 'Ruta no encontrada' }} />

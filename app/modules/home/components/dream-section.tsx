@@ -77,9 +77,7 @@ export default function DreamSection() {
 
     const handleDeleteDream = async (dreamId: string) => {
         try {
-            console.log('Attempting to delete dream with ID:', dreamId);
             await dreamsApi.deleteDream(dreamId);
-            console.log('Dream deleted successfully');
             setDreams(currentDreams => currentDreams.filter(dream => dream.id !== dreamId));
         } catch (error) {
             console.error('Error deleting dream:', error);

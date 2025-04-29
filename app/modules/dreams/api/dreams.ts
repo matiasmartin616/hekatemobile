@@ -150,9 +150,7 @@ export const dreamsApi = {
    */
   deleteDream: async (dreamId: string): Promise<void> => {
     try {
-      console.log('Making DELETE request to:', `/dreams/${dreamId}`);
       await api.delete(`/dreams/${dreamId}`);
-      console.log('Delete request completed');
     } catch (error) {
       console.error('API Delete Error:', error);
       if (error instanceof Error) {

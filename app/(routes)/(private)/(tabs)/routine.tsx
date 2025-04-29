@@ -4,7 +4,6 @@ import ThemedView from '@/app/modules/shared/components/themed-view';
 
 export default function RoutineScreen() {
 
-  console.log('RoutineScreen');
   return (
     <ThemedView style={styles.container}>
       <View style={styles.content}>

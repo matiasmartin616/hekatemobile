@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 export default function WelcomeScreen() {
     return (
         <ImageBackground
-            source={require('@/assets/images/background_blue_purple.png')}
+            source={require('@/assets/images/app-main-background.png')}
             style={styles.container}
             resizeMode="cover"
         >
@@ -36,7 +36,7 @@ export default function WelcomeScreen() {
 
                 <View style={styles.loginSection}>
                     <View style={styles.loginRow}>
-                        <Link href="/(routes)/auth/login" asChild>
+                        <Link href="/(routes)/(public)/auth/login" asChild replace>
                             <TouchableOpacity style={styles.loginButtonRow}>
                                 <ThemedText style={styles.buttonTextWhite}>Email</ThemedText>
                             </TouchableOpacity>
@@ -62,7 +62,7 @@ export default function WelcomeScreen() {
                 </View>
 
                 <View style={styles.registerSection}>
-                    <Link href="/(routes)/auth/register" asChild>
+                    <Link href="/(routes)/(public)/auth/register" asChild replace>
                         <TouchableOpacity style={styles.registerButtonFull}>
                             <ThemedText style={styles.buttonTextWhite}>
                                 Regístrate
