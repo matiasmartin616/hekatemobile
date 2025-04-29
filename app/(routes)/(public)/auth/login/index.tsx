@@ -15,7 +15,6 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 }
 
 export default function LoginRoute() {
-    console.log('LoginRoute iniciado');
     return (
         <LoginScreen />
     );

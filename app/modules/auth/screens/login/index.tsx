@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 
 export default function LoginScreen() {
-  console.log('LoginScreen iniciado');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -99,7 +98,7 @@ export default function LoginScreen() {
           </ThemedText>
         </TouchableOpacity>
 
-        <Link href="/auth/register" asChild>
+        <Link href="/auth/register" asChild replace>
           <TouchableOpacity style={styles.linkButton}>
             <ThemedText>
               <ThemedText style={styles.normalText}>¿No tienes cuenta? </ThemedText>

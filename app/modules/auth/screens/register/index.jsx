@@ -106,7 +106,7 @@ export default function RegisterScreen() {
                     <ThemedText style={styles.buttonText}>Registrarse</ThemedText>
                 </TouchableOpacity>
 
-                <Link href="/auth/login" asChild>
+                <Link href="/auth/login" asChild replace>
                     <TouchableOpacity style={styles.linkButton}>
                         <ThemedText>
                             <ThemedText style={styles.normalText}>¿Ya tienes una cuenta? </ThemedText>

@@ -10,7 +10,7 @@ export default function PrivateLayout() {
     useEffect(() => {
         if (!isLoading && !user) {
             console.log('Redirigiendo a login desde layout privado');
-            router.replace('/(routes)/(public)/auth/login');
+            router.push('/(routes)/(public)/auth/login');
         }
     }, [user, isLoading]);
 

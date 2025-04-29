@@ -14,7 +14,6 @@ SplashScreen.preventAutoHideAsync();
 LogBox.ignoreAllLogs(false);
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
-  console.log('ErrorBoundary');
   return (
     <View style={styles.errorContainer}>
       <Text style={styles.errorTitle}>¡Algo salió mal!</Text>
