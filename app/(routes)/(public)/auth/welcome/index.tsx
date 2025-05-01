@@ -1,15 +1,12 @@
-import { StyleSheet, View, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 
 export default function WelcomeScreen() {
     return (
-        <ImageBackground
-            source={require('@/assets/images/app-main-background.png')}
-            style={styles.container}
-            resizeMode="cover"
-        >
+        <BackgroundWrapper>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
                     <Image
@@ -71,7 +68,7 @@ export default function WelcomeScreen() {
                     </Link>
                 </View>
             </View>
-        </ImageBackground>
+        </BackgroundWrapper>
     );
 }
 

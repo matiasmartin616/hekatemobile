@@ -5,6 +5,7 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
+import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -24,90 +25,92 @@ export default function LoginScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      {/* Círculos decorativos */}
-      <View style={styles.circlesContainer}>
-        <View style={[styles.circle, styles.circle1]} />
-        <View style={[styles.circle, styles.circle2]} />
-      </View>
-
-      <View style={styles.content}>
-        <ThemedText type="title" style={styles.title}>Inicia tu camino</ThemedText>
-
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('@/assets/images/logo-hekate-circle.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+    <BackgroundWrapper>
+      <ThemedView style={styles.container}>
+        {/* Círculos decorativos */}
+        <View style={styles.circlesContainer}>
+          <View style={[styles.circle, styles.circle1]} />
+          <View style={[styles.circle, styles.circle2]} />
         </View>
 
-        {error ? (
-          <ThemedText style={styles.error}>{error}</ThemedText>
-        ) : null}
+        <View style={styles.content}>
+          <ThemedText type="title" style={styles.title}>Inicia tu camino</ThemedText>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Correo electrónico"
-          placeholderTextColor="#999999"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('@/assets/images/logo-hekate-circle.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
 
-        <View style={{ position: 'relative' }}>
+          {error ? (
+            <ThemedText style={styles.error}>{error}</ThemedText>
+          ) : null}
+
           <TextInput
             style={styles.input}
-            placeholder="Contraseña"
+            placeholder="Correo electrónico"
             placeholderTextColor="#999999"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Ionicons
-              name={showPassword ? "eye-outline" : "eye-off-outline"}
-              size={24}
-              color="#999999"
+
+          <View style={{ position: 'relative' }}>
+            <TextInput
+              style={styles.input}
+              placeholder="Contraseña"
+              placeholderTextColor="#999999"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
             />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                size={24}
+                color="#999999"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.forgotPassword}>
+            <ThemedText style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</ThemedText>
           </TouchableOpacity>
-        </View>
 
-        <TouchableOpacity style={styles.forgotPassword}>
-          <ThemedText style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</ThemedText>
-        </TouchableOpacity>
+          <View style={styles.loginOptions}>
+            <ThemedText style={styles.loginWithText}>Iniciar sesión con:</ThemedText>
+            <TouchableOpacity style={styles.googleButton}>
+              <Ionicons name="logo-google" size={24} color="#1253AA" />
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.loginOptions}>
-          <ThemedText style={styles.loginWithText}>Iniciar sesión con:</ThemedText>
-          <TouchableOpacity style={styles.googleButton}>
-            <Ionicons name="logo-google" size={24} color="#1253AA" />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.buttonText}>
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-          </ThemedText>
-        </TouchableOpacity>
-
-        <Link href="/auth/register" asChild replace>
-          <TouchableOpacity style={styles.linkButton}>
-            <ThemedText>
-              <ThemedText style={styles.normalText}>¿No tienes cuenta? </ThemedText>
-              <ThemedText style={styles.registerText}>Regístrate</ThemedText>
+          <TouchableOpacity
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <ThemedText style={styles.buttonText}>
+              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </ThemedText>
           </TouchableOpacity>
-        </Link>
-      </View>
-    </ThemedView>
+
+          <Link href="/auth/register" asChild replace>
+            <TouchableOpacity style={styles.linkButton}>
+              <ThemedText>
+                <ThemedText style={styles.normalText}>¿No tienes cuenta? </ThemedText>
+                <ThemedText style={styles.registerText}>Regístrate</ThemedText>
+              </ThemedText>
+            </TouchableOpacity>
+          </Link>
+        </View>
+      </ThemedView>
+    </BackgroundWrapper>
   );
 }
 

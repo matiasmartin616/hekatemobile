@@ -1,23 +1,35 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import ThemedText from '@modules/shared/components/themed-text';
 import ThemedView from '@modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import { authApi } from '@modules/auth/api/auth-api';
+import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 
 export default function RegisterScreen() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
 
+    const getInputStyle = (value) => {
+        return value ? styles.inputFocused : styles.input;
+    };
+
     const handleRegister = async () => {
         try {
+            if (password !== confirmPassword) {
+                setError('Las contraseñas no coinciden');
+                return;
+            }
+            
             setLoading(true);
             setError('');
 
@@ -40,135 +52,150 @@ export default function RegisterScreen() {
         }
     };
 
+    const handleBack = () => {
+        router.replace('/auth/welcome');
+    };
+
     return (
-        <ThemedView style={styles.container}>
-            {/* Círculos decorativos */}
-            <View style={styles.circlesContainer}>
-                <View style={[styles.circle, styles.circle1]} />
-                <View style={[styles.circle, styles.circle2]} />
-            </View>
-
-            <View style={styles.content}>
-                <ThemedText type="title" style={styles.title}>Conecta con un nuevo comienzo</ThemedText>
-                <ThemedText style={styles.subtitle}>Empieza a diseñar el presente que sueñas</ThemedText>
-
-                {error ? (
-                    <ThemedText style={styles.error}>{error}</ThemedText>
-                ) : null}
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Nombre completo"
-                    placeholderTextColor="#999999"
-                    value={name}
-                    onChangeText={setName}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Correo electrónico"
-                    placeholderTextColor="#999999"
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                />
-
-                <View style={{ position: 'relative' }}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Contraseña"
-                        placeholderTextColor="#999999"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={!showPassword}
-                    />
-                    <TouchableOpacity
-                        style={styles.eyeIcon}
-                        onPress={() => setShowPassword(!showPassword)}
-                    >
-                        <Ionicons
-                            name={showPassword ? "eye-outline" : "eye-off-outline"}
-                            size={24}
-                            color="#999999"
+        <BackgroundWrapper>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <View style={styles.logoContainer}>
+                        <Image
+                            source={require('@/assets/images/logo-hekate-circle.png')}
+                            style={styles.logo}
+                            resizeMode="contain"
                         />
-                    </TouchableOpacity>
-                </View>
+                    </View>
+                    
+                    <ThemedText type="title" style={styles.title}>¡Conecta con un nuevo comienzo!</ThemedText>
+                    <ThemedText style={styles.subtitle}>Empieza a visualizar el futuro que sueñas.</ThemedText>
 
-                <View style={styles.registerOptions}>
-                    <ThemedText style={styles.registerWithText}>Registrarse con:</ThemedText>
-                    <TouchableOpacity style={styles.googleButton}>
-                        <Ionicons name="logo-google" size={24} color="#1253AA" />
-                    </TouchableOpacity>
-                </View>
+                    {error ? (
+                        <ThemedText style={styles.error}>{error}</ThemedText>
+                    ) : null}
 
-                <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                    <ThemedText style={styles.buttonText}>Registrarse</ThemedText>
-                </TouchableOpacity>
+                    <TextInput
+                        style={getInputStyle(name)}
+                        placeholder="Nombre completo"
+                        placeholderTextColor="#999999"
+                        value={name}
+                        onChangeText={setName}
+                    />
 
-                <Link href="/auth/login" asChild replace>
-                    <TouchableOpacity style={styles.linkButton}>
-                        <ThemedText>
-                            <ThemedText style={styles.normalText}>¿Ya tienes una cuenta? </ThemedText>
-                            <ThemedText style={styles.loginText}>Inicia sesión</ThemedText>
+                    <TextInput
+                        style={getInputStyle(email)}
+                        placeholder="Correo electrónico"
+                        placeholderTextColor="#999999"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                    />
+
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={getInputStyle(password)}
+                            placeholder="Contraseña"
+                            placeholderTextColor="#999999"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeIcon}
+                            onPress={() => setShowPassword(!showPassword)}
+                        >
+                            <Ionicons
+                                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                                size={24}
+                                color="#999999"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.passwordRequirements}>
+                        <ThemedText style={styles.requirementText}>-Mínimo 8 caracteres.</ThemedText>
+                        <ThemedText style={styles.requirementText}>-Utiliza caracteres en mayúscula y minúscula.</ThemedText>
+                        <ThemedText style={styles.requirementText}>-Al menos un carácter especial.</ThemedText>
+                    </View>
+
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={getInputStyle(confirmPassword)}
+                            placeholder="Repite la contraseña"
+                            placeholderTextColor="#999999"
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            secureTextEntry={!showConfirmPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeIcon}
+                            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                            <Ionicons
+                                name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                                size={24}
+                                color="#999999"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity 
+                        style={[styles.validateButton, loading && styles.buttonDisabled]} 
+                        onPress={handleRegister}
+                        disabled={loading}
+                    >
+                        <ThemedText style={styles.validateButtonText}>
+                            Validar registro
                         </ThemedText>
                     </TouchableOpacity>
-                </Link>
+
+                    <TouchableOpacity 
+                        style={styles.backButton} 
+                        onPress={handleBack}
+                    >
+                        <ThemedText style={styles.backButtonText}>
+                            Volver
+                        </ThemedText>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </ThemedView>
+        </BackgroundWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#E0F4FF',
-        justifyContent: 'center',
-    },
-    circlesContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 300,
-        overflow: 'hidden',
-    },
-    circle: {
-        position: 'absolute',
-        borderRadius: 200,
-        backgroundColor: '#1253AA',
-    },
-    circle1: {
-        width: 200,
-        height: 200,
-        top: -110,
-        left: -20,
-        opacity: 0.7,
-        transform: [{ rotate: '-15deg' }],
-    },
-    circle2: {
-        width: 200,
-        height: 200,
-        top: -50,
-        left: -90,
-        opacity: 0.7,
-        backgroundColor: '#1253AA',
-        transform: [{ rotate: '15deg' }],
     },
     content: {
+        flex: 1,
         padding: 20,
-        paddingBottom: 40,
+        paddingTop: 40,
+    },
+    logoContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    logo: {
+        width: 80,
+        height: 80,
     },
     title: {
         textAlign: 'center',
         marginBottom: 10,
         fontSize: 28,
         color: '#1D3D47',
+        fontFamily: 'Inter',
     },
     subtitle: {
         textAlign: 'center',
-        color: '#666',
+        color: '#171923',
         marginBottom: 30,
+        fontFamily: 'Inter',
+        fontWeight: '400',
+
     },
     input: {
         backgroundColor: '#FFFFFF',
@@ -178,77 +205,74 @@ const styles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 1,
         borderColor: '#E0E0E0',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 3.84,
-        elevation: 2,
+        fontFamily: 'Inter',
+        textDecorationLine: 'none',
+        color: '#000000EB',
     },
-    registerOptions: {
-        alignItems: 'center',
-        marginVertical: 20,
-    },
-    registerWithText: {
-        marginBottom: 10,
-        color: '#666',
-    },
-    googleButton: {
-        padding: 10,
-        borderRadius: 20,
-        backgroundColor: 'white',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    button: {
-        backgroundColor: '#1253AA',
+    inputFocused: {
+        backgroundColor: '#FFFFFF',
         padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginTop: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    buttonText: {
-        color: 'white',
+        borderRadius: 25,
+        marginBottom: 15,
         fontSize: 16,
-        fontWeight: 'bold',
+        borderWidth: 1,
+        borderColor: '#171923',
+        fontFamily: 'Inter',
+        textDecorationLine: 'none',
+        color: '#000000EB',
     },
-    linkButton: {
+    passwordContainer: {
+        position: 'relative',
+        width: '100%',
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: 15,
+        top: 15,
+    },
+    passwordRequirements: {
+        marginBottom: 15,
+        paddingHorizontal: 15,
+    },
+    requirementText: {
+        color: '#171923',
+        fontSize: 14,
+        marginBottom: 2,
+        fontFamily: 'Inter',
+    },
+    validateButton: {
+        backgroundColor: '#1A365D',
+        height: 48,
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
         marginTop: 20,
+        width: '100%',
+        borderWidth: 0,
+    },
+    validateButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '700',
+        fontFamily: 'Inter',
+    },
+    backButton: {
+        marginTop: 15,
         alignItems: 'center',
     },
-    normalText: {
-        color: '#000000',
+    backButtonText: {
+        color: '#1A365D',
         fontSize: 16,
+        fontWeight: '700',
+        fontFamily: 'Inter',
     },
-    loginText: {
-        color: '#1253AA',
-        fontSize: 16,
-        fontWeight: 'bold',
+    buttonDisabled: {
+        opacity: 0.7,
     },
     error: {
         color: 'red',
         textAlign: 'center',
         marginBottom: 15,
-    },
-    eyeIcon: {
-        position: 'absolute',
-        right: 15,
-        top: 12,
+        fontFamily: 'Inter',
     },
 });
