@@ -1,47 +1,59 @@
 import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, Image } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
 import { router } from 'expo-router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import ThemedText from '@modules/shared/components/themed-text';
 import ThemedView from '@modules/shared/components/themed-view';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import FormTextInput from '@modules/shared/components/form/text-input';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import { authApi } from '@modules/auth/api/auth-api';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 
+// Define el esquema de validación con Zod
+const registerSchema = z.object({
+    name: z.string().min(1, 'El nombre es requerido'),
+    email: z.string().email('Correo electrónico inválido').min(1, 'El correo electrónico es requerido'),
+    password: z.string()
+        .min(8, 'La contraseña debe tener al menos 8 caracteres')
+        .regex(/[A-Z]/, 'Debe incluir al menos una letra mayúscula')
+        .regex(/[a-z]/, 'Debe incluir al menos una letra minúscula')
+        .regex(/[^a-zA-Z0-9]/, 'Debe incluir al menos un carácter especial'),
+    confirmPassword: z.string().min(1, 'Por favor confirma tu contraseña'),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+});
+
 export default function RegisterScreen() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
 
-    const getInputStyle = (value) => {
-        return value ? styles.inputFocused : styles.input;
-    };
+    const { control, handleSubmit, formState: { errors } } = useForm({
+        resolver: zodResolver(registerSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+        },
+    });
 
-    const handleRegister = async () => {
+    const handleRegister = async (data: z.infer<typeof registerSchema>) => {
         try {
-            if (password !== confirmPassword) {
-                setError('Las contraseñas no coinciden');
-                return;
-            }
-            
             setLoading(true);
             setError('');
 
-            const data = await authApi.register({
-                name,
-                email,
-                password
+            const response = await authApi.register({
+                name: data.name,
+                email: data.email,
+                password: data.password
             });
 
-            if (data.token) {
-                await login(data.token, data.user);
-                router.replace('/(tabs)');
+            if (response.token) {
+                router.push('/(routes)/(public)/auth/login');
             } else {
                 setError('Registro exitoso, pero no se recibió token');
             }
@@ -68,7 +80,7 @@ export default function RegisterScreen() {
                         />
                         <ThemedText style={styles.logoText}>Hekate</ThemedText>
                     </View>
-                    
+
                     <ThemedText type="title" style={styles.title}>¡Conecta con un nuevo comienzo!</ThemedText>
                     <ThemedText style={styles.subtitle}>Empieza a visualizar el futuro que sueñas.</ThemedText>
 
@@ -76,44 +88,29 @@ export default function RegisterScreen() {
                         <ThemedText style={styles.error}>{error}</ThemedText>
                     ) : null}
 
-                    <TextInput
-                        style={getInputStyle(name)}
+                    <FormTextInput
+                        name="name"
+                        control={control}
                         placeholder="Nombre completo"
-                        placeholderTextColor="#999999"
-                        value={name}
-                        onChangeText={setName}
+                        required
                     />
 
-                    <TextInput
-                        style={getInputStyle(email)}
+                    <FormTextInput
+                        name="email"
+                        control={control}
                         placeholder="Correo electrónico"
-                        placeholderTextColor="#999999"
-                        value={email}
-                        onChangeText={setEmail}
+                        required
                         autoCapitalize="none"
                         keyboardType="email-address"
                     />
 
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={getInputStyle(password)}
-                            placeholder="Contraseña"
-                            placeholderTextColor="#999999"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={!showPassword}
-                        />
-                        <TouchableOpacity
-                            style={styles.eyeIcon}
-                            onPress={() => setShowPassword(!showPassword)}
-                        >
-                            <Ionicons
-                                name={showPassword ? "eye-outline" : "eye-off-outline"}
-                                size={24}
-                                color="#999999"
-                            />
-                        </TouchableOpacity>
-                    </View>
+                    <FormTextInput
+                        name="password"
+                        control={control}
+                        placeholder="Contraseña"
+                        required
+                        isPassword
+                    />
 
                     <View style={styles.passwordRequirements}>
                         <ThemedText style={styles.requirementText}>-Mínimo 8 caracteres.</ThemedText>
@@ -121,30 +118,17 @@ export default function RegisterScreen() {
                         <ThemedText style={styles.requirementText}>-Al menos un carácter especial.</ThemedText>
                     </View>
 
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={getInputStyle(confirmPassword)}
-                            placeholder="Repite la contraseña"
-                            placeholderTextColor="#999999"
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            secureTextEntry={!showConfirmPassword}
-                        />
-                        <TouchableOpacity
-                            style={styles.eyeIcon}
-                            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                            <Ionicons
-                                name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
-                                size={24}
-                                color="#999999"
-                            />
-                        </TouchableOpacity>
-                    </View>
+                    <FormTextInput
+                        name="confirmPassword"
+                        control={control}
+                        placeholder="Repite la contraseña"
+                        required
+                        isPassword
+                    />
 
-                    <TouchableOpacity 
-                        style={[styles.validateButton, loading && styles.buttonDisabled]} 
-                        onPress={handleRegister}
+                    <TouchableOpacity
+                        style={[styles.validateButton, loading && styles.buttonDisabled]}
+                        onPress={handleSubmit(handleRegister)}
                         disabled={loading}
                     >
                         <ThemedText style={styles.validateButtonText}>
@@ -152,8 +136,8 @@ export default function RegisterScreen() {
                         </ThemedText>
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                        style={styles.backButton} 
+                    <TouchableOpacity
+                        style={styles.backButton}
                         onPress={handleBack}
                     >
                         <ThemedText style={styles.backButtonText}>
@@ -205,46 +189,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter',
         fontWeight: '400',
         lineHeight: 30,
-
-    },
-    input: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 25,
-        paddingHorizontal: 15,
-        marginBottom: 15,
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        fontFamily: 'Inter',
-        textDecorationLine: 'none',
-        color: '#000000EB',
-        height: 46,
-        width: 358,
-        alignSelf: 'center',
-    },
-    inputFocused: {
-        backgroundColor: '#FFFFFF',
-        padding: 15,
-        borderRadius: 25,
-        marginBottom: 15,
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#171923',
-        fontFamily: 'Inter',
-        textDecorationLine: 'none',
-        color: '#000000EB',
-        height: 46,
-        width: 358,
-        alignSelf: 'center',
-    },
-    passwordContainer: {
-        position: 'relative',
-        width: '100%',
-    },
-    eyeIcon: {
-        position: 'absolute',
-        right: 11,
-        top: 11,
     },
     passwordRequirements: {
         marginBottom: 15,
@@ -293,4 +237,4 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         fontFamily: 'Inter',
     },
-});
+}); 
