@@ -66,6 +66,7 @@ export default function RegisterScreen() {
                             style={styles.logo}
                             resizeMode="contain"
                         />
+                        <ThemedText style={styles.logoText}>Hekate</ThemedText>
                     </View>
                     
                     <ThemedText type="title" style={styles.title}>¡Conecta con un nuevo comienzo!</ThemedText>
@@ -172,35 +173,44 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 20,
-        paddingTop: 40,
     },
     logoContainer: {
         alignItems: 'center',
         marginBottom: 20,
     },
     logo: {
-        width: 80,
-        height: 80,
+        width: 54,
+        height: 54,
+    },
+    logoText: {
+        fontSize: 16,
+        color: '#171923',
+        fontFamily: 'Inter',
+        fontWeight: '400',
     },
     title: {
         textAlign: 'center',
         marginBottom: 10,
-        fontSize: 28,
-        color: '#1D3D47',
+        fontSize: 36,
+        color: '#171923',
         fontFamily: 'Inter',
+        paddingTop: 10,
+        lineHeight: 40,
     },
     subtitle: {
+        fontSize: 20,
         textAlign: 'center',
         color: '#171923',
         marginBottom: 30,
         fontFamily: 'Inter',
         fontWeight: '400',
+        lineHeight: 30,
 
     },
     input: {
         backgroundColor: '#FFFFFF',
-        padding: 15,
         borderRadius: 25,
+        paddingHorizontal: 15,
         marginBottom: 15,
         fontSize: 16,
         borderWidth: 1,
@@ -208,6 +218,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter',
         textDecorationLine: 'none',
         color: '#000000EB',
+        height: 46,
+        width: 358,
+        alignSelf: 'center',
     },
     inputFocused: {
         backgroundColor: '#FFFFFF',
@@ -220,6 +233,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter',
         textDecorationLine: 'none',
         color: '#000000EB',
+        height: 46,
+        width: 358,
+        alignSelf: 'center',
     },
     passwordContainer: {
         position: 'relative',
@@ -227,27 +243,29 @@ const styles = StyleSheet.create({
     },
     eyeIcon: {
         position: 'absolute',
-        right: 15,
-        top: 15,
+        right: 11,
+        top: 11,
     },
     passwordRequirements: {
         marginBottom: 15,
-        paddingHorizontal: 15,
+        paddingHorizontal: 12,
+        gap: 10,
     },
     requirementText: {
         color: '#171923',
-        fontSize: 14,
-        marginBottom: 2,
+        fontSize: 12,
+        lineHeight: 12,
         fontFamily: 'Inter',
     },
     validateButton: {
         backgroundColor: '#1A365D',
-        height: 48,
+        height: 46,
+        width: 358,
         borderRadius: 24,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 20,
-        width: '100%',
+        marginTop: 10,
+        alignSelf: 'center',
         borderWidth: 0,
     },
     validateButtonText: {
@@ -261,8 +279,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     backButtonText: {
-        color: '#1A365D',
-        fontSize: 16,
+        color: '#000000EB',
+        fontSize: 12,
         fontWeight: '700',
         fontFamily: 'Inter',
     },
