@@ -6,6 +6,8 @@ import { View, Text, TouchableOpacity, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import useColorScheme from '@modules/shared/hooks/use-color-scheme';
 import { AuthProvider } from '@/app/modules/shared/context/auth-context';
+import { useCallback, useEffect, useState } from 'react';
+import { Asset } from 'expo-asset';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -26,12 +28,42 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 }
 
 export default function RootLayout() {
-  SplashScreen.hideAsync();
+  const [appIsReady, setAppIsReady] = useState(false);
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Pre-load important images
+        await Asset.loadAsync([
+          require('@/assets/images/app-main-background.png'),
+          // Add any other important images here
+        ]);
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      // This tells the splash screen to hide immediately
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <AuthProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }} />
         </ThemeProvider>
