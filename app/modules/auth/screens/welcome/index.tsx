@@ -14,12 +14,12 @@ export default function WelcomeScreen() {
                         style={styles.logo}
                         resizeMode="contain"
                     />
-                    <ThemedText style={styles.appNameGray900}>Hekate</ThemedText>
+                    <ThemedText style={styles.appName}>Hekate</ThemedText>
                 </View>
 
                 <View style={styles.titleContainerAdjusted}>
-                    <ThemedText style={styles.titleGray900}>¿Tienes sueños?</ThemedText>
-                    <ThemedText style={styles.subtitleGray900}>
+                    <ThemedText style={styles.title}>¿Tienes sueños?</ThemedText>
+                    <ThemedText style={styles.subtitle}>
                         Crea rutinas diarias para llegar a cumplir tus metas.
                     </ThemedText>
                 </View>
@@ -45,7 +45,7 @@ export default function WelcomeScreen() {
                     </View>
 
                     <TouchableOpacity style={styles.forgotPassword}>
-                        <ThemedText style={styles.forgotPasswordTextGray900}>
+                        <ThemedText style={styles.forgotPasswordText}>
                             ¿Olvidaste tu contraseña?
                         </ThemedText>
                     </TouchableOpacity>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         height: 120,
         marginBottom: 0,
     },
-    appNameGray900: {
+    appName: {
         fontSize: 16,
         color: '#171923',
         fontWeight: '400',
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         justifyContent: 'center',
     },
-    titleGray900: {
+    title: {
         fontSize: 36,
         color: '#171923',
         fontWeight: '700',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
         lineHeight: 36,
         fontFamily: 'Inter',
     },
-    subtitleGray900: {
+    subtitle: {
         fontSize: 20,
         color: '#171923',
         textAlign: 'center',
@@ -163,10 +163,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 0,
     },
-    forgotPasswordTextGray900: {
+    forgotPasswordText: {
         color: '#171923',
-        fontSize: 14,
-        textDecorationLine: 'underline',
+        fontSize: 12,
         fontWeight: 'bold',
         fontFamily: 'Inter',
     },
