@@ -6,6 +6,7 @@ import ThemedView from '@/app/modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
+import BackButton from '@/app/modules/shared/components/form/back-button';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -108,6 +109,8 @@ export default function LoginScreen() {
               </ThemedText>
             </TouchableOpacity>
           </Link>
+
+          <BackButton route="/(routes)/(public)/auth/welcome" style={styles.backButtonContainer} />
         </View>
       </ThemedView>
     </BackgroundWrapper>
@@ -262,5 +265,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 15,
     top: 12,
+  },
+  backButtonContainer: {
+    marginTop: 20,
   },
 });

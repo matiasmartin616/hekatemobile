@@ -10,6 +10,7 @@ import FormTextInput from '@modules/shared/components/form/text-input';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import { authApi } from '@modules/auth/api/auth-api';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
+import BackButton from '@/app/modules/shared/components/form/back-button';
 
 // Define el esquema de validación con Zod
 const registerSchema = z.object({
@@ -62,10 +63,6 @@ export default function RegisterScreen() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleBack = () => {
-        router.replace('/auth/welcome');
     };
 
     return (
@@ -136,14 +133,7 @@ export default function RegisterScreen() {
                         </ThemedText>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={handleBack}
-                    >
-                        <ThemedText style={styles.backButtonText}>
-                            Volver
-                        </ThemedText>
-                    </TouchableOpacity>
+                    <BackButton route="/(routes)/(public)/auth/welcome" />
                 </View>
             </View>
         </BackgroundWrapper>
@@ -215,16 +205,6 @@ const styles = StyleSheet.create({
     validateButtonText: {
         color: '#FFFFFF',
         fontSize: 16,
-        fontWeight: '700',
-        fontFamily: 'Inter',
-    },
-    backButton: {
-        marginTop: 15,
-        alignItems: 'center',
-    },
-    backButtonText: {
-        color: '#000000EB',
-        fontSize: 12,
         fontWeight: '700',
         fontFamily: 'Inter',
     },
