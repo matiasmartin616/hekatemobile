@@ -213,8 +213,9 @@ const styles = StyleSheet.create({
     },
     error: {
         color: 'red',
-        textAlign: 'center',
+        textAlign: 'left',
         marginBottom: 15,
         fontFamily: 'Inter',
+        paddingLeft: 15,
     },
 }); 

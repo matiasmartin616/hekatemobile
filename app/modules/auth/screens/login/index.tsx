@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ThemedText from '@/app/modules/shared/components/themed-text';
-import ThemedView from '@/app/modules/shared/components/themed-view';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 import BackButton from '@/app/modules/shared/components/form/back-button';
@@ -195,10 +194,11 @@ const styles = StyleSheet.create({
   },
   error: {
     color: '#E74C3C',
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 16,
     fontSize: 14,
     fontFamily: 'Inter',
+    paddingLeft: 15,
   },
   buttonDisabled: {
     opacity: 0.7,
