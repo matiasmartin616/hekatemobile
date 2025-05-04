@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 10,
         paddingTop: 20,
-        paddingBottom: 24,
+        paddingBottom: 48,
         justifyContent: 'space-between',
     },
     logoContainer: {
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     },
     registerSection: {
         alignItems: 'center',
-        marginBottom: 0,
+        marginBottom: 16,
     },
     registerButtonFull: {
         backgroundColor: '#1A365D',
