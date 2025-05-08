@@ -132,7 +132,7 @@ export default function RegisterScreen() {
                         disabled={!isValid || !isDirty || loading}
                     >
                         <ThemedText style={styles.validateButtonText}>
-                            Regístrate
+                            Registrarte
                         </ThemedText>
                     </TouchableOpacity>
 
