@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
         height: 32,
     },
     logoText: {
-        fontSize: 20,
+        fontSize: 16,
         color: '#171923',
         fontFamily: 'Inter',
         fontWeight: '500',
