@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         fontSize: 36,
         color: '#171923',
         fontWeight: '700',
-        marginBottom: 10,
+        marginBottom: 20,
         textAlign: 'center',
         lineHeight: 36,
         fontFamily: 'Inter',
@@ -164,10 +164,11 @@ const styles = StyleSheet.create({
         marginTop: 0,
     },
     forgotPasswordText: {
-        color: '#171923',
-        fontSize: 12,
+        color: '#1A365D',
+        fontSize: 14,
         fontWeight: 'bold',
         fontFamily: 'Inter',
+        paddingTop: 12,
     },
     registerSection: {
         alignItems: 'center',

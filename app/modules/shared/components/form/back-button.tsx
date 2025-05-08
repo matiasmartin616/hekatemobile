@@ -44,14 +44,14 @@ export default function BackButton({
 
 const styles = StyleSheet.create({
   backButton: {
-    marginTop: 15,
+    marginTop: 6,
     alignItems: 'center',
     paddingVertical: 12,
     width: '100%',
   },
   backButtonText: {
-    color: '#000000EB',
-    fontSize: 12,
+    color: '#1A365D',
+    fontSize: 14,
     fontWeight: '700',
     fontFamily: 'Inter',
   },

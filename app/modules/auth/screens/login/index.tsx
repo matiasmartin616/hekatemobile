@@ -22,12 +22,13 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
 
-  const { control, handleSubmit } = useForm<LoginFormData>({
+  const { control, handleSubmit, formState: { isValid, isDirty } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: ''
-    }
+    },
+    mode: 'onChange'
   });
 
   const handleLogin = async (data: LoginFormData) => {
@@ -53,7 +54,12 @@ export default function LoginScreen() {
               <ThemedText style={styles.logoText}>Hekate</ThemedText>
           </View>
 
-          <ThemedText type="title" style={styles.title}>Inicia tu camino...</ThemedText>
+          <View style={styles.titleContainerAdjusted}>
+              <ThemedText style={styles.title}>Inicio de sesión</ThemedText>
+              <ThemedText style={styles.subtitle}>
+                  Inicia tu camino indicando tu email y contraseña
+              </ThemedText>
+          </View>
 
           {error ? (
             <ThemedText style={styles.error}>{error}</ThemedText>
@@ -87,23 +93,17 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
+            style={[
+              styles.button, 
+              (!isValid || !isDirty || isLoading) && styles.buttonDisabled
+            ]}
             onPress={handleSubmit(handleLogin)}
-            disabled={isLoading}
+            disabled={!isValid || !isDirty || isLoading}
           >
             <ThemedText style={styles.buttonText}>
               {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </ThemedText>
           </TouchableOpacity>
-
-          <Link href="/(routes)/(public)/auth/register" asChild replace>
-            <TouchableOpacity style={styles.linkButton}>
-              <ThemedText>
-                <ThemedText style={styles.normalText}>¿No tienes cuenta? </ThemedText>
-                <ThemedText style={styles.registerText}>Regístrate</ThemedText>
-              </ThemedText>
-            </TouchableOpacity>
-          </Link>
 
           <BackButton route="/(routes)/(public)/auth/welcome" style={styles.backButtonContainer} />
         </View>
@@ -143,23 +143,13 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     marginTop: 8,
   },
-  title: {
-    textAlign: 'center',
-    marginBottom: 32,
-    fontSize: 36,
-    color: '#171923',
-    fontFamily: 'Inter',
-    paddingTop: 10,
-    lineHeight: 40,
-    paddingBottom: 40,
-  },
   forgotPassword: {
     alignItems: 'center',
     marginTop: 0,
   },
   forgotPasswordText: {
-      color: '#171923',
-      fontSize: 12,
+      color: '#1A365D',
+      fontSize: 14,
       fontWeight: 'bold',
       fontFamily: 'Inter',
   },
@@ -206,4 +196,29 @@ const styles = StyleSheet.create({
   backButtonContainer: {
     marginTop: 24,
   },
+  titleContainerAdjusted: {
+    alignItems: 'center',
+    marginBottom: 56,
+    width: '95%',
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+},
+title: {
+    fontSize: 36,
+    color: '#171923',
+    fontWeight: '700',
+    marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 36,
+    fontFamily: 'Inter',
+},
+subtitle: {
+    fontSize: 19,
+    color: '#171923',
+    textAlign: 'center',
+    opacity: 0.9,
+    fontFamily: 'Inter',
+    lineHeight: 30,
+    fontWeight: '400',
+},
 });

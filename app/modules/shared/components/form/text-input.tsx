@@ -35,6 +35,7 @@ export default function FormTextInput<TFieldValues extends FieldValues>({
 
     const hasError = !!fieldState.error;
     const showSecureEntry = isPassword ? !showPassword : !!secureTextEntry;
+    const hasValue = field.value && field.value.length > 0;
 
     const getInputStyle = () => {
         if (hasError) return styles.inputError;
@@ -65,7 +66,7 @@ export default function FormTextInput<TFieldValues extends FieldValues>({
                     {...rest}
                 />
 
-                {isPassword && (
+                {isPassword && hasValue && (
                     <TouchableOpacity
                         style={styles.eyeIcon}
                         onPress={() => setShowPassword(!showPassword)}
@@ -79,7 +80,7 @@ export default function FormTextInput<TFieldValues extends FieldValues>({
                 )}
             </View>
 
-            {hasError && (
+            {hasError && isPassword && (
                 <ThemedText style={styles.errorText}>
                     {fieldState.error?.message}
                 </ThemedText>

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import ThemedText from '@modules/shared/components/themed-text';
-import ThemedView from '@modules/shared/components/themed-view';
 import FormTextInput from '@modules/shared/components/form/text-input';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import { authApi } from '@modules/auth/api/auth-api';
@@ -32,7 +31,7 @@ export default function RegisterScreen() {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
 
-    const { control, handleSubmit, formState: { errors } } = useForm({
+    const { control, handleSubmit, formState: { isValid, isDirty } } = useForm({
         resolver: zodResolver(registerSchema),
         defaultValues: {
             name: '',
@@ -40,6 +39,7 @@ export default function RegisterScreen() {
             password: '',
             confirmPassword: '',
         },
+        mode: 'onChange'
     });
 
     const handleRegister = async (data: z.infer<typeof registerSchema>) => {
@@ -124,12 +124,15 @@ export default function RegisterScreen() {
                     />
 
                     <TouchableOpacity
-                        style={[styles.validateButton, loading && styles.buttonDisabled]}
+                        style={[
+                            styles.validateButton, 
+                            (!isValid || !isDirty || loading) && styles.buttonDisabled
+                        ]}
                         onPress={handleSubmit(handleRegister)}
-                        disabled={loading}
+                        disabled={!isValid || !isDirty || loading}
                     >
                         <ThemedText style={styles.validateButtonText}>
-                            Validar registro
+                            Regístrate
                         </ThemedText>
                     </TouchableOpacity>
 
