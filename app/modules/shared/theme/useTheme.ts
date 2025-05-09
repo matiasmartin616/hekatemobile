@@ -9,3 +9,5 @@ export const useTheme = () => {
     shadows,
   };
 }; 
+
+export default useTheme;

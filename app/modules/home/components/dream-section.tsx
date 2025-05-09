@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     },
     flatList: {
         width: '100%',
-        marginLeft: -4
+        marginLeft: -4,
+        marginTop: 8
     }
 }); 

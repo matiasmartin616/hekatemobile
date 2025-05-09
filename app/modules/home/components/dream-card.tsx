@@ -8,6 +8,7 @@ import {
     ScrollView,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import colors from '../../shared/constants/Colors';
 
 interface DreamCardProps {
     title: string;
@@ -91,12 +92,12 @@ const THUMB_SIZE = 64;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: '#eaf6ff',
+        backgroundColor: colors.blue[50],
         borderRadius: 16,
         padding: 14,
         marginRight: 16,
         width: 300,
-        shadowColor: '#000',
+        shadowColor: colors.blue[500],
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         elevation: 2,
@@ -113,16 +114,16 @@ const styles = StyleSheet.create({
     title: {
         fontWeight: 'bold',
         fontSize: 15,
-        color: '#0a2342',
+        color: colors.gray[900],
         flex: 1,
     },
     viewComplete: {
-        color: '#0a2342',
+        color: colors.gray[900],
         fontWeight: '600',
         fontSize: 13,
     },
     description: {
-        color: '#1a2b3c',
+        color: colors.gray[900],
         fontSize: 13,
         marginBottom: 8,
     },
@@ -139,13 +140,13 @@ const styles = StyleSheet.create({
         height: THUMB_SIZE,
         borderRadius: 12,
         marginRight: 10,
-        backgroundColor: '#dbeafe',
+        backgroundColor: colors.blue[100],
     },
     addImage: {
         width: THUMB_SIZE,
         height: THUMB_SIZE,
         borderRadius: 12,
-        backgroundColor: '#1253AA',
+        backgroundColor: colors.blue[500],
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 10,
@@ -154,13 +155,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#1253AA',
+        borderColor: colors.blue[500],
         borderRadius: 20,
         paddingVertical: 6,
         justifyContent: 'center',
     },
     visualizeText: {
-        color: '#1253AA',
+        color: colors.blue[500],
         fontWeight: 'bold',
         fontSize: 15,
     },

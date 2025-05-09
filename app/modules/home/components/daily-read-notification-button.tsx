@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import colors from '../../shared/constants/Colors';
 
 interface DailyReadNotificationButtonProps {
     onNewReading?: () => void;
@@ -23,7 +24,7 @@ export default function DailyReadNotificationButton({ onNewReading, onReadNow }:
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        backgroundColor: '#eaf6ff',
+        backgroundColor: colors.blue[50],
         borderRadius: 12,
         paddingVertical: 8,
         paddingHorizontal: 12,
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 8,
         borderWidth: 2,
-        borderColor: '#B3D8FD',
+        borderColor: colors.blue[100],
     },
     leftButton: {
         flexDirection: 'row',
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#17457B',
+        borderColor: colors.blue[500],
         paddingVertical: 4,
         paddingHorizontal: 12,
     },
@@ -57,12 +58,12 @@ const styles = StyleSheet.create({
         marginRight: 6,
     },
     leftButtonText: {
-        color: '#17457B',
+        color: colors.blue[500],
         fontWeight: 'bold',
         fontSize: 15,
     },
     rightButtonText: {
-        color: '#17457B',
+        color: colors.blue[500],
         fontWeight: 'bold',
         fontSize: 13,
     },

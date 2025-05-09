@@ -3,7 +3,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
-
+import colors from '@/app/modules/shared/constants/Colors';
 interface InspirationCardProps {
     message: string;
     date: string;
@@ -33,13 +33,13 @@ export default function InspirationCard({ message, date, onShare }: InspirationC
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fffbeb',
+        backgroundColor: colors.yellow[50],
         borderRadius: 12,
         padding: 12,
         marginBottom: 16,
         width: '100%',
         borderWidth: 2,
-        borderColor: '#B3D8FD',
+        borderColor: colors.blue[200],
     },
     contentRow: {
         display: 'flex',
@@ -73,12 +73,12 @@ const styles = StyleSheet.create({
     },
     date: {
         fontSize: 15,
-        color: '#222',
+        color: colors.gray[900],
         fontWeight: 'bold',
     },
     message: {
         fontSize: 18,
-        color: '#333333',
+        color: colors.gray[900],
         lineHeight: 24,
         marginTop: 2,
     },
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 12,
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
-        borderTopColor: '#B3D8FD',
+        borderTopColor: colors.blue[200],
         zIndex: 1,
     },
     trianglePointer: {

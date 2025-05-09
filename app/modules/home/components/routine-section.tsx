@@ -4,7 +4,6 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import useThemeColor from '@/app/modules/shared/hooks/use-theme-color';
 import { Swipeable } from 'react-native-gesture-handler';
 
 interface Routine {
@@ -33,8 +32,6 @@ export default function RoutineSection() {
         { id: '2', time: '8:30', description: 'ENTRENAR', completed: true },
         { id: '3', time: '10:00', description: 'OFI', completed: false },
     ]);
-
-    const backgroundColor = useThemeColor({}, 'background');
 
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString('es-ES', {
@@ -189,7 +186,7 @@ export default function RoutineSection() {
                 animationType="slide"
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={[styles.modalContainer, { backgroundColor }]}>
+                <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <ThemedText style={styles.modalTitle}>Nueva Rutina</ThemedText>
 
