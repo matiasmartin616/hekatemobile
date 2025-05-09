@@ -5,6 +5,7 @@ import RoutineSection from '@modules/home/components/routine-section';
 import InspirationCard from '@modules/home/components/inspiration-card';
 import DailyReadNotificationButton from '@modules/home/components/daily-read-notification-button';
 import colors from '@/app/modules/shared/constants/Colors';
+import { router } from 'expo-router';
 
 const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
@@ -25,7 +26,7 @@ export default function HomeScreen() {
                     date={formattedDate}
                 />
 
-                <DailyReadNotificationButton />
+                <DailyReadNotificationButton onReadNow={() => { router.push('/(routes)/(private)/(tabs)/reading') }} />
 
                 <DreamSection />
 

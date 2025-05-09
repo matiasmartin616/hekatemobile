@@ -8,7 +8,7 @@ interface DailyReadNotificationButtonProps {
     onReadNow?: () => void;
 }
 
-export default function DailyReadNotificationButton({ onNewReading, onReadNow }: DailyReadNotificationButtonProps) {
+export default function DailyReadNotificationButton({ onReadNow }: DailyReadNotificationButtonProps) {
     return (
         <View style={styles.container}>
             <Ionicons name="book-outline" size={20} color="#17457B" style={styles.icon} />
