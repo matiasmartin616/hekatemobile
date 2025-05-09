@@ -15,7 +15,7 @@ export default function InspirationCard({ message, date, onShare }: InspirationC
         <ThemedView style={styles.container}>
             <View style={styles.contentRow}>
                 <View style={styles.sunIcon}>
-                    <Ionicons name="partly-sunny-outline" size={28} color="#FFE066" />
+                    <Ionicons name="partly-sunny-outline" size={40} color="#FFE066" />
                 </View>
                 <View style={styles.textColumn}>
                     <ThemedText style={styles.date}>{date}</ThemedText>
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         width: '100%',
         borderWidth: 2,
-        borderColor: colors.blue[200],
+        borderColor: colors.blue[100],
     },
     contentRow: {
         display: 'flex',
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 12,
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
-        borderTopColor: colors.blue[200],
+        borderTopColor: colors.blue[100],
         zIndex: 1,
     },
     trianglePointer: {

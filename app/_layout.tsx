@@ -6,6 +6,7 @@ import { View, Text, TouchableOpacity, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import useColorScheme from '@modules/shared/hooks/use-color-scheme';
 import { AuthProvider } from '@/app/modules/shared/context/auth-context';
+import { ModalProvider } from '@/app/modules/shared/context/modal-context';
 import { useCallback, useEffect, useState } from 'react';
 import { Asset } from 'expo-asset';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -68,7 +69,9 @@ export default function RootLayout() {
       <AuthProvider>
         <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack screenOptions={{ headerShown: false }} />
+            <ModalProvider>
+              <Stack screenOptions={{ headerShown: false }} />
+            </ModalProvider>
           </ThemeProvider>
         </GestureHandlerRootView>
       </AuthProvider>
