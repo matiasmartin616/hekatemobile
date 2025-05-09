@@ -6,13 +6,19 @@ import { dreamsApi, Dream } from '../../dreams/api/dreams';
 import useDreamsApiFetching from '../../dreams/hooks/use-dreams-api';
 import DreamCard from './dream-card';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
+import { useRouter } from 'expo-router';
 
 export default function DreamSection() {
     const theme = useTheme();
+    const router = useRouter();
     const [modalVisible, setModalVisible] = useState(false);
     const [newDream, setNewDream] = useState({ title: '', text: '' });
     const [editingDream, setEditingDream] = useState<Dream | null>(null);
     const { dreams, isLoading, error, refetch, createDream, updateDream, archiveDream, visualizeDream, deleteDream } = useDreamsApiFetching();
+
+    const handleDreamPress = (dreamId: string) => {
+        router.push(`/dreams/${dreamId}`);
+    };
 
     const handleVisualize = async (dreamId: string) => {
         visualizeDream.mutate({ dreamId });
@@ -83,7 +89,7 @@ export default function DreamSection() {
                     title={item.title}
                     description={item.text}
                     images={[require('@assets/images/dream-carousel-default-image.png'), require('@assets/images/dream-carousel-default-image.png')]}
-                    onViewComplete={() => openEditModal(item)}
+                    onViewComplete={() => handleDreamPress(item.id)}
                     onAddImage={() => { }}
                     onVisualize={() => handleVisualize(item.id)}
                 />

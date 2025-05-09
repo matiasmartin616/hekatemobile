@@ -253,6 +253,7 @@ export default function RoutineSection() {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: '#FFFFFF',
+        marginTop: 20,
         borderRadius: 10,
         marginBottom: 15,
         shadowColor: '#000',
