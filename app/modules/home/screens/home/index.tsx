@@ -1,13 +1,16 @@
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
-import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import DreamSection from '@modules/home/components/dream-section';
 import RoutineSection from '@modules/home/components/routine-section';
 import InspirationCard from '@modules/home/components/inspiration-card';
+import DailyReadNotificationButton from '@modules/home/components/daily-read-notification-button';
+
+const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 export default function HomeScreen() {
+
+    const date = new Date().toLocaleDateString().split('/');
+    const formattedDate = `${date[0]} de ${months[parseInt(date[1]) - 1]} de ${date[2]}`;
     return (
         <ThemedView style={styles.container}>
             <ScrollView
@@ -18,19 +21,15 @@ export default function HomeScreen() {
                 <InspirationCard
                     message="Cree en ti mismo y todo será posible"
                     onShare={() => { }}
-                    onArchive={() => { }}
+                    date={formattedDate}
                 />
+
+                <DailyReadNotificationButton />
 
                 <DreamSection />
 
                 <RoutineSection />
 
-                <Link href="/reading" asChild>
-                    <TouchableOpacity style={styles.menuItem}>
-                        <ThemedText style={styles.menuText}>Lectura diaria</ThemedText>
-                        <Ionicons name="chevron-forward" size={24} color="#1253AA" />
-                    </TouchableOpacity>
-                </Link>
             </ScrollView>
         </ThemedView>
     );
@@ -45,7 +44,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollViewContent: {
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         paddingTop: 40,
         paddingBottom: 20,
     },
