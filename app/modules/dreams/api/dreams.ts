@@ -12,9 +12,10 @@ export interface Dream {
     visualizations: number;
   };
   todayVisualizations: number;
-  slotVisualized: boolean;
-  canVisualize: boolean;
+  slotVisualized: boolean; //If the dream was visualized in the temporal slot today
+  canVisualize: boolean; //If the dream can be visualized in the temporal slot today
 }
+
 
 export interface CreateDreamRequest {
   title: string;

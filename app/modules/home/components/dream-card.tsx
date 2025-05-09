@@ -6,17 +6,20 @@ import {
     TouchableOpacity,
     Image,
     ScrollView,
+    ActivityIndicator,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import colors from '../../shared/constants/Colors';
 
-interface DreamCardProps {
+export interface DreamCardProps {
     title: string;
     description: string;
     images: string[];
     onViewComplete?: () => void;
     onAddImage?: () => void;
     onVisualize?: () => void;
+    isVisualized?: boolean;
+    isVisualizing?: boolean;
 }
 
 export default function DreamCard({
@@ -26,6 +29,8 @@ export default function DreamCard({
     onViewComplete,
     onAddImage,
     onVisualize,
+    isVisualized = false,
+    isVisualizing = false,
 }: DreamCardProps) {
     /** Limitamos a 2 miniaturas + botón "add" */
     const imageData = images.slice(0, 2);
@@ -75,14 +80,42 @@ export default function DreamCard({
             </ScrollView>
 
             {/* Botón Visualizar */}
-            <TouchableOpacity style={styles.visualizeBtn} onPress={onVisualize}>
-                <Ionicons
-                    name="eye-outline"
-                    size={18}
-                    color="#1253AA"
-                    style={{ marginRight: 6 }}
-                />
-                <Text style={styles.visualizeText}>Visualizar</Text>
+            <TouchableOpacity
+                style={[
+                    styles.visualizeBtn,
+                    isVisualized && styles.visualizedBtn,
+                    isVisualizing && styles.visualizingBtn
+                ]}
+                onPress={onVisualize}
+                disabled={isVisualized || isVisualizing}
+            >
+                {isVisualizing ? (
+                    <>
+                        <ActivityIndicator
+                            size="small"
+                            color={colors.blue[500]}
+                            style={{ marginRight: 6 }}
+                        />
+                        <Text style={styles.visualizeText}>
+                            Cargando...
+                        </Text>
+                    </>
+                ) : (
+                    <>
+                        <Ionicons
+                            name={isVisualized ? "checkmark" : "eye-outline"}
+                            size={18}
+                            color={isVisualized ? colors.blue[700] : colors.blue[500]}
+                            style={{ marginRight: 6 }}
+                        />
+                        <Text style={[
+                            styles.visualizeText,
+                            isVisualized && styles.visualizedText
+                        ]}>
+                            {isVisualized ? "Visualizado" : "Visualizar"}
+                        </Text>
+                    </>
+                )}
             </TouchableOpacity>
         </View>
     );
@@ -164,5 +197,16 @@ const styles = StyleSheet.create({
         color: colors.blue[500],
         fontWeight: 'bold',
         fontSize: 15,
+    },
+    visualizedBtn: {
+        borderColor: colors.blue[700],
+        backgroundColor: colors.blue[100],
+    },
+    visualizedText: {
+        color: colors.blue[700],
+    },
+    visualizingBtn: {
+        borderColor: colors.blue[300],
+        backgroundColor: colors.blue[50],
     },
 });

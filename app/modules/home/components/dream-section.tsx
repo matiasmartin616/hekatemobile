@@ -11,59 +11,28 @@ import { useRouter } from 'expo-router';
 export default function DreamSection() {
     const theme = useTheme();
     const router = useRouter();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [newDream, setNewDream] = useState({ title: '', text: '' });
-    const [editingDream, setEditingDream] = useState<Dream | null>(null);
-    const { dreams, isLoading, error, refetch, createDream, updateDream, archiveDream, visualizeDream, deleteDream } = useDreamsApiFetching();
+    const { dreams, isLoading, refetch, visualizeDream } = useDreamsApiFetching();
+    const [visualizingDreamId, setVisualizingDreamId] = useState<string | null>(null);
 
-    const handleDreamPress = (dreamId: string) => {
+    const handleSeeDreamDetail = (dreamId: string) => {
         router.push(`/dreams/${dreamId}`);
     };
 
     const handleVisualize = async (dreamId: string) => {
-        visualizeDream.mutate({ dreamId });
-        refetch();
-    };
-
-    const handleCreateDream = async () => {
-        createDream.mutate({ title: newDream.title, text: newDream.text, maxDaily: 1 });
-    };
-
-    const handleEditDream = async () => {
-        if (!editingDream) return;
-        try {
-            updateDream.mutate({
-                dreamId: editingDream.id,
-                dream: {
-                    title: editingDream.title,
-                    text: editingDream.text
+        setVisualizingDreamId(dreamId);
+        visualizeDream.mutate(
+            { dreamId },
+            {
+                onSuccess: () => {
+                    refetch();
+                    setVisualizingDreamId(null);
+                },
+                onError: () => {
+                    setVisualizingDreamId(null);
+                    Alert.alert('Error', 'No se pudo visualizar el sueño. Inténtalo de nuevo.');
                 }
-            });
-            setModalVisible(false);
-            setEditingDream(null);
-            refetch();
-        } catch (error) {
-            console.error('Error updating dream:', error);
-        }
-    };
-
-    const openEditModal = (dream: Dream) => {
-        setEditingDream(dream);
-        setModalVisible(true);
-    };
-
-    const handleDeleteDream = async (dreamId: string) => {
-        try {
-            deleteDream.mutate(dreamId);
-            refetch();
-        } catch (error) {
-            console.error('Error deleting dream:', error);
-            Alert.alert(
-                'Error',
-                'No se pudo eliminar el sueño. Por favor, inténtalo de nuevo.',
-                [{ text: 'OK' }]
-            );
-        }
+            }
+        );
     };
 
     if (isLoading) {
@@ -89,9 +58,11 @@ export default function DreamSection() {
                     title={item.title}
                     description={item.text}
                     images={[require('@assets/images/dream-carousel-default-image.png'), require('@assets/images/dream-carousel-default-image.png')]}
-                    onViewComplete={() => handleDreamPress(item.id)}
+                    onViewComplete={() => handleSeeDreamDetail(item.id)}
                     onAddImage={() => { }}
                     onVisualize={() => handleVisualize(item.id)}
+                    isVisualized={!item.canVisualize || item.slotVisualized}
+                    isVisualizing={visualizingDreamId === item.id}
                 />
             )}
         />
