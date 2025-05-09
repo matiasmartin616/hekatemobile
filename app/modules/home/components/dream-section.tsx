@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Modal, TextInput, Text, Alert, FlatList } from 'react-native';
+import { StyleSheet, Alert, FlatList } from 'react-native';
 import ThemedText from '@/app/modules/shared/components/themed-text';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { dreamsApi, Dream } from '../../dreams/api/dreams';
 import useDreamsApiFetching from '../../dreams/hooks/use-dreams-api';
 import DreamCard from './dream-card';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
