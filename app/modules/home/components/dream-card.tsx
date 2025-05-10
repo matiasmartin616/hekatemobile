@@ -7,9 +7,11 @@ import {
     Image,
     ScrollView,
     ActivityIndicator,
+    Dimensions,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import colors from '@/app/modules/shared/theme/theme';
+import { useModal } from '../../shared/context/modal-context';
 
 export interface DreamCardProps {
     title: string;
@@ -35,6 +37,22 @@ export default function DreamCard({
     /** Limitamos a 2 miniaturas + botón "add" */
     const imageData = images.slice(0, 2);
     imageData.push('add');
+
+    const { openModal } = useModal();
+
+    const handleImagePress = (image: string) => {
+        const screenWidth = Dimensions.get('window').width;
+        const imageSize = screenWidth * 0.8; // 80% del ancho de pantalla
+
+        openModal(
+            <Image
+                source={{ uri: image }}
+                style={{ width: imageSize, height: imageSize }}
+                resizeMode="contain"
+            />,
+            true
+        );
+    };
 
     return (
         <View style={styles.card}>
@@ -69,12 +87,13 @@ export default function DreamCard({
                             <Ionicons name="add" size={28} color="#fff" />
                         </TouchableOpacity>
                     ) : (
-                        <Image
-                            key={i}
-                            source={{ uri: item }}
-                            style={styles.image}
-                            resizeMode="contain"
-                        />
+                        <TouchableOpacity onPress={() => handleImagePress(item)} key={i}>
+                            <Image
+                                source={{ uri: item }}
+                                style={styles.image}
+                                resizeMode="cover"
+                            />
+                        </TouchableOpacity>
                     )
                 )}
             </ScrollView>

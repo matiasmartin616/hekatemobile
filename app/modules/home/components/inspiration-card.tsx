@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         width: '100%',
         borderWidth: 2,
-        borderColor: colors.light.palette.blue[200],
+        borderColor: colors.light.palette.blue[100],
     },
     contentRow: {
         display: 'flex',

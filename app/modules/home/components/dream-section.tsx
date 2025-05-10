@@ -96,7 +96,10 @@ export default function DreamSection() {
                     <DreamCard
                         title={item.title}
                         description={item.text}
-                        images={[require('@assets/images/dream-carousel-default-image.png'), require('@assets/images/dream-carousel-default-image.png')]}
+                        images={[
+                            'https://inmoclip.com/wp-content/uploads/2023/10/comprar-una-casa-en-la-playa.jpg',
+                            'https://inmoclip.com/wp-content/uploads/2023/10/comprar-una-casa-en-la-playa.jpg'
+                        ]}
                         onViewComplete={() => handleSeeDreamDetail(item.id)}
                         onAddImage={() => { }}
                         onVisualize={() => handleVisualize(item.id)}
