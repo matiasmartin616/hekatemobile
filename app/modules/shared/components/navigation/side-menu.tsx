@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingTop: 40,
         borderBottomWidth: 1,
         borderBottomColor: '#1A365D',
     },
@@ -249,6 +249,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#1A365D',
         fontFamily: 'Inter',
-        fontWeight:800
+        fontWeight: 800
     },
 }); 
