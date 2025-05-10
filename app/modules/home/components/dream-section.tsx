@@ -13,9 +13,8 @@ import CreateDreamForm from './form/create-dream-form';
 export default function DreamSection() {
     const theme = useTheme();
     const router = useRouter();
-    const { dreams, isLoading, refetch, visualizeDream, createDream } = useDreamsApi();
-    const [visualizingDreamId, setVisualizingDreamId] = useState<string | null>(null);
-    const { openModal, closeModal } = useModal();
+    const { dreams, isLoading, refetch, createDream } = useDreamsApi();
+    const { openModal } = useModal();
 
     const handleSeeDreamDetail = (dreamId: string) => {
         router.push(`/dreams/${dreamId}`);
@@ -24,23 +23,6 @@ export default function DreamSection() {
         // Open the modal with a form to create a new dream
         openModal(
             <CreateDreamForm />
-        );
-    };
-
-    const handleVisualize = async (dreamId: string) => {
-        setVisualizingDreamId(dreamId);
-        visualizeDream.mutate(
-            { dreamId },
-            {
-                onSuccess: () => {
-                    refetch();
-                    setVisualizingDreamId(null);
-                },
-                onError: () => {
-                    setVisualizingDreamId(null);
-                    Alert.alert('Error', 'No se pudo visualizar el sueño. Inténtalo de nuevo.');
-                }
-            }
         );
     };
 
@@ -83,17 +65,17 @@ export default function DreamSection() {
                 // Otherwise render normal dream card
                 return (
                     <DreamCard
+                        id={item.id}
                         title={item.title}
                         description={item.text}
+                        canVisualize={item.canVisualize}
+                        slotVisualized={item.slotVisualized}
                         images={[
                             'https://inmoclip.com/wp-content/uploads/2023/10/comprar-una-casa-en-la-playa.jpg',
                             'https://inmoclip.com/wp-content/uploads/2023/10/comprar-una-casa-en-la-playa.jpg'
                         ]}
                         onViewComplete={() => handleSeeDreamDetail(item.id)}
                         onAddImage={() => { }}
-                        onVisualize={() => handleVisualize(item.id)}
-                        isVisualized={!item.canVisualize || item.slotVisualized}
-                        isVisualizing={visualizingDreamId === item.id}
                     />
                 );
             }}

@@ -53,12 +53,24 @@ export default function TabLayout() {
             ),
           }}
         />
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="dreams"
           options={{
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? 'moon' : 'moon-outline'}
+                color={color}
+                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+              />
+            ),
+          }}
+        /> */}
+        <Tabs.Screen
+          name="reading"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon
+                name={focused ? 'book' : 'book-outline'}
                 color={color}
                 style={{ fontWeight: focused ? 'bold' : 'normal' }}
               />
@@ -71,18 +83,6 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? 'heart' : 'heart-outline'}
-                color={color}
-                style={{ fontWeight: focused ? 'bold' : 'normal' }}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="reading"
-          options={{
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? 'book' : 'book-outline'}
                 color={color}
                 style={{ fontWeight: focused ? 'bold' : 'normal' }}
               />

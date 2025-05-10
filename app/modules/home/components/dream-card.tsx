@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -8,37 +8,46 @@ import {
     ScrollView,
     ActivityIndicator,
     Dimensions,
+    Alert,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import colors from '@/app/modules/shared/theme/theme';
 import { useModal } from '../../shared/context/modal-context';
+import useDreamsApi from '../../dreams/hooks/use-dreams-api';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface DreamCardProps {
+    id: string;
     title: string;
     description: string;
     images: string[];
+    canVisualize: boolean;
+    slotVisualized: boolean;
     onViewComplete?: () => void;
     onAddImage?: () => void;
-    onVisualize?: () => void;
-    isVisualized?: boolean;
-    isVisualizing?: boolean;
 }
 
 export default function DreamCard({
+    id,
     title,
     description,
     images,
+    canVisualize,
+    slotVisualized,
     onViewComplete,
     onAddImage,
-    onVisualize,
-    isVisualized = false,
-    isVisualizing = false,
 }: DreamCardProps) {
     /** Limitamos a 2 miniaturas + botón "add" */
     const imageData = images.slice(0, 2);
     imageData.push('add');
 
     const { openModal } = useModal();
+    const { visualizeDream, refetch } = useDreamsApi();
+    const queryClient = useQueryClient();
+    const [isVisualizing, setIsVisualizing] = useState(false);
+
+    // Determine if the dream is visualized from props
+    const isVisualized = !canVisualize || slotVisualized;
 
     const handleImagePress = (image: string) => {
         const screenWidth = Dimensions.get('window').width;
@@ -51,6 +60,51 @@ export default function DreamCard({
                 resizeMode="contain"
             />,
             true
+        );
+    };
+
+    const handleVisualize = async () => {
+        if (isVisualized || isVisualizing) return;
+
+        setIsVisualizing(true);
+
+        // Perform optimistic update
+        queryClient.setQueryData(['dreams', false], (oldData: any) => {
+            if (!oldData) return oldData;
+
+            return oldData.map((dream: any) =>
+                dream.id === id
+                    ? { ...dream, slotVisualized: true, canVisualize: false }
+                    : dream
+            );
+        });
+
+        visualizeDream.mutate(
+            { dreamId: id },
+            {
+                onSuccess: () => {
+                    setIsVisualizing(false);
+                },
+                onError: () => {
+                    // Revert the optimistic update on error
+                    queryClient.setQueryData(['dreams', false], (oldData: any) => {
+                        if (!oldData) return oldData;
+
+                        return oldData.map((dream: any) =>
+                            dream.id === id
+                                ? { ...dream, slotVisualized: false, canVisualize: true }
+                                : dream
+                        );
+                    });
+
+                    setIsVisualizing(false);
+                    Alert.alert('Error', 'No se pudo visualizar el sueño. Inténtalo de nuevo.');
+                },
+                onSettled: () => {
+                    // Always refetch after error or success to ensure we're showing the correct server state
+                    refetch();
+                }
+            }
         );
     };
 
@@ -105,7 +159,7 @@ export default function DreamCard({
                     isVisualized && styles.visualizedBtn,
                     isVisualizing && styles.visualizingBtn
                 ]}
-                onPress={onVisualize}
+                onPress={handleVisualize}
                 disabled={isVisualized || isVisualizing}
             >
                 {isVisualizing ? (
