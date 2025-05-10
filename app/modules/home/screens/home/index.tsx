@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 import DreamSection from '@modules/home/components/dream-section';
-import RoutineSection from '@modules/home/components/routine-section';
+import PrivateRoutineSection from '@/app/modules/home/components/private-routine-section';
 import InspirationCard from '@modules/home/components/inspiration-card';
 import DailyReadNotificationButton from '@modules/home/components/daily-read-notification-button';
 import colors from '@/app/modules/shared/theme/theme';
@@ -30,7 +30,7 @@ export default function HomeScreen() {
 
                 <DreamSection />
 
-                <RoutineSection />
+                <PrivateRoutineSection />
 
             </ScrollView>
         </ThemedView>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
         paddingHorizontal: 10,
-        paddingTop: 40,
+        paddingTop: 10,
         paddingBottom: 20,
     },
 });
