@@ -7,6 +7,7 @@ import { useTheme } from '@/app/modules/shared/theme/useTheme';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useModal } from '@/app/modules/shared/context/modal-context';
+import colors from '@/app/modules/shared/theme/theme';
 
 export default function DreamSection() {
     const theme = useTheme();
@@ -50,10 +51,10 @@ export default function DreamSection() {
     };
 
     if (isLoading) {
-        return <ThemedText style={[styles.loadingText, { color: theme.colors.primary.main }]}>Cargando sueños...</ThemedText>;
+        return <ThemedText style={[styles.loadingText, { color: theme.colors.light.primary.main }]}>Cargando sueños...</ThemedText>;
     }
     if (dreams && dreams.length === 0) {
-        return <ThemedText style={[styles.loadingText, { color: theme.colors.primary.main }]}>No hay sueños disponibles</ThemedText>;
+        return <ThemedText style={[styles.loadingText, { color: theme.colors.light.primary.main }]}>No hay sueños disponibles</ThemedText>;
     }
 
 
@@ -83,8 +84,8 @@ export default function DreamSection() {
                             onPress={handleAddDream}
                         >
                             <View style={styles.addDreamButtonInner}>
-                                <Ionicons name="add" size={32} color={theme.colors.primary.main} />
-                                <Text style={[styles.addDreamText, { color: theme.colors.primary.main }]}>Añadir sueño</Text>
+                                <Ionicons name="add" size={32} color={theme.colors.light.primary.main} />
+                                <Text style={[styles.addDreamText, { color: theme.colors.light.primary.main }]}>Añadir sueño</Text>
                             </View>
                         </TouchableOpacity>
                     );
@@ -124,11 +125,11 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         borderWidth: 2,
         borderStyle: 'dashed',
-        borderColor: '#BFD6F5',
+        borderColor: colors.light.palette.blue[200],
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
-        backgroundColor: '#F5FAFF'
+        backgroundColor: colors.light.palette.blue[50]
     },
     addDreamButtonInner: {
         alignItems: 'center',

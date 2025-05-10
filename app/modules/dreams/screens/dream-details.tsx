@@ -36,7 +36,7 @@ export default function DreamDetailsScreen() {
                 style={styles.backButton}
                 onPress={() => router.back()}
             >
-                <Ionicons name="arrow-back" size={24} color={theme.colors.primary.main} />
+                <Ionicons name="arrow-back" size={24} color={theme.colors.light.primary.main} />
             </TouchableOpacity>
 
             <ScrollView>

@@ -10,7 +10,7 @@ type ModalContextType = {
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
-export function ModalProvider({ children }: { children: ReactNode }) {
+export default function ModalProvider({ children }: { children: ReactNode }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalContent, setModalContent] = useState<ReactNode>(null);
     const theme = useTheme();
@@ -46,12 +46,12 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                         <View style={[
                             styles.modalView,
                             {
-                                backgroundColor: theme.colors.neutral.white,
-                                shadowColor: theme.colors.neutral.black
+                                backgroundColor: theme.colors.light.neutral.white,
+                                shadowColor: theme.colors.light.neutral.black
                             }
                         ]}>
                             <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                                <Ionicons name="close" size={24} color={theme.colors.neutral.black} />
+                                <Ionicons name="close" size={24} color={theme.colors.light.neutral.black} />
                             </TouchableOpacity>
                             {modalContent}
                         </View>
