@@ -5,6 +5,7 @@ import TabBarIcon from '@/app/modules/shared/components/navigation/tabbar-icon';
 import TopMenu from '@/app/modules/shared/components/navigation/top-menu';
 import SideMenu from '@/app/modules/shared/components/navigation/side-menu';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
+import colors from '@/app/modules/shared/theme/theme';
 export default function TabLayout() {
   const [sideMenuVisible, setSideMenuVisible] = useState(false);
   const { user } = useAuth();
@@ -18,7 +19,7 @@ export default function TabLayout() {
           tabBarStyle: {
             height: 85,
             paddingTop: 8,
-            backgroundColor: '#b9d4f7',
+            backgroundColor: colors.light.palette.blue[100],
           },
           tabBarLabel: ({ focused }) => (
             <Text style={{

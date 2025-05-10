@@ -4,7 +4,7 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
 import useDreamsApiFetching from '../hooks/use-dreams-api';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../shared/constants/Colors';
+import colors from '@/app/modules/shared/theme/theme';
 
 export default function DreamDetailsScreen() {
     const { id } = useLocalSearchParams();
@@ -66,7 +66,7 @@ export default function DreamDetailsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.blue[100],
+        backgroundColor: colors.light.palette.blue[100],
     },
     backButton: {
         zIndex: 1,

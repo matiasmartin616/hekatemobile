@@ -3,7 +3,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
-import colors from '@/app/modules/shared/constants/Colors';
+import colors from '@/app/modules/shared/theme/theme';
 interface InspirationCardProps {
     message: string;
     date: string;
@@ -33,13 +33,13 @@ export default function InspirationCard({ message, date, onShare }: InspirationC
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.yellow[50],
+        backgroundColor: colors.light.palette.yellow[50],
         borderRadius: 12,
         padding: 12,
         marginBottom: 16,
         width: '100%',
         borderWidth: 2,
-        borderColor: colors.blue[100],
+        borderColor: colors.light.palette.blue[200],
     },
     contentRow: {
         display: 'flex',
@@ -73,12 +73,12 @@ const styles = StyleSheet.create({
     },
     date: {
         fontSize: 15,
-        color: colors.gray[900],
+        color: colors.light.neutral.black,
         fontWeight: 'bold',
     },
     message: {
         fontSize: 18,
-        color: colors.gray[900],
+        color: colors.light.neutral.black,
         lineHeight: 24,
         marginTop: 2,
     },
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 12,
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
-        borderTopColor: colors.blue[100],
+        borderTopColor: colors.light.palette.blue[100],
         zIndex: 1,
     },
     trianglePointer: {
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 10,
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
-        borderTopColor: '#FFFDE4',
+        borderTopColor: colors.light.palette.yellow[100],
         zIndex: 2,
     },
 }); 

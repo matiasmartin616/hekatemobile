@@ -9,7 +9,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import colors from '../../shared/constants/Colors';
+import colors from '@/app/modules/shared/theme/theme';
 
 export interface DreamCardProps {
     title: string;
@@ -93,7 +93,7 @@ export default function DreamCard({
                     <>
                         <ActivityIndicator
                             size="small"
-                            color={colors.blue[500]}
+                            color={colors.light.palette.blue[500]}
                             style={{ marginRight: 6 }}
                         />
                         <Text style={styles.visualizeText}>
@@ -105,7 +105,7 @@ export default function DreamCard({
                         <Ionicons
                             name={isVisualized ? "checkmark" : "eye-outline"}
                             size={18}
-                            color={isVisualized ? colors.blue[700] : colors.blue[500]}
+                            color={isVisualized ? colors.light.palette.blue[700] : colors.light.palette.blue[500]}
                             style={{ marginRight: 6 }}
                         />
                         <Text style={[
@@ -125,12 +125,12 @@ const THUMB_SIZE = 64;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.blue[50],
+        backgroundColor: colors.light.palette.blue[50],
         borderRadius: 16,
         padding: 14,
         marginRight: 16,
         width: 300,
-        shadowColor: colors.blue[500],
+        shadowColor: colors.light.palette.blue[500],
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         elevation: 2,
@@ -147,16 +147,16 @@ const styles = StyleSheet.create({
     title: {
         fontWeight: 'bold',
         fontSize: 15,
-        color: colors.gray[900],
+        color: colors.light.neutral.black,
         flex: 1,
     },
     viewComplete: {
-        color: colors.gray[900],
+        color: colors.light.neutral.black,
         fontWeight: '600',
         fontSize: 13,
     },
     description: {
-        color: colors.gray[900],
+        color: colors.light.neutral.black,
         fontSize: 13,
         marginBottom: 8,
     },
@@ -173,13 +173,13 @@ const styles = StyleSheet.create({
         height: THUMB_SIZE,
         borderRadius: 12,
         marginRight: 10,
-        backgroundColor: colors.blue[100],
+        backgroundColor: colors.light.palette.blue[100],
     },
     addImage: {
         width: THUMB_SIZE,
         height: THUMB_SIZE,
         borderRadius: 12,
-        backgroundColor: colors.blue[500],
+        backgroundColor: colors.light.palette.blue[500],
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 10,
@@ -188,25 +188,25 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.blue[500],
+        borderColor: colors.light.palette.blue[500],
         borderRadius: 20,
         paddingVertical: 6,
         justifyContent: 'center',
     },
     visualizeText: {
-        color: colors.blue[500],
+        color: colors.light.palette.blue[500],
         fontWeight: 'bold',
         fontSize: 15,
     },
     visualizedBtn: {
-        borderColor: colors.blue[700],
-        backgroundColor: colors.blue[100],
+        borderColor: colors.light.palette.blue[700],
+        backgroundColor: colors.light.palette.blue[100],
     },
     visualizedText: {
-        color: colors.blue[700],
+        color: colors.light.palette.blue[700],
     },
     visualizingBtn: {
-        borderColor: colors.blue[300],
-        backgroundColor: colors.blue[50],
+        borderColor: colors.light.palette.blue[300],
+        backgroundColor: colors.light.palette.blue[50],
     },
 });

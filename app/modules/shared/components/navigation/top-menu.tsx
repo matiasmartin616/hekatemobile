@@ -3,7 +3,7 @@ import { TouchableOpacity, View, StyleSheet, Platform, Image } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../themed-text';
 import ThemedView from '../themed-view';
-
+import colors from '@/app/modules/shared/theme/theme';
 interface TopMenuProps {
     onMenuPress: () => void;
 }
@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: Platform.OS === 'ios' ? 50 : 40,
+        paddingTop: Platform.OS === 'ios' ? 60 : 40,
         paddingHorizontal: 16,
         paddingBottom: 16,
-        backgroundColor: '#CEEDFF',
+        backgroundColor: colors.light.palette.blue[100],
     },
     menuButton: {
         padding: 8,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     },
     logoText: {
         fontSize: 16,
-        color: '#171923',
+        color: colors.light.neutral.black,
         fontFamily: 'Inter',
         fontWeight: '500',
     },
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     },
     visualizationsText: {
         fontSize: 16,
-        color: '#2A69AC',
+        color: colors.light.palette.blue[500],
         fontFamily: 'Inter',
         fontWeight: '500',
     },
