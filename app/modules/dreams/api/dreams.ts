@@ -20,13 +20,11 @@ export interface Dream {
 export interface CreateDreamRequest {
   title: string;
   text: string;
-  maxDaily: number;
 }
 
 export interface UpdateDreamRequest {
   title?: string;
   text?: string;
-  maxDaily?: number;
 }
 
 export interface Visualization {

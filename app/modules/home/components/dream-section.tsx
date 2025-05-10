@@ -1,35 +1,29 @@
 import { useState } from 'react';
 import { StyleSheet, Alert, FlatList, TouchableOpacity, View, Text } from 'react-native';
 import ThemedText from '@/app/modules/shared/components/themed-text';
-import useDreamsApiFetching from '../../dreams/hooks/use-dreams-api';
+import useDreamsApi from '../../dreams/hooks/use-dreams-api';
 import DreamCard from './dream-card';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useModal } from '@/app/modules/shared/context/modal-context';
 import colors from '@/app/modules/shared/theme/theme';
+import CreateDreamForm from './form/create-dream-form';
 
 export default function DreamSection() {
     const theme = useTheme();
     const router = useRouter();
-    const { dreams, isLoading, refetch, visualizeDream, createDream } = useDreamsApiFetching();
+    const { dreams, isLoading, refetch, visualizeDream, createDream } = useDreamsApi();
     const [visualizingDreamId, setVisualizingDreamId] = useState<string | null>(null);
     const { openModal, closeModal } = useModal();
 
     const handleSeeDreamDetail = (dreamId: string) => {
         router.push(`/dreams/${dreamId}`);
     };
-    const MyComponent = () => {
-        return (
-            <View>
-                <Text>TODO: Crear sueño</Text>
-            </View>
-        );
-    };
     const handleAddDream = () => {
         // Open the modal with a form to create a new dream
         openModal(
-            <MyComponent />
+            <CreateDreamForm />
         );
     };
 

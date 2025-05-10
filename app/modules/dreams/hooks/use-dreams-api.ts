@@ -1,7 +1,7 @@
 import dreamsApi, { Dream, CreateDreamRequest, UpdateDreamRequest, ArchiveDreamRequest, VisualizeDreamRequest, Visualization } from "../api/dreams";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export default function useDreamsApiFetching(archived: boolean = false) {
+export default function useDreamsApi(archived: boolean = false) {
     const queryClient = useQueryClient();
 
     const { data, isLoading, error, refetch } = useQuery<Dream[]>({

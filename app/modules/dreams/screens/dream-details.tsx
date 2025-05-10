@@ -2,7 +2,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
-import useDreamsApiFetching from '../hooks/use-dreams-api';
+import useDreamsApi from '../hooks/use-dreams-api';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '@/app/modules/shared/theme/theme';
 
@@ -10,7 +10,7 @@ export default function DreamDetailsScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
     const theme = useTheme();
-    const { dreams, isLoading } = useDreamsApiFetching();
+    const { dreams, isLoading } = useDreamsApi();
 
     const dream = dreams?.find(d => d.id === id);
 
