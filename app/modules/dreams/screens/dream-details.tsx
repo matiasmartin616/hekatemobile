@@ -30,6 +30,7 @@ export default function DreamDetailsScreen() {
             </View>
         );
     }
+    
     const { openModal, closeModal } = useModal();
 
     const handleEditDream = () => {

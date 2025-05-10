@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     },
     inputError: {
         backgroundColor: colors.light.neutral.white,
-        padding: 15,
+        paddingHorizontal: 15,
         borderRadius: 25,
         fontSize: 16,
         borderWidth: 2,
