@@ -47,11 +47,6 @@ export default function DreamSection() {
     if (isLoading) {
         return <ThemedText style={[styles.loadingText, { color: theme.colors.light.primary.main }]}>Cargando sueños...</ThemedText>;
     }
-    if (dreams && dreams.length === 0) {
-        return <ThemedText style={[styles.loadingText, { color: theme.colors.light.primary.main }]}>No hay sueños disponibles</ThemedText>;
-    }
-
-
 
     // Combine dreams data with an extra item for the "Add Dream" button
     const listData = dreams && dreams.length > 0
