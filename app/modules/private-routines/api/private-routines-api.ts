@@ -1,4 +1,5 @@
 import { api } from '@shared/services/api';
+import { PrivateRoutineBlock } from './private-routine-block-api';
 
 export interface PrivateRoutine {
   id: string;
@@ -8,17 +9,6 @@ export interface PrivateRoutine {
   day: number;
   month: number;
   year: number;
-}
-
-export interface PrivateRoutineBlock{
-  id: string;
-  routineDayId: string;
-  weekDay: string;
-  title: string;
-  description: string;
-  color: string;
-  order: number;
-  status: string;
 }
 
 export const privateRoutinesApi = {

@@ -4,25 +4,13 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import usePrivateRoutinesApi from '@/app/modules/private-routines/hooks/use-private-routines-api';
-import { PrivateRoutineBlock } from '@/app/modules/private-routines/api/private-routines-api';
+import { PrivateRoutineBlock } from '@/app/modules/private-routines/api/private-routine-block-api';
 import { router } from 'expo-router';
 import PrivateRoutineList from './private-routine-list';
 import colors from '../../shared/theme/theme';
 
 export default function PrivateRoutineSection() {
     const { todayData, todayLoading } = usePrivateRoutinesApi();
-    const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
-
-    const handleToggleCompleted = (taskId: string) => {
-        setCompletedTasks(prev => ({
-            ...prev,
-            [taskId]: !prev[taskId]
-        }));
-    };
-
-    const handleVisualizeTask = (task: PrivateRoutineBlock) => {
-        console.log('Visualizing task:', task);
-    };
 
     const blocks = todayData?.blocks || [];
 
@@ -46,9 +34,6 @@ export default function PrivateRoutineSection() {
             ) : blocks.length > 0 ? (
                 <PrivateRoutineList
                     blocks={blocks}
-                    onVisualize={handleVisualizeTask}
-                    onToggleComplete={handleToggleCompleted}
-                    completedTasks={completedTasks}
                 />
             ) : (
                 <View style={styles.emptyContainer}>

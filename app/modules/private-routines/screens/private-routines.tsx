@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions, FlatList, ViewToken, Animated, TouchableO
 import ThemedText from "@/app/modules/shared/components/themed-text";
 import ThemedView from "@/app/modules/shared/components/themed-view";
 import usePrivateRoutinesApi from "../hooks/use-private-routines-api";
-import { PrivateRoutineBlock } from '../api/private-routines-api';
+import { PrivateRoutineBlock } from '../api/private-routine-block-api';
 import colors from '../../shared/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
 

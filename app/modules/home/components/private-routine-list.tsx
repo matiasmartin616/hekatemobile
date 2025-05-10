@@ -1,17 +1,14 @@
 import { ScrollView } from "react-native";
 import { StyleSheet } from "react-native";
 import { View } from "react-native";
-import { PrivateRoutineBlock } from "../../private-routines/api/private-routines-api";
+import { PrivateRoutineBlock } from "../../private-routines/api/private-routine-block-api";
 import PrivateRoutineTimeBlock from "./private-routine-block";
 import colors from "../../shared/theme/theme";
 interface RoutineListProps {
     blocks: PrivateRoutineBlock[];
-    onVisualize: (block: PrivateRoutineBlock) => void;
-    onToggleComplete: (id: string) => void;
-    completedTasks: Record<string, boolean>;
 }
 
-export default function PrivateRoutineList({ blocks, onVisualize, onToggleComplete, completedTasks }: RoutineListProps) {
+export default function PrivateRoutineList({ blocks }: RoutineListProps) {
     const sortedBlocks = [...blocks].sort((a, b) => a.order - b.order);
 
     return (
@@ -20,9 +17,6 @@ export default function PrivateRoutineList({ blocks, onVisualize, onToggleComple
                 <View key={block.id} style={styles.group}>
                     <PrivateRoutineTimeBlock
                         block={block}
-                        onVisualize={onVisualize}
-                        onToggleComplete={onToggleComplete}
-                        isCompleted={!!completedTasks[block.id]}
                     />
                     {index < sortedBlocks.length - 1 && <View style={styles.divider} />}
                 </View>

@@ -72,12 +72,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     date: {
-        fontSize: 15,
+        fontSize: 10,
         color: colors.light.neutral.black,
         fontWeight: 'bold',
     },
     message: {
-        fontSize: 18,
+        fontSize: 14,
         color: colors.light.neutral.black,
         lineHeight: 24,
         marginTop: 2,
