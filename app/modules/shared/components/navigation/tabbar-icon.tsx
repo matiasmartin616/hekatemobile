@@ -1,9 +1,32 @@
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { type IconProps } from '@expo/vector-icons/build/createIconSet';
-import { type ComponentProps } from 'react';
+import { Image, StyleSheet } from 'react-native';
 
-export default function TabBarIcon({ style, ...rest }: IconProps<ComponentProps<typeof Ionicons>['name']>) {
-  return <Ionicons size={28} style={[{ marginBottom: -3 }, style]} {...rest} />;
+interface TabBarIconProps {
+  imageName: string;
+  color: string;
+  style?: any;
 }
+
+export default function TabBarIcon({ imageName, color, style }: TabBarIconProps) {
+  return (
+    <Image
+      source={imageName}
+      style={[
+        styles.icon,
+        {
+          tintColor: '#4299E1',
+        },
+        style
+      ]}
+      resizeMode="contain"
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  icon: {
+    width: 32,
+    height: 32,
+  }
+});
