@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { authApi } from '@modules/auth/api/auth-api';
+import { authApi, RegisterRequest } from '@modules/auth/api/auth-api';
 
 export interface User {
     id: string;
@@ -14,6 +14,7 @@ export interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
+    register: (userData: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
     isAuthenticated: boolean;
 }
@@ -46,6 +47,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         loadAuthData();
     }, []);
+
+
+    const register = async (userData: RegisterRequest) => {
+        setIsLoading(true);
+        try {
+            const profile = await authApi.register(userData);
+            await AsyncStorage.setItem('auth_token', profile.token);
+            setToken(profile.token);
+            setUser(profile.user);
+
+            router.replace('/(routes)/(private)/(tabs)');
+        } catch (error) {
+            console.error('Error during register:', error);
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     const login = async (email: string, password: string) => {
         setIsLoading(true);
@@ -90,6 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 isLoading,
                 login,
                 logout,
+                register,
                 isAuthenticated: !!token,
             }}
         >

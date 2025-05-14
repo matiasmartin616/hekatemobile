@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
-import { router } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,10 +15,10 @@ const registerSchema = z.object({
     name: z.string().min(1, 'El nombre es requerido'),
     email: z.string().email('Correo electrónico inválido').min(1, 'El correo electrónico es requerido'),
     password: z.string()
-        .min(8, 'La contraseña debe tener al menos 8 caracteres')
-        .regex(/[A-Z]/, 'Debe incluir al menos una letra mayúscula')
-        .regex(/[a-z]/, 'Debe incluir al menos una letra minúscula')
-        .regex(/[^a-zA-Z0-9]/, 'Debe incluir al menos un carácter especial'),
+        .min(1, 'La contraseña debe tener al menos 1 caracteres'),
+    /* .regex(/[A-Z]/, 'Debe incluir al menos una letra mayúscula')
+    .regex(/[a-z]/, 'Debe incluir al menos una letra minúscula')
+    .regex(/[^a-zA-Z0-9]/, 'Debe incluir al menos un carácter especial'), */
     confirmPassword: z.string().min(1, 'Por favor confirma tu contraseña'),
 }).refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
@@ -29,7 +28,7 @@ const registerSchema = z.object({
 export default function RegisterScreen() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { register } = useAuth();
 
     const { control, handleSubmit, formState: { isValid, isDirty } } = useForm({
         resolver: zodResolver(registerSchema),
@@ -46,18 +45,11 @@ export default function RegisterScreen() {
         try {
             setLoading(true);
             setError('');
-
-            const response = await authApi.register({
+            await register({
                 name: data.name,
                 email: data.email,
                 password: data.password
             });
-
-            if (response.token) {
-                router.push('/(routes)/(public)/auth/login');
-            } else {
-                setError('Registro exitoso, pero no se recibió token');
-            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al intentar registrarse');
         } finally {
@@ -109,11 +101,11 @@ export default function RegisterScreen() {
                         isPassword
                     />
 
-                    <View style={styles.passwordRequirements}>
+                    {/*  <View style={styles.passwordRequirements}>
                         <ThemedText style={styles.requirementText}>-Mínimo 8 caracteres.</ThemedText>
                         <ThemedText style={styles.requirementText}>-Utiliza caracteres en mayúscula y minúscula.</ThemedText>
                         <ThemedText style={styles.requirementText}>-Al menos un carácter especial.</ThemedText>
-                    </View>
+                    </View> */}
 
                     <FormTextInput
                         name="confirmPassword"
@@ -125,7 +117,7 @@ export default function RegisterScreen() {
 
                     <TouchableOpacity
                         style={[
-                            styles.validateButton, 
+                            styles.validateButton,
                             (!isValid || !isDirty || loading) && styles.buttonDisabled
                         ]}
                         onPress={handleSubmit(handleRegister)}

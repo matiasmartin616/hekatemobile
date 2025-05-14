@@ -5,6 +5,7 @@ import TabBarIcon from '@/app/modules/shared/components/navigation/tabbar-icon';
 import TopMenu from '@/app/modules/shared/components/navigation/top-menu';
 import SideMenu from '@/app/modules/shared/components/navigation/side-menu';
 import { useAuth } from '@/app/modules/shared/context/auth-context';
+import colors from '@/app/modules/shared/theme/theme';
 export default function TabLayout() {
   const [sideMenuVisible, setSideMenuVisible] = useState(false);
   const { user } = useAuth();
@@ -12,47 +13,74 @@ export default function TabLayout() {
     <>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#000000',
-          tabBarInactiveTintColor: '#000000',
+          tabBarActiveTintColor: '#4299E1',
+          tabBarInactiveTintColor: '#4299E1',
           headerShown: true,
           tabBarStyle: {
-            height: 85,
+            height: 120,
             paddingTop: 8,
-            backgroundColor: '#b9d4f7',
+            backgroundColor: colors.light.palette.blue[100],
           },
           tabBarLabel: ({ focused }) => (
-            <Text style={{
-              color: '#000000',
-              fontWeight: focused ? 'bold' : 'normal'
-            }} />
+            <Text 
+              style={{
+                color: '#000000',
+                fontSize: 12,
+                fontFamily: 'Inter',
+                fontWeight: focused ? 'bold' : 'normal',
+                marginBottom: 10
+              }}
+            />
           ),
           header: () => <TopMenu onMenuPress={() => setSideMenuVisible(true)} />
         }}>
         <Tabs.Screen
           name="index"
           options={{
-            tabBarIcon: ({ color, focused }) => (
+            tabBarIcon: ({ focused }) => (
               <TabBarIcon
-                name={focused ? 'home' : 'home-outline'}
-                color={color}
-                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+                imageName={require('@/assets/images/House.png')}
+                color="#4299E1"
+                style={{ opacity: focused ? 1 : 0.7 }}
               />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <Text style={{
+                color: '#4299E1',
+                fontSize: 10,
+                fontFamily: 'Inter',
+                fontWeight: focused ? 'bold' : 'normal',
+                marginBottom: 10
+              }}>
+                Home
+              </Text>
             ),
           }}
         />
         <Tabs.Screen
           name="routine"
           options={{
-            tabBarIcon: ({ color, focused }) => (
+            tabBarIcon: ({ focused }) => (
               <TabBarIcon
-                name={focused ? 'folder' : 'folder-outline'}
-                color={color}
-                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+                imageName={require('@/assets/images/Barbell.png')}
+                color="#4299E1"
+                style={{ opacity: focused ? 1 : 0.7 }}
               />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <Text style={{
+                color: '#4299E1',
+                fontSize: 10,
+                fontFamily: 'Inter',
+                fontWeight: focused ? 'bold' : 'normal',
+                marginBottom: 10
+              }}>
+                Mis rutinas
+              </Text>
             ),
           }}
         />
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="dreams"
           options={{
             tabBarIcon: ({ color, focused }) => (
@@ -63,28 +91,50 @@ export default function TabLayout() {
               />
             ),
           }}
-        />
+        /> */}
         <Tabs.Screen
-          name="improve"
+          name="reading"
           options={{
-            tabBarIcon: ({ color, focused }) => (
+            tabBarIcon: ({ focused }) => (
               <TabBarIcon
-                name={focused ? 'heart' : 'heart-outline'}
-                color={color}
-                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+                imageName={require('@/assets/images/BookOpen.png')}
+                color="#4299E1"
+                style={{ opacity: focused ? 1 : 0.7 }}
               />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <Text style={{
+                color: '#4299E1',
+                fontSize: 10,
+                fontFamily: 'Inter',
+                fontWeight: focused ? 'bold' : 'normal',
+                marginBottom: 10
+              }}>
+                Lectura del día
+              </Text>
             ),
           }}
         />
         <Tabs.Screen
-          name="reading"
+          name="improve"
           options={{
-            tabBarIcon: ({ color, focused }) => (
+            tabBarIcon: ({ focused }) => (
               <TabBarIcon
-                name={focused ? 'book' : 'book-outline'}
-                color={color}
-                style={{ fontWeight: focused ? 'bold' : 'normal' }}
+                imageName={require('@/assets/images/Heartbeat.png')}
+                color="#4299E1"
+                style={{ opacity: focused ? 1 : 0.7 }}
               />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <Text style={{
+                color: '#4299E1',
+                fontSize: 10,
+                fontFamily: 'Inter',
+                fontWeight: focused ? 'bold' : 'normal',
+                marginBottom: 10
+              }}>
+                Quiero mejorar
+              </Text>
             ),
           }}
         />

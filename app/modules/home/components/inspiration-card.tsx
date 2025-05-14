@@ -3,78 +3,117 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
-
+import colors from '@/app/modules/shared/theme/theme';
 interface InspirationCardProps {
     message: string;
+    date: string;
     onShare?: () => void;
-    onArchive?: () => void;
 }
 
-export default function InspirationCard({ message, onShare, onArchive }: InspirationCardProps) {
+export default function InspirationCard({ message, date, onShare }: InspirationCardProps) {
     return (
         <ThemedView style={styles.container}>
-            <View style={styles.contentContainer}>
-                <View style={styles.iconContainer}>
-                    <Ionicons name="sunny" size={32} color="#FFB800" />
+            <View style={styles.contentRow}>
+                <View style={styles.sunIcon}>
+                    <Ionicons name="partly-sunny-outline" size={40} color="#FFE066" />
                 </View>
-                <View style={styles.messageContainer}>
+                <View style={styles.textColumn}>
+                    <ThemedText style={styles.date}>{date}</ThemedText>
                     <ThemedText style={styles.message}>{message}</ThemedText>
                 </View>
-            </View>
-            <View style={styles.actionsContainer}>
                 <TouchableOpacity onPress={onShare} style={styles.actionButton}>
-                    <Ionicons name="share-outline" size={20} color="#666666" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onArchive} style={styles.actionButton}>
-                    <Ionicons name="bookmark-outline" size={20} color="#666666" />
+                    <Ionicons name="share-outline" size={22} color="#4A90E2" />
                 </TouchableOpacity>
             </View>
+            <View style={styles.triangleBorder} />
+            <View style={styles.trianglePointer} />
         </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fffbeb',
+        backgroundColor: colors.light.palette.yellow[50],
         borderRadius: 12,
-        padding: 16,
+        padding: 12,
         marginBottom: 16,
-        marginHorizontal: 16,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
+        width: '100%',
+        borderWidth: 2,
+        borderColor: colors.light.palette.blue[100],
     },
-    contentContainer: {
+    contentRow: {
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 0,
+        maxHeight: 70,
+        gap: 18,
     },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        marginRight: 12,
-        justifyContent: 'center',
+    sunIcon: {
+        marginRight: 0,
+        display: 'flex',
+        height: '100%',
         alignItems: 'center',
+        justifyContent: 'center',
     },
-    messageContainer: {
+    textColumn: {
         flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+    },
+    dateMessageRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 2,
+        justifyContent: 'space-between',
+    },
+    date: {
+        fontSize: 10,
+        color: colors.light.neutral.black,
+        fontWeight: 'bold',
     },
     message: {
-        fontSize: 15,
-        color: '#333333',
-        lineHeight: 20,
-    },
-    actionsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 12,
+        fontSize: 14,
+        color: colors.light.neutral.black,
+        lineHeight: 24,
+        marginTop: 2,
     },
     actionButton: {
         padding: 4,
-        marginLeft: 16,
+        alignSelf: 'center',
+    },
+    triangleBorder: {
+        position: 'absolute',
+        bottom: -12,
+        left: '50%',
+        marginLeft: -12,
+        width: 0,
+        height: 0,
+        borderLeftWidth: 12,
+        borderRightWidth: 12,
+        borderTopWidth: 12,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: colors.light.palette.blue[100],
+        zIndex: 1,
+    },
+    trianglePointer: {
+        position: 'absolute',
+        bottom: -10,
+        left: '50%',
+        marginLeft: -10,
+        width: 0,
+        height: 0,
+        borderLeftWidth: 10,
+        borderRightWidth: 10,
+        borderTopWidth: 10,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: colors.light.palette.yellow[100],
+        zIndex: 2,
     },
 }); 

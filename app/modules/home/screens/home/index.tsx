@@ -1,13 +1,52 @@
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
-import ThemedText from '@/app/modules/shared/components/themed-text';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ThemedView from '@/app/modules/shared/components/themed-view';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import DreamSection from '@modules/home/components/dream-section';
-import RoutineSection from '@modules/home/components/routine-section';
+import PrivateRoutineSection from '@/app/modules/home/components/private-routine-section';
 import InspirationCard from '@modules/home/components/inspiration-card';
+import DailyReadNotificationButton from '@modules/home/components/daily-read-notification-button';
+import colors from '@/app/modules/shared/theme/theme';
+import { router } from 'expo-router';
+import { DAILY_READ_NOTIFICATION_KEY, months } from '@/app/modules/shared/constants/const';
+
+
 
 export default function HomeScreen() {
+    const [showNotification, setShowNotification] = useState(false);
+
+    useEffect(() => {
+        checkNotificationStatus();
+    }, []);
+
+    const checkNotificationStatus = async () => {
+        try {
+            const lastShownDate = await AsyncStorage.getItem(DAILY_READ_NOTIFICATION_KEY);
+            const today = new Date().toDateString();
+
+            if (!lastShownDate || lastShownDate !== today) {
+                setShowNotification(true);
+            }
+        } catch (error) {
+            console.error('Error checking notification status:', error);
+            setShowNotification(true); // Show by default if there's an error
+        }
+    };
+
+    const handleReadNow = async () => {
+        try {
+            // Save today's date as the last shown date
+            await AsyncStorage.setItem(DAILY_READ_NOTIFICATION_KEY, new Date().toDateString());
+            setShowNotification(false);
+            router.push('/(routes)/(private)/(tabs)/reading');
+        } catch (error) {
+            console.error('Error saving notification status:', error);
+            router.push('/(routes)/(private)/(tabs)/reading');
+        }
+    };
+
+    const date = new Date().toLocaleDateString().split('/');
+    const formattedDate = `${date[0]} de ${months[parseInt(date[1]) - 1]} de ${date[2]}`;
     return (
         <ThemedView style={styles.container}>
             <ScrollView
@@ -18,19 +57,17 @@ export default function HomeScreen() {
                 <InspirationCard
                     message="Cree en ti mismo y todo será posible"
                     onShare={() => { }}
-                    onArchive={() => { }}
+                    date={formattedDate}
                 />
+
+                {showNotification && (
+                    <DailyReadNotificationButton onReadNow={handleReadNow} />
+                )}
 
                 <DreamSection />
 
-                <RoutineSection />
+                <PrivateRoutineSection />
 
-                <Link href="/reading" asChild>
-                    <TouchableOpacity style={styles.menuItem}>
-                        <ThemedText style={styles.menuText}>Lectura diaria</ThemedText>
-                        <Ionicons name="chevron-forward" size={24} color="#1253AA" />
-                    </TouchableOpacity>
-                </Link>
             </ScrollView>
         </ThemedView>
     );
@@ -39,37 +76,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.light.palette.blue[20],
     },
     scrollView: {
         flex: 1,
     },
     scrollViewContent: {
-        paddingHorizontal: 20,
-        paddingTop: 40,
+        paddingHorizontal: 10,
+        paddingTop: 10,
         paddingBottom: 20,
-    },
-    menuItem: {
-        backgroundColor: '#FFFFFF',
-        padding: 15,
-        borderRadius: 10,
-        marginBottom: 15,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 3.84,
-        elevation: 2,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-    },
-    menuText: {
-        fontSize: 16,
-        color: '#000000',
     },
 });

@@ -12,20 +12,19 @@ export interface Dream {
     visualizations: number;
   };
   todayVisualizations: number;
-  slotVisualized: boolean;
-  canVisualize: boolean;
+  slotVisualized: boolean; //If the dream was visualized in the temporal slot today
+  canVisualize: boolean; //If the dream can be visualized in the temporal slot today
 }
+
 
 export interface CreateDreamRequest {
   title: string;
   text: string;
-  maxDaily: number;
 }
 
 export interface UpdateDreamRequest {
   title?: string;
   text?: string;
-  maxDaily?: number;
 }
 
 export interface Visualization {
@@ -150,7 +149,7 @@ export const dreamsApi = {
    */
   deleteDream: async (dreamId: string): Promise<void> => {
     try {
-      await api.delete(`/dreams/${dreamId}`);
+      await api.post(`/dreams/${dreamId}/archive`, {});
     } catch (error) {
       console.error('API Delete Error:', error);
       if (error instanceof Error) {
