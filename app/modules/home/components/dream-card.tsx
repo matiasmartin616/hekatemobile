@@ -42,7 +42,7 @@ export default function DreamCard({
     imageData.push('add');
 
     const { openModal } = useModal();
-    const { visualizeDream, refetch } = useDreamsApi();
+    const { visualizeDream } = useDreamsApi();
     const queryClient = useQueryClient();
     const [isVisualizing, setIsVisualizing] = useState(false);
 
@@ -84,6 +84,8 @@ export default function DreamCard({
             {
                 onSuccess: () => {
                     setIsVisualizing(false);
+                    // Forzar una actualización limpia del contador
+                    queryClient.resetQueries({ queryKey: ['visualizations-history'] });
                 },
                 onError: () => {
                     // Revert the optimistic update on error
@@ -99,10 +101,6 @@ export default function DreamCard({
 
                     setIsVisualizing(false);
                     Alert.alert('Error', 'No se pudo visualizar el sueño. Inténtalo de nuevo.');
-                },
-                onSettled: () => {
-                    // Always refetch after error or success to ensure we're showing the correct server state
-                    refetch();
                 }
             }
         );
@@ -110,7 +108,6 @@ export default function DreamCard({
 
     return (
         <View style={styles.card}>
-
             <View style={styles.headerRow}>
                 <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity onPress={onViewComplete}>
@@ -235,7 +232,7 @@ const styles = StyleSheet.create({
     },
     imageList: {
         marginBottom: 12,
-        maxHeight: THUMB_SIZE,      // límite vertical para evitar apilado
+        maxHeight: THUMB_SIZE,
     },
     imageListContent: {
         alignItems: 'center',
