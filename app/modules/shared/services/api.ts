@@ -12,8 +12,8 @@ interface RequestOptions {
 }
 
 async function apiRequest<T>(
-  endpoint: string, 
-  options: RequestOptions = {}
+  endpoint: string,
+  options: RequestOptions = {},
 ): Promise<T> {
   const {
     method = 'GET',
@@ -22,36 +22,30 @@ async function apiRequest<T>(
     authenticated = true,
   } = options;
 
-  const requestHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...headers,
-  };
+  const requestHeaders: Record<string, string> = { ...headers };
 
   if (authenticated) {
     const token = await AsyncStorage.getItem('auth_token');
-    if (token) {
-      requestHeaders['Authorization'] = `Bearer ${token}`;
-    }
+    if (token) requestHeaders.Authorization = `Bearer ${token}`;
   }
 
-  const requestOptions: RequestInit = {
-    method,
-    headers: requestHeaders,
-  };
+  const requestOptions: RequestInit = { method, headers: requestHeaders };
 
-  if (body) {
+  const isFormData = body instanceof FormData;
+  if (body && isFormData) {
+    requestOptions.body = body;
+  } else if (body) {
+    requestHeaders['Content-Type'] = 'application/json';
     requestOptions.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, requestOptions);
-  const data = await response.json();
-  
-  if (!response.ok) {
-    throw new Error(data.error || data.message || 'Something went wrong');
-  }
-  
+  const res = await fetch(`${API_URL}${endpoint}`, requestOptions);
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
   return data as T;
 }
+
 
 export const api = {
   get: <T>(endpoint: string, options?: Omit<RequestOptions, 'method'>) =>
