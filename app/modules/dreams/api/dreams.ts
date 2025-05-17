@@ -1,4 +1,5 @@
 import { api } from '@shared/services/api';
+import { DreamImage } from './dream-images-api';
 
 export interface Dream {
   id: string;
@@ -8,23 +9,27 @@ export interface Dream {
   createdAt: string;
   updatedAt: string;
   visualizations: Visualization[];
+  images: DreamImage[];
   _count: {
     visualizations: number;
+    images: number;
   };
   todayVisualizations: number;
-  slotVisualized: boolean; //If the dream was visualized in the temporal slot today
-  canVisualize: boolean; //If the dream can be visualized in the temporal slot today
+  slotVisualized: boolean; // If the dream was visualized in the temporal slot today
+  canVisualize: boolean; // If the dream can be visualized in the temporal slot today
 }
-
 
 export interface CreateDreamRequest {
   title: string;
   text: string;
+  images?: File[] | string[]; // Allow file paths for React Native
 }
 
 export interface UpdateDreamRequest {
   title?: string;
   text?: string;
+  images?: File[] | string[]; // Allow file paths for React Native
+  keepImageIds?: string[]; // IDs of existing images to keep
 }
 
 export interface Visualization {
@@ -65,7 +70,37 @@ export const dreamsApi = {
    */
   createDream: async (dream: CreateDreamRequest): Promise<Dream> => {
     try {
-      return await api.post<Dream>('/dreams', dream);
+      // Handle with or without images
+      if (!dream.images || dream.images.length === 0) {
+        return await api.post<Dream>('/dreams', dream);
+      }
+      
+      // Create FormData for multipart request with images
+      const formData = new FormData();
+      formData.append('title', dream.title);
+      formData.append('text', dream.text);
+      
+      // Add each image to form data
+      dream.images.forEach((image) => {
+        if (typeof image === 'string') {
+          // Handle image URI (React Native)
+          const fileName = image.split('/').pop() || 'image.jpg';
+          const match = /\.(\w+)$/.exec(fileName);
+          const type = match ? `image/${match[1]}` : 'image/jpeg';
+          
+          formData.append('images', {
+            uri: image,
+            name: fileName,
+            type,
+          } as any);
+        }
+      });
+      
+      return await api.post<Dream>('/dreams', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
@@ -79,7 +114,67 @@ export const dreamsApi = {
    */
   updateDream: async (dreamId: string, dream: UpdateDreamRequest): Promise<Dream> => {
     try {
-      return await api.patch<Dream>(`/dreams/${dreamId}`, dream);
+      // Handle with or without images
+      if (!dream.images || dream.images.length === 0) {
+        // If we have images to keep but no new images to upload
+        if ('keepImageIds' in dream && Array.isArray(dream.keepImageIds) && dream.keepImageIds.length > 0) {
+          // Create FormData to pass the keepImageIds
+          const formData = new FormData();
+          if (dream.title) formData.append('title', dream.title);
+          if (dream.text) formData.append('text', dream.text);
+          
+          // Add image IDs to keep
+          dream.keepImageIds.forEach((imageId) => {
+            formData.append('keepImageIds', imageId);
+          });
+          
+          return await api.patch<Dream>(`/dreams/${dreamId}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+        }
+        
+        // No images to upload or keep, just update text fields
+        return await api.patch<Dream>(`/dreams/${dreamId}`, dream);
+      }
+      
+      // Create FormData for multipart request with images
+      const formData = new FormData();
+      if (dream.title) formData.append('title', dream.title);
+      if (dream.text) formData.append('text', dream.text);
+      
+      // Add existing image IDs to keep
+      if ('keepImageIds' in dream && Array.isArray(dream.keepImageIds)) {
+        dream.keepImageIds.forEach((imageId) => {
+          formData.append('keepImageIds', imageId);
+        });
+      }
+      
+      // Add each new image to form data
+      dream.images.forEach((image) => {
+        if (typeof image === 'string') {
+          // Handle image URI (React Native)
+          const fileName = image.split('/').pop() || 'image.jpg';
+          const match = /\.(\w+)$/.exec(fileName);
+          const type = match ? `image/${match[1]}` : 'image/jpeg';
+          
+          formData.append('images', {
+            uri: image,
+            name: fileName,
+            type,
+          } as any);
+        } else {
+          // Handle File object (Web)
+          formData.append('images', image);
+        }
+      });
+      
+      return await api.patch<Dream>(`/dreams/${dreamId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw error;

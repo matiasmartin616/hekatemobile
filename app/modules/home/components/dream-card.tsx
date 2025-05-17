@@ -5,57 +5,147 @@ import {
     StyleSheet,
     TouchableOpacity,
     Image,
-    ScrollView,
     ActivityIndicator,
     Dimensions,
     Alert,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as ImagePicker from 'expo-image-picker';
 import colors from '@/app/modules/shared/theme/theme';
 import { useModal } from '../../shared/context/modal-context';
 import useDreamsApi from '../../dreams/hooks/use-dreams-api';
+import useDreamImagesApi from '../../dreams/hooks/use-dream-images-api';
 import { useQueryClient } from '@tanstack/react-query';
+import ImageCarousel from '@/app/modules/shared/components/image-carousel';
 
 export interface DreamCardProps {
     id: string;
     title: string;
     description: string;
-    images: string[];
     canVisualize: boolean;
     slotVisualized: boolean;
     onViewComplete?: () => void;
-    onAddImage?: () => void;
 }
 
 export default function DreamCard({
     id,
     title,
     description,
-    images,
     canVisualize,
     slotVisualized,
     onViewComplete,
-    onAddImage,
 }: DreamCardProps) {
-    /** Limitamos a 2 miniaturas + botón "add" */
-    const imageData = images.slice(0, 2);
-    imageData.push('add');
-
     const { openModal } = useModal();
     const { visualizeDream, refetch } = useDreamsApi();
+    const { uploadDreamImage } = useDreamImagesApi(id);
     const queryClient = useQueryClient();
     const [isVisualizing, setIsVisualizing] = useState(false);
-
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const { images } = useDreamImagesApi(id);
     // Determine if the dream is visualized from props
     const isVisualized = !canVisualize || slotVisualized;
 
-    const handleImagePress = (image: string) => {
+    const handleAddImage = () => {
+        if (isUploadingImage) return;
+
+        // Show options to take photo or choose from gallery
+        Alert.alert(
+            'Añadir imagen',
+            'Selecciona una opción',
+            [
+                {
+                    text: 'Tomar foto',
+                    onPress: () => takePhoto(),
+                },
+                {
+                    text: 'Galería',
+                    onPress: () => pickImage(),
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel',
+                },
+            ],
+            { cancelable: true }
+        );
+    };
+
+    const pickImage = async () => {
+        try {
+            // Request permissions
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permiso denegado', 'Necesitamos permisos para acceder a tu galería de fotos');
+                return;
+            }
+
+            // Open image picker
+            const result = await ImagePicker.launchImageLibraryAsync({
+                quality: 0.8,
+                allowsEditing: true,
+                aspect: [4, 3],
+            });
+
+            if (!result.canceled) {
+                const selectedUri = result.assets[0].uri;
+                await uploadImage(selectedUri);
+            }
+        } catch (error) {
+            console.error('Error selecting image:', error);
+            Alert.alert('Error', 'Ocurrió un error al seleccionar la imagen');
+        }
+    };
+
+    const takePhoto = async () => {
+        try {
+            // Request camera permissions
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permiso denegado', 'Necesitamos permisos para acceder a tu cámara');
+                return;
+            }
+
+            // Launch camera
+            const result = await ImagePicker.launchCameraAsync({
+                quality: 0.8,
+                allowsEditing: true,
+                aspect: [4, 3],
+            });
+
+            if (!result.canceled) {
+                const selectedUri = result.assets[0].uri;
+                await uploadImage(selectedUri);
+            }
+        } catch (error) {
+            console.error('Error taking photo:', error);
+            Alert.alert('Error', 'Ocurrió un error al tomar la foto');
+        }
+    };
+
+    const uploadImage = async (imageUri: string) => {
+        try {
+            setIsUploadingImage(true);
+
+            await uploadDreamImage.mutateAsync({
+                dreamId: id,
+                image: imageUri
+            });
+
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            Alert.alert('Error', 'Ocurrió un error al subir la imagen');
+        } finally {
+            setIsUploadingImage(false);
+        }
+    };
+
+    const handleImagePress = (imageUri: string) => {
         const screenWidth = Dimensions.get('window').width;
         const imageSize = screenWidth * 0.8; // 80% del ancho de pantalla
 
         openModal(
             <Image
-                source={{ uri: image }}
+                source={{ uri: imageUri }}
                 style={{ width: imageSize, height: imageSize }}
                 resizeMode="contain"
             />,
@@ -110,7 +200,6 @@ export default function DreamCard({
 
     return (
         <View style={styles.card}>
-
             <View style={styles.headerRow}>
                 <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity onPress={onViewComplete}>
@@ -125,32 +214,15 @@ export default function DreamCard({
                 {description}
             </Text>
 
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
+            <ImageCarousel
+                images={images?.map(image => image.signedUrl || image.storageUrl) || []}
+                onImagePress={handleImagePress}
+                onAddPress={handleAddImage}
+                maxImages={7}
+                thumbSize={64}
                 style={styles.imageList}
-                contentContainerStyle={styles.imageListContent}
-            >
-                {imageData.map((item, i) =>
-                    item === 'add' ? (
-                        <TouchableOpacity
-                            key={i}
-                            style={styles.addImage}
-                            onPress={onAddImage}
-                        >
-                            <Ionicons name="add" size={28} color="#fff" />
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity onPress={() => handleImagePress(item)} key={i}>
-                            <Image
-                                source={{ uri: item }}
-                                style={styles.image}
-                                resizeMode="cover"
-                            />
-                        </TouchableOpacity>
-                    )
-                )}
-            </ScrollView>
+                isLoading={isUploadingImage}
+            />
 
             {/* Botón Visualizar */}
             <TouchableOpacity
@@ -235,27 +307,7 @@ const styles = StyleSheet.create({
     },
     imageList: {
         marginBottom: 12,
-        maxHeight: THUMB_SIZE,      // límite vertical para evitar apilado
-    },
-    imageListContent: {
-        alignItems: 'center',
-        paddingRight: 10,
-    },
-    image: {
-        width: THUMB_SIZE,
-        height: THUMB_SIZE,
-        borderRadius: 12,
-        marginRight: 10,
-        backgroundColor: colors.light.palette.blue[100],
-    },
-    addImage: {
-        width: THUMB_SIZE,
-        height: THUMB_SIZE,
-        borderRadius: 12,
-        backgroundColor: colors.light.palette.blue[500],
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 10,
+        maxHeight: THUMB_SIZE,
     },
     visualizeBtn: {
         flexDirection: 'row',
