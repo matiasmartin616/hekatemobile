@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions, Modal, TextInput, Alert } from 'react-native';
 import ThemedText from "@/app/modules/shared/components/themed-text";
 import ThemedView from "@/app/modules/shared/components/themed-view";
 import usePrivateRoutinesApi from "../hooks/use-private-routines-api";
@@ -7,7 +7,8 @@ import { PrivateRoutineBlock, PrivateRoutineDay } from '../api/private-routine-a
 import colors from '../../shared/theme/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import privateRoutinesApi from '../api/private-routines-api';
+import { useQueryClient } from '@tanstack/react-query';
 
 const { width, height } = Dimensions.get('window');
 
@@ -79,43 +80,159 @@ const getTodayWeekDay = () => {
     return dayNumberToWeekDay[dayOfWeek];
 };
 
-// Componente para mostrar bloques de rutina
-function RoutineBlockItem({ block }: { block: PrivateRoutineBlock }) {
-    return (
-        <View style={[styles.blockItem, { borderLeftColor: block.color }]}>
-            <View style={styles.blockContent}>
-                <ThemedText style={styles.blockTitle}>{block.title}</ThemedText>
-                <ThemedText style={styles.blockDescription} numberOfLines={2}>
-                    {block.description}
-                </ThemedText>
-            </View>
-        </View>
-    );
-}
-
-// Componente para mostrar un indicador de día actual
-function TodayIndicator() {
-    return (
-        <View style={styles.todayBadge}>
-            <ThemedText style={styles.todayText}>HOY</ThemedText>
-        </View>
-    );
-}
-
 export default function PrivateRoutinesScreen() {
     const { data, isLoading } = usePrivateRoutinesApi();
-    const [selectedDay, setSelectedDay] = useState<string | null>(getTodayWeekDay());
+    const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [selectedBlock, setSelectedBlock] = useState<PrivateRoutineBlock | null>(null);
+    const [editedBlock, setEditedBlock] = useState<PrivateRoutineBlock | null>(null);
+    const queryClient = useQueryClient();
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     
-    // Manejar la edición de una rutina
-    const handleEditRoutine = (weekDay: string) => {
-        router.push({
-            pathname: "/(routes)/(private)/routine-edit",
-            params: { 
-                weekDay: weekDay,
-                routineId: data?.id
+    // Inicializar el día seleccionado cuando los datos se cargan
+    useEffect(() => {
+        if (data && data.days && data.days.length > 0) {
+            // Si tenemos datos, seleccionar el día actual o el primer día disponible
+            const todayWeekDay = getTodayWeekDay();
+            const todayRoutine = data.days.find(day => day.weekDay === todayWeekDay);
+            if (todayRoutine) {
+                setSelectedDayId(todayRoutine.id);
+            } else {
+                setSelectedDayId(data.days[0].id);
             }
-        });
+        }
+    }, [data]);
+    
+    // Función para abrir el modal de edición de bloque
+    const handleBlockPress = (block: PrivateRoutineBlock) => {
+        setSelectedBlock(block);
+        setEditedBlock({...block});
+        setEditModalVisible(true);
     };
+    
+    // Función para abrir modal para añadir un nuevo bloque
+    const handleAddNewBlock = () => {
+        // Crear un bloque vacío con valores predeterminados
+        if (!selectedRoutine) return;
+        
+        console.log("Día seleccionado:", {
+            id: selectedRoutine.id,
+            routineId: selectedRoutine.routineId,
+            weekDay: selectedRoutine.weekDay
+        });
+        
+        const newBlockData: Omit<PrivateRoutineBlock, 'id'> = {
+            title: '',
+            description: '',
+            color: blockColors[0],
+            order: sortedBlocks.length > 0 ? Math.max(...sortedBlocks.map(b => b.order)) + 1 : 0,
+            routineDayId: selectedRoutine.id,
+            weekDay: selectedRoutine.weekDay,
+            status: 'VISUALIZED'
+        };
+        
+        // Crear un objeto temporal para el formulario
+        setSelectedBlock(null);
+        setEditedBlock({
+            ...newBlockData,
+            id: 'temp-id' // ID temporal que se reemplazará al guardar
+        });
+        setEditModalVisible(true);
+    };
+    
+    // Función para guardar cambios de un bloque
+    const handleSaveBlock = async () => {
+        if (!editedBlock || !selectedRoutine) return;
+        
+        try {
+            setIsSaving(true);
+            // Si el bloque tiene un ID temporal, es un nuevo bloque
+            if (editedBlock.id === 'temp-id') {
+                // Crear un nuevo bloque
+                const blockData = {
+                    title: editedBlock.title,
+                    description: editedBlock.description,
+                    color: editedBlock.color,
+                    order: editedBlock.order,
+                    routineDayId: selectedRoutine.id,
+                    weekDay: selectedRoutine.weekDay,
+                    status: 'VISUALIZED' as 'DONE' | 'VISUALIZED'
+                };
+                
+                console.log("Creando bloque con datos:", blockData);
+                
+                // Usar la ruta correcta con el ID del día de rutina
+                await privateRoutinesApi.addBlockDirectly(selectedRoutine.id, blockData);
+            } else {
+                // Actualizar un bloque existente
+                await privateRoutinesApi.updateBlockDirectly(editedBlock.id, {
+                    title: editedBlock.title,
+                    description: editedBlock.description,
+                    color: editedBlock.color,
+                    order: editedBlock.order
+                });
+            }
+            
+            queryClient.invalidateQueries({ queryKey: ['private-routines'] });
+            setEditModalVisible(false);
+        } catch (error) {
+            console.error('Error al guardar el bloque:', error);
+            Alert.alert('Error', 'No se pudo guardar el bloque');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    // Función para eliminar un bloque
+    const handleDeleteBlock = async () => {
+        if (!selectedBlock) return;
+        
+        Alert.alert(
+            'Eliminar bloque',
+            '¿Estás seguro de que deseas eliminar este bloque?',
+            [
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                },
+                {
+                    text: 'Eliminar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            setIsDeleting(true);
+                            await privateRoutinesApi.deleteBlockDirectly(selectedBlock.id);
+                            queryClient.invalidateQueries({ queryKey: ['private-routines'] });
+                            setEditModalVisible(false);
+                        } catch (error) {
+                            console.error('Error al eliminar el bloque:', error);
+                            Alert.alert('Error', 'No se pudo eliminar el bloque');
+                        } finally {
+                            setIsDeleting(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    // Componente para mostrar bloques de rutina con interacción para editar
+    function RoutineBlockItem({ block }: { block: PrivateRoutineBlock }) {
+        return (
+            <TouchableOpacity 
+                style={[styles.blockItem, { borderLeftColor: block.color }]}
+                onPress={() => handleBlockPress(block)}
+            >
+                <View style={styles.blockContent}>
+                    <ThemedText style={styles.blockTitle}>{block.title}</ThemedText>
+                    <ThemedText style={styles.blockDescription} numberOfLines={2}>
+                        {block.description}
+                    </ThemedText>
+                </View>
+            </TouchableOpacity>
+        );
+    }
 
     // Mostrar pantalla de carga
     if (isLoading || !data) {
@@ -127,23 +244,17 @@ export default function PrivateRoutinesScreen() {
         );
     }
 
-    // Extraer días de la respuesta
-    const routines = data.days || [];
-
-    // Asegurarse de que hay rutinas para todos los días
-    const allWeekDays = Object.keys(weekDayNames);
-    const routinesByDay = allWeekDays.reduce((acc, day) => {
-        acc[day] = routines.find((r: PrivateRoutineDay) => r.weekDay === day) || {
-            id: `empty-${day}`,
-            routineId: data.id,
-            weekDay: day,
-            blocks: []
-        };
-        return acc;
-    }, {} as Record<string, PrivateRoutineDay>);
-
-    // Obtener la rutina seleccionada
-    const selectedRoutine = selectedDay ? routinesByDay[selectedDay] : null;
+    // Obtener los días de la rutina desde la API
+    const routineDays = data.days || [];
+    
+    // Ordenar los días según el orden de la semana
+    const sortedRoutineDays = [...routineDays].sort((a, b) => {
+        const weekDayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+        return weekDayOrder.indexOf(a.weekDay) - weekDayOrder.indexOf(b.weekDay);
+    });
+    
+    // Encontrar la rutina seleccionada
+    const selectedRoutine = routineDays.find(day => day.id === selectedDayId) || null;
     
     // Ordenar bloques por orden
     const sortedBlocks = selectedRoutine?.blocks 
@@ -152,26 +263,25 @@ export default function PrivateRoutinesScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            {/* Selector de días de la semana - compacto */}
+            {/* Selector de días dinámico */}
             <View style={styles.daySelectorContainer}>
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.daySelector}
                 >
-                    {Object.entries(weekDayNames).map(([weekDay, displayName]) => {
-                        const isToday = weekDay === getTodayWeekDay();
-                        const isSelected = weekDay === selectedDay;
-                        const dayColor = weekDayColors[weekDay];
+                    {sortedRoutineDays.map((routineDay) => {
+                        const isSelected = routineDay.id === selectedDayId;
+                        const dayColor = weekDayColors[routineDay.weekDay] || weekDayColors.MONDAY; // fallback a lunes
                         
                         return (
                             <TouchableOpacity
-                                key={weekDay}
+                                key={routineDay.id}
                                 style={[
                                     styles.dayButton,
                                     isSelected && { backgroundColor: dayColor.light, borderColor: dayColor.main }
                                 ]}
-                                onPress={() => setSelectedDay(weekDay)}
+                                onPress={() => setSelectedDayId(routineDay.id)}
                             >
                                 <ThemedText 
                                     style={[
@@ -179,9 +289,8 @@ export default function PrivateRoutinesScreen() {
                                         isSelected && { color: dayColor.main, fontWeight: 'bold' }
                                     ]}
                                 >
-                                    {displayName.substring(0, 3)}
+                                    {routineDay.weekDay}
                                 </ThemedText>
-                                {isToday && <View style={[styles.todayDot, { backgroundColor: dayColor.main }]} />}
                             </TouchableOpacity>
                         );
                     })}
@@ -196,26 +305,6 @@ export default function PrivateRoutinesScreen() {
             >
                 {selectedRoutine && (
                     <>
-                        {/* Cabecera del día */}
-                        <LinearGradient
-                            colors={[weekDayColors[selectedRoutine.weekDay].gradient[0], weekDayColors[selectedRoutine.weekDay].gradient[1]]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={styles.dayHeader}
-                        >
-                            <View style={styles.dayHeaderContent}>
-                                <View>
-                                    <ThemedText style={styles.dayHeaderTitle}>
-                                        {weekDayNames[selectedRoutine.weekDay]}
-                                    </ThemedText>
-                                    <ThemedText style={styles.dayHeaderSubtitle}>
-                                        {selectedRoutine.blocks.length} {selectedRoutine.blocks.length === 1 ? 'actividad' : 'actividades'}
-                                    </ThemedText>
-                                </View>
-                                {getTodayWeekDay() === selectedRoutine.weekDay && <TodayIndicator />}
-                            </View>
-                        </LinearGradient>
-
                         {/* Lista de bloques */}
                         <View style={styles.blocksContainer}>
                             {sortedBlocks.length > 0 ? (
@@ -240,15 +329,117 @@ export default function PrivateRoutinesScreen() {
                     </>
                 )}
 
-                {/* Botón de edición */}
+                {/* Botón para agregar nueva rutina */}
                 <TouchableOpacity 
                     style={styles.editButton}
-                    onPress={() => selectedDay && handleEditRoutine(selectedDay)}
+                    onPress={handleAddNewBlock}
                 >
-                    <Ionicons name="create-outline" size={22} color="#fff" />
-                    <ThemedText style={styles.editButtonText}>Editar Rutina</ThemedText>
+                    <Ionicons name="add-outline" size={22} color="#fff" />
+                    <ThemedText style={styles.editButtonText}>Añadir Rutina</ThemedText>
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* Modal de edición de bloque */}
+            <Modal
+                visible={editModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setEditModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                            <ThemedText type="subtitle" style={styles.modalTitle}>
+                                {selectedBlock ? "Editar Bloque" : "Nuevo Bloque"}
+                            </ThemedText>
+                            <TouchableOpacity 
+                                onPress={() => setEditModalVisible(false)}
+                                style={styles.closeButton}
+                            >
+                                <Ionicons name="close" size={24} color={colors.light.neutral.black} />
+                            </TouchableOpacity>
+                        </View>
+                        
+                        {editedBlock && (
+                            <View style={styles.modalBody}>
+                                <ThemedText style={styles.inputLabel}>Título</ThemedText>
+                                <TextInput
+                                    style={styles.inputTitle}
+                                    value={editedBlock.title}
+                                    onChangeText={text => setEditedBlock(prev => prev ? {...prev, title: text} : null)}
+                                    placeholder="Título del bloque"
+                                />
+                                
+                                <ThemedText style={styles.inputLabel}>Descripción</ThemedText>
+                                <TextInput
+                                    style={styles.inputDesc}
+                                    value={editedBlock.description}
+                                    onChangeText={text => setEditedBlock(prev => prev ? {...prev, description: text} : null)}
+                                    placeholder="Descripción del bloque"
+                                    multiline={true}
+                                    numberOfLines={3}
+                                />
+                                
+                                <ThemedText style={styles.inputLabel}>Color</ThemedText>
+                                <View style={styles.colorSelector}>
+                                    {blockColors.map(color => (
+                                        <TouchableOpacity 
+                                            key={color}
+                                            style={[
+                                                styles.colorOption, 
+                                                { backgroundColor: color },
+                                                editedBlock.color === color && styles.colorOptionSelected
+                                            ]}
+                                            onPress={() => setEditedBlock(prev => prev ? {...prev, color} : null)}
+                                        />
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+                        
+                        <View style={styles.modalFooter}>
+                            {selectedBlock && (
+                                <TouchableOpacity 
+                                    style={styles.deleteButton}
+                                    onPress={handleDeleteBlock}
+                                    disabled={isDeleting || isSaving}
+                                >
+                                    {isDeleting ? (
+                                        <ActivityIndicator size="small" color={colors.light.palette.red[500]} />
+                                    ) : (
+                                        <>
+                                            <Ionicons name="trash-outline" size={20} color={colors.light.palette.red[500]} />
+                                            <ThemedText style={styles.deleteButtonText}>Eliminar</ThemedText>
+                                        </>
+                                    )}
+                                </TouchableOpacity>
+                            )}
+                            
+                            <View style={styles.footerActions}>
+                                <TouchableOpacity 
+                                    style={styles.cancelButton}
+                                    onPress={() => setEditModalVisible(false)}
+                                    disabled={isSaving || isDeleting}
+                                >
+                                    <ThemedText style={styles.cancelButtonText}>Cancelar</ThemedText>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity 
+                                    style={styles.saveButton}
+                                    onPress={handleSaveBlock}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <ThemedText style={styles.saveButtonText}>Guardar</ThemedText>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </ThemedView>
     );
 }
@@ -289,20 +480,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: 56,
-        height: 28,
+        minWidth: 90,
+        height: 32,
     },
     dayButtonText: {
         fontSize: 12,
         color: colors.light.neutral.gray[700],
     },
-    todayDot: {
-        width: 3,
-        height: 3,
-        borderRadius: 1.5,
-        position: 'absolute',
-        bottom: 2,
-    },
+    
     content: {
         flex: 1,
     },
@@ -339,17 +524,7 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.8)',
         marginTop: 4,
     },
-    todayBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        backgroundColor: 'rgba(255, 255, 255, 0.25)',
-        borderRadius: 12,
-    },
-    todayText: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
+    
     blocksContainer: {
         marginBottom: 20,
     },
@@ -414,4 +589,185 @@ const styles = StyleSheet.create({
         color: '#fff',
         marginLeft: 8,
     },
+    groupContainer: {
+        marginBottom: 24,
+        backgroundColor: colors.light.palette.blue[50],
+        borderRadius: 16,
+        padding: 16,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    groupHeader: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.light.palette.blue[700],
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light.palette.blue[100],
+        paddingBottom: 8,
+    },
+    viewByGroupButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: colors.light.palette.blue[50],
+        position: 'absolute',
+        right: 12,
+        top: 10,
+        borderWidth: 1,
+        borderColor: colors.light.palette.blue[200],
+    },
+    viewByGroupButtonText: {
+        fontSize: 12,
+        marginLeft: 4,
+        color: colors.light.palette.blue[600],
+        fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        width: '90%',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        overflow: 'hidden',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 10,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light.palette.blue[100],
+        backgroundColor: colors.light.palette.blue[50],
+    },
+    modalTitle: {
+        fontSize: 18,
+    },
+    closeButton: {
+        padding: 4,
+    },
+    modalBody: {
+        padding: 16,
+    },
+    inputLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+        color: colors.light.palette.blue[700],
+    },
+    inputTitle: {
+        backgroundColor: '#fff',
+        borderColor: colors.light.palette.blue[200],
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        fontSize: 16,
+    },
+    inputDesc: {
+        backgroundColor: '#fff',
+        borderColor: colors.light.palette.blue[200],
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        fontSize: 14,
+        minHeight: 100,
+        textAlignVertical: 'top',
+    },
+    colorSelector: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 8,
+        marginBottom: 16,
+    },
+    colorOption: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginRight: 12,
+        marginBottom: 12,
+    },
+    colorOptionSelected: {
+        borderWidth: 3,
+        borderColor: colors.light.neutral.black,
+    },
+    modalFooter: {
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: colors.light.palette.blue[100],
+    },
+    footerActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 16,
+    },
+    cancelButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginRight: 12,
+        borderWidth: 1,
+        borderColor: colors.light.palette.blue[300],
+    },
+    cancelButtonText: {
+        color: colors.light.palette.blue[500],
+        fontWeight: '600',
+    },
+    saveButton: {
+        backgroundColor: colors.light.palette.blue[500],
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+    },
+    saveButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    deleteButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignSelf: 'flex-start',
+        borderWidth: 1,
+        borderColor: colors.light.palette.red[300],
+        backgroundColor: colors.light.palette.red[50],
+    },
+    deleteButtonText: {
+        marginLeft: 8,
+        color: colors.light.palette.red[500],
+        fontWeight: '600',
+    },
 });
+
+// Colores predefinidos para bloques
+const blockColors = [
+    '#4A90E2', // Azul
+    '#50E3C2', // Verde turquesa
+    '#F5A623', // Naranja
+    '#D0021B', // Rojo
+    '#7ED321', // Verde
+    '#9013FE', // Morado
+];

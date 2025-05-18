@@ -18,13 +18,25 @@ const privateRoutinesApi = {
     deleteBlock: async (weekDay: string, blockId: string): Promise<void> => {
         await api.delete(`/private-routines/${weekDay}/blocks/${blockId}`);
     },
+    
+    deleteBlockDirectly: async (blockId: string): Promise<void> => {
+        await api.delete(`/private-routines/blocks/${blockId}`);
+    },
 
     addBlock: async (weekDay: string, block: Omit<PrivateRoutineBlock, 'id'>): Promise<PrivateRoutineBlock> => {
         return await api.post<PrivateRoutineBlock>(`/private-routines/${weekDay}/blocks`, block);
     },
 
+    addBlockDirectly: async (routineDayId: string, block: Omit<PrivateRoutineBlock, 'id'>): Promise<PrivateRoutineBlock> => {
+        return await api.post<PrivateRoutineBlock>(`/private-routines/blocks/${routineDayId}`, block);
+    },
+
     updateBlock: async (weekDay: string, blockId: string, data: Partial<PrivateRoutineBlock>): Promise<PrivateRoutineBlock> => {
         return await api.put<PrivateRoutineBlock>(`/private-routines/${weekDay}/blocks/${blockId}`, data);
+    },
+    
+    updateBlockDirectly: async (blockId: string, data: Partial<PrivateRoutineBlock>): Promise<PrivateRoutineBlock> => {
+        return await api.put<PrivateRoutineBlock>(`/private-routines/blocks/${blockId}`, data);
     }
 };
 
