@@ -9,6 +9,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useModal } from '@/app/modules/shared/context/modal-context';
 import colors from '@/app/modules/shared/theme/theme';
 import CreateDreamForm from './form/create-dream-form';
+import EditDreamForm from '@/app/modules/dreams/components/edit-dream-form';
 
 export default function DreamSection() {
     const theme = useTheme();
@@ -19,11 +20,21 @@ export default function DreamSection() {
     const handleSeeDreamDetail = (dreamId: string) => {
         router.push(`/dreams/${dreamId}`);
     };
+
     const handleAddDream = () => {
         // Open the modal with a form to create a new dream
         openModal(
             <CreateDreamForm />
         );
+    };
+
+    const handleEditDream = (dreamId: string) => {
+        const dreamToEdit = dreams?.find(d => d.id === dreamId);
+        if (dreamToEdit) {
+            openModal(
+                <EditDreamForm dream={dreamToEdit} />
+            );
+        }
     };
 
     if (isLoading) {
@@ -70,12 +81,7 @@ export default function DreamSection() {
                         description={item.text}
                         canVisualize={item.canVisualize}
                         slotVisualized={item.slotVisualized}
-                        images={[
-                            'https://inmoclip.com/wp-content/uploads/2023/10/comprar-una-casa-en-la-playa.jpg',
-                            'https://inmoclip.com/wp-content/uploads/2023/10/comprar-una-casa-en-la-playa.jpg'
-                        ]}
                         onViewComplete={() => handleSeeDreamDetail(item.id)}
-                        onAddImage={() => { }}
                     />
                 );
             }}
