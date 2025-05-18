@@ -1,17 +1,20 @@
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet, Platform, Image } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Platform, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from '../themed-text';
 import ThemedView from '../themed-view';
 import colors from '@/app/modules/shared/theme/theme';
+import useVisualizationsCount from '@/app/modules/dreams/hooks/use-visualizations-count';
+
 interface TopMenuProps {
     onMenuPress: () => void;
 }
 
 export default function TopMenu({ onMenuPress }: TopMenuProps) {
-    // Por ahora hardcodeamos el número de visualizaciones, 
-    // después se deberá obtener del contexto o props
-    const totalVisualizations = "3.200";
+    const { totalCount, isLoading } = useVisualizationsCount();
+
+    // Format the number with thousands separator
+    const formattedCount = totalCount.toLocaleString();
 
     return (
         <ThemedView style={styles.mainContainer}>
@@ -37,7 +40,11 @@ export default function TopMenu({ onMenuPress }: TopMenuProps) {
                 {/* Contador de visualizaciones */}
                 <View style={styles.visualizationsContainer}>
                     <Ionicons name="star-outline" size={20} color="#2A69AC" />
-                    <ThemedText style={styles.visualizationsText}>{totalVisualizations}</ThemedText>
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color="#2A69AC" />
+                    ) : (
+                        <ThemedText style={styles.visualizationsText}>{formattedCount}</ThemedText>
+                    )}
                 </View>
             </View>
         </ThemedView>

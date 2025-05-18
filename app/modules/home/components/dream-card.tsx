@@ -174,6 +174,8 @@ export default function DreamCard({
             {
                 onSuccess: () => {
                     setIsVisualizing(false);
+                    // Forzar una actualización limpia del contador
+                    queryClient.resetQueries({ queryKey: ['visualizations-history'] });
                 },
                 onError: () => {
                     // Revert the optimistic update on error
@@ -189,10 +191,6 @@ export default function DreamCard({
 
                     setIsVisualizing(false);
                     Alert.alert('Error', 'No se pudo visualizar el sueño. Inténtalo de nuevo.');
-                },
-                onSettled: () => {
-                    // Always refetch after error or success to ensure we're showing the correct server state
-                    refetch();
                 }
             }
         );
