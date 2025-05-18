@@ -398,7 +398,7 @@ export default function PrivateRoutinesScreen() {
                         )}
                         
                         <View style={styles.modalFooter}>
-                            {selectedBlock && (
+                            {selectedBlock && selectedBlock.id !== 'temp-id' && (
                                 <TouchableOpacity 
                                     style={styles.deleteButton}
                                     onPress={handleDeleteBlock}
