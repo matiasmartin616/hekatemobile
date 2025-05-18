@@ -1,40 +1,43 @@
+import { PrivateRoutine } from '@modules/private-routines/api/private-routine-api';
+import { PrivateRoutineBlock } from '@modules/private-routines/api/private-routine-block-api';
 import { api } from '@shared/services/api';
-import { PrivateRoutineBlock } from './private-routine-block-api';
 
-export interface PrivateRoutine {
-  id: string;
-  routineId: string;
-  weekDay: string;
-  blocks: PrivateRoutineBlock[];
-  day: number;
-  month: number;
-  year: number;
-}
+const privateRoutinesApi = {
+    getPrivateRoutine: async (): Promise<PrivateRoutine> => {
+        return await api.get<PrivateRoutine>('/private-routines');
+    },
 
-export const privateRoutinesApi = {
-  /**
-   * Get all dreams with optional archived filter
-   */
-  getPrivateRoutine: async (): Promise<PrivateRoutine> => {
-    try {
-      return await api.get<PrivateRoutine>(`/private-routines`);
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Error al obtener la lectura diaria');
+    getTodayPrivateRoutine: async (): Promise<PrivateRoutine> => {
+        return await api.get<PrivateRoutine>('/private-routines/today');
+    },
+
+    updateRoutine: async (weekDay: string, data: Partial<PrivateRoutine>): Promise<PrivateRoutine> => {
+        return await api.put<PrivateRoutine>(`/private-routines/${weekDay}`, data);
+    },
+
+    deleteBlock: async (weekDay: string, blockId: string): Promise<void> => {
+        await api.delete(`/private-routines/${weekDay}/blocks/${blockId}`);
+    },
+    
+    deleteBlockDirectly: async (blockId: string): Promise<void> => {
+        await api.delete(`/private-routines/blocks/${blockId}`);
+    },
+
+    addBlock: async (weekDay: string, block: Omit<PrivateRoutineBlock, 'id'>): Promise<PrivateRoutineBlock> => {
+        return await api.post<PrivateRoutineBlock>(`/private-routines/${weekDay}/blocks`, block);
+    },
+
+    addBlockDirectly: async (routineDayId: string, block: Omit<PrivateRoutineBlock, 'id'>): Promise<PrivateRoutineBlock> => {
+        return await api.post<PrivateRoutineBlock>(`/private-routines/blocks/${routineDayId}`, block);
+    },
+
+    updateBlock: async (weekDay: string, blockId: string, data: Partial<PrivateRoutineBlock>): Promise<PrivateRoutineBlock> => {
+        return await api.put<PrivateRoutineBlock>(`/private-routines/${weekDay}/blocks/${blockId}`, data);
+    },
+    
+    updateBlockDirectly: async (blockId: string, data: Partial<PrivateRoutineBlock>): Promise<PrivateRoutineBlock> => {
+        return await api.put<PrivateRoutineBlock>(`/private-routines/blocks/${blockId}`, data);
     }
-  },
-  getTodayPrivateRoutine: async (): Promise<PrivateRoutine> => {
-    try {
-      return await api.get<PrivateRoutine>(`/private-routines/today`);
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Error al obtener la lectura diaria');
-    }
-  },
 };
 
 export default privateRoutinesApi;
