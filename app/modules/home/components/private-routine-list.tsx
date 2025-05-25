@@ -1,9 +1,8 @@
-import { ScrollView } from "react-native";
-import { StyleSheet } from "react-native";
-import { View } from "react-native";
+import { ScrollView, View, StyleSheet } from "react-native";
 import { PrivateRoutineBlock } from "../../private-routines/api/private-routine-block-api";
-import PrivateRoutineTimeBlock from "./private-routine-block";
+import RoutineBlockItem from '@/app/modules/private-routines/components/routine-block-item';
 import colors from "../../shared/theme/theme";
+
 interface RoutineListProps {
     blocks: PrivateRoutineBlock[];
 }
@@ -13,12 +12,9 @@ export default function PrivateRoutineList({ blocks }: RoutineListProps) {
 
     return (
         <ScrollView>
-            {sortedBlocks.map((block, index) => (
+            {sortedBlocks.map((block) => (
                 <View key={block.id} style={styles.group}>
-                    <PrivateRoutineTimeBlock
-                        block={block}
-                    />
-                    {index < sortedBlocks.length - 1 && <View style={styles.divider} />}
+                    <RoutineBlockItem block={block} showEditButton={false} stateIconCentered={true} />
                 </View>
             ))}
         </ScrollView>
@@ -27,7 +23,7 @@ export default function PrivateRoutineList({ blocks }: RoutineListProps) {
 
 const styles = StyleSheet.create({
     group: {
-        marginBottom: 10,
+        marginBottom: 0,
     },
     divider: {
         height: 1,

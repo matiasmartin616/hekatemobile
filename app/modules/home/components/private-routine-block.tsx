@@ -1,13 +1,16 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { PrivateRoutineBlock as PrivateRoutineBlockType } from "../../private-routines/api/private-routine-block-api";
 import ThemedText from "../../shared/components/themed-text";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, ActivityIndicator } from "react-native";
 import { View } from "react-native";
 import { StyleSheet } from "react-native";
 import PrivateRoutineItem from "./private-routine-item";
 import { colors } from "../../shared/theme/theme";
 import usePrivateRoutineBlockApi from "../../private-routines/hooks/use-private-routine-block-api";
 import { useState, useEffect, useRef } from "react";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useQueryClient } from "@tanstack/react-query";
+import { routineStateStyles } from '../../shared/utils/routine-state-styles';
 
 interface PrivateRoutineBlockProps {
     block: PrivateRoutineBlockType;
@@ -15,68 +18,95 @@ interface PrivateRoutineBlockProps {
 
 export default function PrivateRoutineBlock({ block }: PrivateRoutineBlockProps) {
     const { updateStatusMutation } = usePrivateRoutineBlockApi();
-    const [status, setStatus] = useState<null | 'DONE' | 'VISUALIZED'>(block.status || null);
-    const [showOptions, setShowOptions] = useState(status === null);
+    const status = block.status || 'NULL';
+    const [showOptions, setShowOptions] = useState(status === 'NULL');
+    const [isLoading, setIsLoading] = useState(false);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const queryClient = useQueryClient();
+    const style = routineStateStyles[status];
 
     useEffect(() => {
         return () => {
-            // Clear timer on component unmount
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
             }
         };
     }, []);
 
-    const handleStatusUpdate = (newStatus: 'DONE' | 'VISUALIZED') => {
+    const handleStatusUpdate = (newStatus: 'NULL' | 'VISUALIZED' | 'DONE') => {
+        setIsLoading(true);
         updateStatusMutation.mutate({
             blockId: block.id,
             status: newStatus
         },
-            {
-                onSuccess: () => {
-                    setStatus(newStatus);
-                    setShowOptions(false);
-                },
-                onError: (error) => {
-                    console.error('Error updating status:', error);
-                }
-            });
+        {
+            onSuccess: () => {
+                setShowOptions(false);
+                setIsLoading(false);
+                queryClient.invalidateQueries({ queryKey: ['private-routines'] });
+                queryClient.invalidateQueries({ queryKey: ['today-private-routine'] });
+            },
+            onError: (error) => {
+                setIsLoading(false);
+                console.error('Error updating status:', error);
+            }
+        });
     };
 
     const handleStatusButtonClick = () => {
+        // Si ya está en DONE, no permitir más cambios
+        if (status === 'DONE') return;
         setShowOptions(true);
-
-        // Automatically hide options after 3 seconds and default to VISUALIZED if nothing selected
         if (timerRef.current) {
             clearTimeout(timerRef.current);
         }
-
         timerRef.current = setTimeout(() => {
             setShowOptions(false);
-            if (!status) {
+            if (status === 'NULL') {
                 handleStatusUpdate('VISUALIZED');
             }
         }, 3000);
     };
 
     const renderActionButtons = () => {
+        // Si está en DONE, mostrar solo el botón de estado sin opción de cambio
+        if (status === 'DONE') {
+            return (
+                <TouchableOpacity
+                    style={[styles.statusButton, styles.doneButton]}
+                    disabled={true}
+                >
+                    <Ionicons name="checkmark-circle-outline" size={15} color={colors.light.palette.blue[500]} />
+                    <ThemedText style={styles.statusButtonText}>Completado</ThemedText>
+                </TouchableOpacity>
+            );
+        }
         if (showOptions) {
             return (
                 <View style={styles.actionButtons}>
                     <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => handleStatusUpdate('VISUALIZED')}
+                        disabled={isLoading}
                     >
-                        <Ionicons name="eye-outline" size={15} color={colors.light.palette.blue[500]} />
-                        <ThemedText style={styles.actionButtonText}>Visualizar</ThemedText>
+                        {isLoading ? (
+                            <ActivityIndicator size={15} color={colors.light.palette.blue[500]} />
+                        ) : (
+                            <MaterialCommunityIcons name="dumbbell" size={15} color={colors.light.palette.blue[500]} />
+                        )}
+                        <ThemedText style={styles.actionButtonText}>En progreso</ThemedText>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => handleStatusUpdate('DONE')}
+                        disabled={isLoading}
                     >
-                        <Ionicons name="help-circle-outline" size={15} color={colors.light.palette.blue[500]} />
-                        <ThemedText style={styles.actionButtonText}>¿Hecha?</ThemedText>
+                        {isLoading ? (
+                            <ActivityIndicator size={15} color={colors.light.palette.blue[500]} />
+                        ) : (
+                            <Ionicons name="checkmark-circle-outline" size={15} color={colors.light.palette.blue[500]} />
+                        )}
+                        <ThemedText style={styles.actionButtonText}>Completado</ThemedText>
                     </TouchableOpacity>
                 </View>
             );
@@ -85,13 +115,20 @@ export default function PrivateRoutineBlock({ block }: PrivateRoutineBlockProps)
                 <TouchableOpacity
                     style={[
                         styles.statusButton,
-                        status === 'DONE' ? styles.doneButton : styles.visualizedButton
+                        status === 'VISUALIZED' ? styles.visualizedButton : styles.nullButton
                     ]}
                     onPress={handleStatusButtonClick}
+                    disabled={isLoading}
                 >
-                    <Ionicons name="checkmark" size={15} color={colors.light.palette.blue[500]} />
+                    {isLoading ? (
+                        <ActivityIndicator size={15} color={colors.light.palette.blue[500]} />
+                    ) : status === 'NULL' ? (
+                        <Ionicons name="eye-outline" size={15} color={colors.light.palette.blue[500]} />
+                    ) : (
+                        <MaterialCommunityIcons name="dumbbell" size={15} color={colors.light.palette.blue[500]} />
+                    )}
                     <ThemedText style={styles.statusButtonText}>
-                        {status === 'DONE' ? 'Hecho' : 'Visualizado'}
+                        {status === 'NULL' ? 'Pendiente' : 'En progreso'}
                     </ThemedText>
                 </TouchableOpacity>
             );
@@ -99,7 +136,7 @@ export default function PrivateRoutineBlock({ block }: PrivateRoutineBlockProps)
     };
 
     return (
-        <View style={styles.block}>
+        <View style={[styles.block, { backgroundColor: style.backgroundColor }, status === 'NULL' ? { borderColor: '#90CDF4', borderWidth: 1 } : { borderColor: 'transparent', borderWidth: 0 }] }>
             {renderActionButtons()}
             <View style={styles.blockContent}>
                 <ThemedText type="title" style={styles.blockTitle}>{block.title}</ThemedText>
@@ -177,5 +214,9 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: colors.light.palette.blue[500],
         fontWeight: '600',
+    },
+    nullButton: {
+        backgroundColor: colors.light.palette.blue[100],
+        borderColor: colors.light.palette.blue[500],
     },
 }); 

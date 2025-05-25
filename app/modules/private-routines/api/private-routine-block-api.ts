@@ -9,12 +9,12 @@ export interface PrivateRoutineBlock{
   description: string;
   color: string;
   order: number;
-  status: 'DONE' | 'VISUALIZED';
+  status: 'NULL' | 'VISUALIZED' | 'DONE';
 }
 
 export interface UpdateBlockStatusRequest {
   blockId: string;
-  status: 'DONE' | 'VISUALIZED';
+  status: 'NULL' | 'VISUALIZED' | 'DONE';
 }
 
 export const privateRoutineBlockApi = {

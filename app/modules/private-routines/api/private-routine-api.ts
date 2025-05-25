@@ -6,7 +6,7 @@ export interface PrivateRoutineBlock {
     description: string;
     color: string;
     order: number;
-    status?: string;
+    status?: 'NULL' | 'VISUALIZED' | 'DONE';
 }
 
 export interface PrivateRoutineDay {
@@ -22,4 +22,6 @@ export interface PrivateRoutine {
     createdAt: string;
     updatedAt: string;
     days: PrivateRoutineDay[];
-} 
+}
+
+export default {}; 
