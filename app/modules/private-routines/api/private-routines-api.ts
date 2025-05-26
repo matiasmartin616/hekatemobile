@@ -1,5 +1,5 @@
 import { PrivateRoutine } from '@modules/private-routines/api/private-routine-api';
-import { PrivateRoutineBlock } from '@modules/private-routines/api/private-routine-block-api';
+import { PrivateRoutineBlock, BlockStatus } from '@modules/private-routines/api/private-routine-block-api';
 import { api } from '@shared/services/api';
 
 const privateRoutinesApi = {
@@ -36,7 +36,12 @@ const privateRoutinesApi = {
     },
     
     updateBlockDirectly: async (blockId: string, data: Partial<PrivateRoutineBlock>): Promise<PrivateRoutineBlock> => {
-        return await api.put<PrivateRoutineBlock>(`/private-routines/blocks/${blockId}`, data);
+        // Ensure status is sent as a string value
+        const updateData = {
+            ...data,
+            status: data.status ? data.status.toString() : BlockStatus.NULL.toString()
+        };
+        return await api.put<PrivateRoutineBlock>(`/private-routines/blocks/${blockId}`, updateData);
     }
 };
 

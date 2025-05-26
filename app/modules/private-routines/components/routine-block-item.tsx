@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from '@/app/modules/shared/components/themed-text';
-import privateRoutineBlockApi from '../api/private-routine-block-api';
+import privateRoutineBlockApi, { BlockStatus } from '../api/private-routine-block-api';
 import { useQueryClient } from '@tanstack/react-query';
 import { routineStateStyles } from '../../shared/utils/routine-state-styles';
 import { useRouter } from 'expo-router';
@@ -14,10 +14,10 @@ interface RoutineBlockItemProps {
   stateIconCentered?: boolean;
 }
 
-function getNextRoutineState(current: 'NULL' | 'VISUALIZED' | 'DONE') {
-  if (current === 'NULL') return 'VISUALIZED';
-  if (current === 'VISUALIZED') return 'DONE';
-  return 'DONE';
+function getNextRoutineState(current: BlockStatus): BlockStatus {
+  if (current === BlockStatus.NULL) return BlockStatus.VISUALIZED;
+  if (current === BlockStatus.VISUALIZED) return BlockStatus.DONE;
+  return BlockStatus.DONE;
 }
 
 const styles = StyleSheet.create({
@@ -69,25 +69,27 @@ const RoutineBlockItem = ({ block, showEditButton = true, onEdit, stateIconCente
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const status: 'NULL' | 'VISUALIZED' | 'DONE' = (block.status as 'NULL' | 'VISUALIZED' | 'DONE') || 'NULL';
+  const status: BlockStatus = block.status || BlockStatus.NULL;
   const style = routineStateStyles[status];
   const activities = block.description
     ? block.description.split(/\n|\r|•/).map((s: string) => s.trim()).filter(Boolean)
     : [];
 
   const handleStatusPress = async () => {
-    if ((block.status || 'NULL') === 'DONE') return;
-    const nextStatus: 'NULL' | 'VISUALIZED' | 'DONE' = getNextRoutineState(block.status || 'NULL');
+    if (status === BlockStatus.DONE) return;
+    const nextStatus = getNextRoutineState(status);
     setIsLoading(true);
     try {
       await privateRoutineBlockApi.updateBlockStatus({
         blockId: block.id,
         status: nextStatus
       });
+      await queryClient.invalidateQueries({ queryKey: ['private-routines'] });
+      await queryClient.invalidateQueries({ queryKey: ['today-private-routine'] });
+    } catch (error) {
+      console.error('Error updating status:', error);
     } finally {
       setIsLoading(false);
-      queryClient.invalidateQueries({ queryKey: ['private-routines'] });
-      queryClient.invalidateQueries({ queryKey: ['today-private-routine'] });
     }
   };
 
@@ -96,7 +98,7 @@ const RoutineBlockItem = ({ block, showEditButton = true, onEdit, stateIconCente
       style={[
         styles.routineCard,
         { backgroundColor: style.backgroundColor },
-        (block.status || 'NULL') === 'NULL'
+        status === BlockStatus.NULL
           ? { borderColor: '#90CDF4', borderWidth: 1 }
           : { borderColor: 'transparent', borderWidth: 0 },
       ]}
@@ -114,10 +116,10 @@ const RoutineBlockItem = ({ block, showEditButton = true, onEdit, stateIconCente
           <TouchableOpacity onPress={handleStatusPress} style={styles.iconButton} disabled={isLoading}>
             {isLoading ? (
               <ActivityIndicator size={24} color={style.iconColor} />
-            ) : (block.status || 'NULL') === 'VISUALIZED' ? (
+            ) : status === BlockStatus.VISUALIZED ? (
               <MaterialCommunityIcons name="dumbbell" size={24} color={style.iconColor} />
             ) : (
-              <Ionicons name={status === 'DONE' ? 'checkmark-circle-outline' : 'eye-outline'} size={24} color={style.iconColor} />
+              <Ionicons name={status === BlockStatus.DONE ? 'checkmark-circle-outline' : 'eye-outline'} size={24} color={style.iconColor} />
             )}
           </TouchableOpacity>
         </View>
@@ -126,10 +128,10 @@ const RoutineBlockItem = ({ block, showEditButton = true, onEdit, stateIconCente
           <TouchableOpacity onPress={handleStatusPress} style={styles.iconButton} disabled={isLoading}>
             {isLoading ? (
               <ActivityIndicator size={24} color={style.iconColor} />
-            ) : (block.status || 'NULL') === 'VISUALIZED' ? (
+            ) : status === BlockStatus.VISUALIZED ? (
               <MaterialCommunityIcons name="dumbbell" size={24} color={style.iconColor} />
             ) : (
-              <Ionicons name={status === 'DONE' ? 'checkmark-circle-outline' : 'eye-outline'} size={24} color={style.iconColor} />
+              <Ionicons name={status === BlockStatus.DONE ? 'checkmark-circle-outline' : 'eye-outline'} size={24} color={style.iconColor} />
             )}
           </TouchableOpacity>
           {showEditButton && (

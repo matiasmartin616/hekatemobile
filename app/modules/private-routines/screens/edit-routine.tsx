@@ -10,6 +10,7 @@ import colors from '../../shared/theme/theme';
 import ScreenHeader from '@/app/modules/shared/components/navigation/screen-header';
 import { useQueryClient } from '@tanstack/react-query';
 import usePrivateRoutineBlockApi from '../hooks/use-private-routine-block-api';
+import privateRoutineBlockApi, { BlockStatus } from '../api/private-routine-block-api';
 
 export default function EditRoutineScreen() {
   const { blockId, mode, routineDayId, weekDay, order } = useLocalSearchParams();
@@ -41,7 +42,7 @@ export default function EditRoutineScreen() {
         order: typeof order === 'string' ? parseInt(order, 10) : 0,
         routineDayId: routineDayId as string || '',
         weekDay: weekDay as string || '',
-        status: 'NULL',
+        status: BlockStatus.NULL,
       });
       setLoading(false);
       return;
@@ -74,25 +75,23 @@ export default function EditRoutineScreen() {
         const { id, ...blockData } = block;
         await privateRoutinesApi.addBlockDirectly(block.routineDayId, {
           ...blockData,
-          status: 'NULL' as 'NULL' | 'VISUALIZED' | 'DONE',
+          status: BlockStatus.NULL,
         });
       } else {
-        // First update the block data
+        // Primero actualiza los datos del bloque sin el status
         const { status, ...blockData } = block;
         await privateRoutinesApi.updateBlockDirectly(block.id, blockData);
-        
-        // Then update the status separately using the mutation
-        if (status) {
-          await updateStatusMutation.mutateAsync({
-            blockId: block.id,
-            status: status
-          });
-        }
+        // Luego actualiza el status usando el endpoint dedicado
+        await privateRoutineBlockApi.updateBlockStatus({
+          blockId: block.id,
+          status: status || BlockStatus.NULL
+        });
       }
       await queryClient.invalidateQueries({ queryKey: ['private-routines'] });
       await queryClient.invalidateQueries({ queryKey: ['today-private-routine'] });
       router.back();
     } catch (e) {
+      console.error('Error saving routine:', e);
       Alert.alert('Error', 'No se pudo guardar la rutina');
     } finally {
       setSaving(false);
@@ -154,14 +153,14 @@ export default function EditRoutineScreen() {
         {/* Selector de estado */}
         <View style={styles.statusSelectorContainer}>
           {[
-            { label: 'Sin estado', value: 'NULL' },
-            { label: 'Visualizada', value: 'VISUALIZED' },
-            { label: 'Realizada', value: 'DONE' },
+            { label: 'Sin estado', value: BlockStatus.NULL },
+            { label: 'Visualizada', value: BlockStatus.VISUALIZED },
+            { label: 'Realizada', value: BlockStatus.DONE },
           ].map(option => (
             <TouchableOpacity
               key={option.value}
               style={[styles.statusPill, block.status === option.value && styles.statusPillSelected]}
-              onPress={() => setBlock({ ...block, status: option.value as 'NULL' | 'VISUALIZED' | 'DONE' })}
+              onPress={() => setBlock({ ...block, status: option.value })}
             >
               <ThemedText style={[styles.statusPillText, block.status === option.value && styles.statusPillTextSelected]}>
                 {option.label}
