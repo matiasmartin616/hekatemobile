@@ -9,6 +9,7 @@ import { PrivateRoutineBlock } from '../api/private-routine-api';
 import colors from '../../shared/theme/theme';
 import ScreenHeader from '@/app/modules/shared/components/navigation/screen-header';
 import { useQueryClient } from '@tanstack/react-query';
+import usePrivateRoutineBlockApi from '../hooks/use-private-routine-block-api';
 
 export default function EditRoutineScreen() {
   const { blockId, mode, routineDayId, weekDay, order } = useLocalSearchParams();
@@ -18,6 +19,7 @@ export default function EditRoutineScreen() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const queryClient = useQueryClient();
+  const { updateStatusMutation } = usePrivateRoutineBlockApi();
 
   const weekDayNames: Record<string, string> = {
     MONDAY: 'lunes',
@@ -75,7 +77,17 @@ export default function EditRoutineScreen() {
           status: 'NULL' as 'NULL' | 'VISUALIZED' | 'DONE',
         });
       } else {
-        await privateRoutinesApi.updateBlockDirectly(block.id, block);
+        // First update the block data
+        const { status, ...blockData } = block;
+        await privateRoutinesApi.updateBlockDirectly(block.id, blockData);
+        
+        // Then update the status separately using the mutation
+        if (status) {
+          await updateStatusMutation.mutateAsync({
+            blockId: block.id,
+            status: status
+          });
+        }
       }
       await queryClient.invalidateQueries({ queryKey: ['private-routines'] });
       await queryClient.invalidateQueries({ queryKey: ['today-private-routine'] });
@@ -129,11 +141,15 @@ export default function EditRoutineScreen() {
             style={[styles.input, styles.inputMultiline]}
             value={block.description}
             onChangeText={text => setBlock({ ...block, description: text })}
-            placeholder="Añade una descripción"
+            placeholder="Añade una descripción (presiona Enter para nueva línea)"
             placeholderTextColor="#888"
             multiline
             maxLength={200}
+            textAlignVertical="top"
           />
+          <ThemedText style={styles.descriptionHint}>
+            Cada línea se mostrará como un elemento de la lista
+          </ThemedText>
         </View>
         {/* Selector de estado */}
         <View style={styles.statusSelectorContainer}>
@@ -249,10 +265,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputMultiline: {
-    minHeight: 48,
+    minHeight: 120,
     borderRadius: 16,
     borderColor: '#153866',
     textAlignVertical: 'top',
+    paddingTop: 12,
+    paddingBottom: 12,
+    lineHeight: 24,
   },
   buttonFooter: {
     flexDirection: 'row',
@@ -386,5 +405,11 @@ const styles = StyleSheet.create({
   },
   statusPillTextSelected: {
     color: '#fff',
+  },
+  descriptionHint: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
 }); 
