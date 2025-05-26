@@ -39,12 +39,14 @@ export default function TopMenu({ onMenuPress }: TopMenuProps) {
 
                 {/* Contador de visualizaciones */}
                 <View style={styles.visualizationsContainer}>
-                    <Ionicons name="star-outline" size={20} color="#2A69AC" />
+                  <View style={styles.visualizationsBadge}>
+                    <Ionicons name="eye-outline" size={18} color={colors.light.palette.blue[500]} style={{ marginRight: 4 }} />
                     {isLoading ? (
-                        <ActivityIndicator size="small" color="#2A69AC" />
+                      <ActivityIndicator size="small" color={colors.light.palette.blue[500]} />
                     ) : (
-                        <ThemedText style={styles.visualizationsText}>{formattedCount}</ThemedText>
+                      <ThemedText style={styles.visualizationsText}>{formattedCount}</ThemedText>
                     )}
+                  </View>
                 </View>
             </View>
         </ThemedView>
@@ -88,12 +90,23 @@ const styles = StyleSheet.create({
     visualizationsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+    },
+    visualizationsBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1.2,
+        borderColor: colors.light.palette.blue[500],
+        borderRadius: 12,
+        backgroundColor: '#e0edff',
+        paddingHorizontal: 8,
+        paddingVertical: 0,
+        minWidth: 40,
+        minHeight: 22,
     },
     visualizationsText: {
-        fontSize: 16,
+        fontSize: 14,
         color: colors.light.palette.blue[500],
         fontFamily: 'Inter',
-        fontWeight: '500',
+        fontWeight: 'bold',
     },
 });
