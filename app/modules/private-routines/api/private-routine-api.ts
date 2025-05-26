@@ -1,3 +1,5 @@
+import { BlockStatus } from './private-routine-block-api';
+
 export interface PrivateRoutineBlock {
     id: string;
     routineDayId: string;
@@ -6,7 +8,7 @@ export interface PrivateRoutineBlock {
     description: string;
     color: string;
     order: number;
-    status?: string;
+    status: BlockStatus;
 }
 
 export interface PrivateRoutineDay {
@@ -22,4 +24,6 @@ export interface PrivateRoutine {
     createdAt: string;
     updatedAt: string;
     days: PrivateRoutineDay[];
-} 
+}
+
+export default {}; 

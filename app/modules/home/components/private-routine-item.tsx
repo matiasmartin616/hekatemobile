@@ -7,15 +7,26 @@ interface RoutineItemProps {
 }
 
 export default function PrivateRoutineItem({ description }: RoutineItemProps) {
+    const items = description
+        ? description.split(/\n|\r|•/).map((s: string) => s.trim()).filter(Boolean)
+        : [];
+
     return (
-        <View key={description} style={styles.routineItem}>
-            <ThemedText style={styles.bulletPoint}>•</ThemedText>
-            <ThemedText style={styles.routineText}>{description}</ThemedText>
+        <View style={styles.container}>
+            {items.map((item, index) => (
+                <View key={index} style={styles.routineItem}>
+                    <ThemedText style={styles.bulletPoint}>•</ThemedText>
+                    <ThemedText style={styles.routineText}>{item}</ThemedText>
+                </View>
+            ))}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'column',
+    },
     routineItem: {
         flexDirection: 'row',
         alignItems: 'flex-start',
@@ -29,5 +40,6 @@ const styles = StyleSheet.create({
     routineText: {
         fontSize: 14,
         lineHeight: 20,
+        flex: 1,
     },
 });

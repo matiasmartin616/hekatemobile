@@ -1,7 +1,12 @@
 import { api } from '@shared/services/api';
 
+export enum BlockStatus {
+  NULL = 'NULL',
+  VISUALIZED = 'VISUALIZED',
+  DONE = 'DONE'
+}
 
-export interface PrivateRoutineBlock{
+export interface PrivateRoutineBlock {
   id: string;
   routineDayId: string;
   weekDay: string;
@@ -9,12 +14,12 @@ export interface PrivateRoutineBlock{
   description: string;
   color: string;
   order: number;
-  status: 'DONE' | 'VISUALIZED';
+  status: BlockStatus;
 }
 
 export interface UpdateBlockStatusRequest {
   blockId: string;
-  status: 'DONE' | 'VISUALIZED';
+  status: BlockStatus;
 }
 
 export const privateRoutineBlockApi = {
@@ -23,8 +28,12 @@ export const privateRoutineBlockApi = {
    */
   updateBlockStatus: async (request: UpdateBlockStatusRequest) => {
     try {
-      return await api.put(`/private-routines/blocks/${request.blockId}/status`, { status: request.status });
+      // Send the status as a string value without toString()
+      return await api.put(`/private-routines/blocks/${request.blockId}/status`, {
+        status: request.status
+      });
     } catch (error) {
+      console.error('Error updating block status:', error);
       throw new Error('Error al actualizar el estado del bloque');
     }
   },
