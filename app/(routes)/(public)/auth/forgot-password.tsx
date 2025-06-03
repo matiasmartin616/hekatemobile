@@ -1,43 +1,52 @@
 import { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
-import { Link, useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ThemedText from '@/app/modules/shared/components/themed-text';
-import { useAuth } from '@/app/modules/shared/context/auth-context';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 import BackButton from '@/app/modules/shared/components/form/back-button';
 import FormTextInput from '@/app/modules/shared/components/form/text-input';
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
 // Define el esquema de validación con Zod
-const loginSchema = z.object({
+const forgotPasswordSchema = z.object({
   email: z.string().email('Correo electrónico inválido').min(1, 'El correo electrónico es requerido'),
-  password: z.string().min(1, 'La contraseña es requerida')
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { control, handleSubmit, formState: { isValid, isDirty } } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  const { control, handleSubmit, formState: { isValid, isDirty } } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: '',
-      password: ''
+      email: ''
     },
     mode: 'onChange'
   });
 
-  const handleLogin = async (data: LoginFormData) => {
+  const handleForgotPassword = async (data: ForgotPasswordFormData) => {
     try {
+      setIsLoading(true);
       setError('');
-      await login(data.email, data.password);
+      const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email }),
+      });
+      const responseData = await res.json();
+      if (!res.ok) {
+        throw new Error(responseData.message || 'Error al enviar el correo');
+      }
+      setError('success:Correo enviado. Revisa tu correo electrónico para recuperar tu contraseña');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al intentar iniciar sesión');
+      setError(err instanceof Error ? err.message : 'No se pudo enviar el correo');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,23 +55,28 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-              <Image
-                  source={require('@/assets/images/logo-hekate-circle.png')}
-                  style={styles.logo}
-                  resizeMode="contain"
-              />
-              <ThemedText style={styles.logoText}>Hekate</ThemedText>
+            <Image
+              source={require('@/assets/images/logo-hekate-circle.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <ThemedText style={styles.logoText}>Hekate</ThemedText>
           </View>
 
           <View style={styles.titleContainerAdjusted}>
-              <ThemedText style={styles.title}>Inicio de sesión</ThemedText>
-              <ThemedText style={styles.subtitle}>
-                  Inicia tu camino indicando tu email y contraseña
-              </ThemedText>
+            <ThemedText style={styles.title}>¿Olvidaste tu contraseña?</ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Ingresa tu correo electrónico y te enviaremos instrucciones para recuperarla
+            </ThemedText>
           </View>
 
           {error ? (
-            <ThemedText style={styles.error}>{error}</ThemedText>
+            <ThemedText style={[
+              styles.message,
+              error.startsWith('success:') ? styles.successMessage : styles.errorMessage
+            ]}>
+              {error.startsWith('success:') ? error.replace('success:', '') : error}
+            </ThemedText>
           ) : null}
 
           <View style={styles.inputsContainer}>
@@ -74,38 +88,22 @@ export default function LoginScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            
-            <View style={styles.spacer} />
-            
-            <FormTextInput
-              name="password"
-              control={control}
-              placeholder="Contraseña"
-              required
-              isPassword
-            />
           </View>
-
-          <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(routes)/(public)/auth/forgot-password')}>
-              <ThemedText style={styles.forgotPasswordText}>
-                  ¿Olvidaste tu contraseña?
-              </ThemedText>
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.button, 
               (!isValid || !isDirty || isLoading) && styles.buttonDisabled
             ]}
-            onPress={handleSubmit(handleLogin)}
+            onPress={handleSubmit(handleForgotPassword)}
             disabled={!isValid || !isDirty || isLoading}
           >
             <ThemedText style={styles.buttonText}>
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {isLoading ? 'Enviando...' : 'Enviar instrucciones'}
             </ThemedText>
           </TouchableOpacity>
 
-          <BackButton route="/(routes)/(public)/auth/welcome" style={styles.backButtonContainer} />
+          <BackButton route="/(routes)/(public)/auth/login" style={styles.backButtonContainer} />
         </View>
       </View>
     </BackgroundWrapper>
@@ -124,9 +122,6 @@ const styles = StyleSheet.create({
   inputsContainer: {
     width: '100%',
   },
-  spacer: {
-    height: 15, // Espacio adicional entre los inputs
-  },
   logoContainer: {
     alignItems: 'center',
     marginBottom: 24,
@@ -143,16 +138,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     marginTop: 8,
   },
-  forgotPassword: {
-    alignItems: 'center',
-    marginTop: 0,
-  },
-  forgotPasswordText: {
-      color: '#1A365D',
-      fontSize: 14,
-      fontWeight: 'bold',
-      fontFamily: 'Inter',
-  },
   button: {
     backgroundColor: '#1A365D',
     padding: 15,
@@ -165,21 +150,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'Inter',
-  },
-  linkButton: {
-    marginTop: 24,
-    alignItems: 'center',
-  },
-  normalText: {
-    color: '#000000',
-    fontSize: 16,
-    fontFamily: 'Inter',
-  },
-  registerText: {
-    color: '#1253AA',
-    fontSize: 16,
-    fontWeight: 'bold',
     fontFamily: 'Inter',
   },
   error: {
@@ -202,8 +172,8 @@ const styles = StyleSheet.create({
     width: '95%',
     paddingHorizontal: 10,
     justifyContent: 'center',
-},
-title: {
+  },
+  title: {
     fontSize: 36,
     color: '#171923',
     fontWeight: '700',
@@ -211,8 +181,8 @@ title: {
     textAlign: 'center',
     lineHeight: 36,
     fontFamily: 'Inter',
-},
-subtitle: {
+  },
+  subtitle: {
     fontSize: 19,
     color: '#171923',
     textAlign: 'center',
@@ -220,5 +190,23 @@ subtitle: {
     fontFamily: 'Inter',
     lineHeight: 30,
     fontWeight: '400',
-},
-});
+  },
+  message: {
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 16,
+    fontFamily: 'Inter',
+    fontWeight: '500',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  errorMessage: {
+    color: '#E74C3C',
+    backgroundColor: '#FEE2E2',
+  },
+  successMessage: {
+    color: '#059669',
+    backgroundColor: '#D1FAE5',
+  },
+}); 

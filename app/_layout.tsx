@@ -70,7 +70,17 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
           <ThemeProvider value={colorScheme.mode === 'dark' ? DarkTheme : DefaultTheme}>
             <ModalProvider>
-              <Stack screenOptions={{ headerShown: false }} />
+              <Stack
+                screenOptions={{ headerShown: false }}
+                linking={{
+                  prefixes: ['hekate://'],
+                  config: {
+                    screens: {
+                      '(routes)/(public)/auth/reset-password': 'reset-password',
+                    },
+                  },
+                }}
+              />
             </ModalProvider>
           </ThemeProvider>
         </GestureHandlerRootView>

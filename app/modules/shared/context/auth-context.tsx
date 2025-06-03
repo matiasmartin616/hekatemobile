@@ -13,7 +13,7 @@ export interface AuthContextType {
     token: string | null;
     user: User | null;
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string, googleToken?: string) => Promise<void>;
     register: (userData: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
     isAuthenticated: boolean;
@@ -66,11 +66,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string, googleToken?: string) => {
         setIsLoading(true);
         try {
-            // Get fresh user data after successful login
-            const profile = await authApi.login({ email, password });
+            let profile;
+            if (googleToken) {
+                profile = await authApi.loginWithGoogle(googleToken);
+            } else {
+                profile = await authApi.login({ email, password });
+            }
 
             await AsyncStorage.setItem('auth_token', profile.token);
             setToken(profile.token);

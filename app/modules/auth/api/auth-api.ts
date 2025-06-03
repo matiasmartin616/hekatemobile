@@ -15,6 +15,7 @@ export interface AuthResponse {
 export interface LoginRequest {
   email: string;
   password: string;
+  googleToken?: string;
 }
 
 export interface RegisterRequest {
@@ -32,7 +33,7 @@ export interface AuthError {
 // Authentication API functions
 export const authApi = {
   /**
-   * Login user with email and password
+   * Login user with email and password or Google token
    */
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
@@ -42,6 +43,20 @@ export const authApi = {
         throw error;
       }
       throw new Error('Error al intentar iniciar sesión');
+    }
+  },
+
+  /**
+   * Login with Google token
+   */
+  loginWithGoogle: async (googleToken: string): Promise<AuthResponse> => {
+    try {
+      return await api.post<AuthResponse>('/auth/google', { token: googleToken }, { authenticated: false });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Error al intentar iniciar sesión con Google');
     }
   },
 

@@ -2,9 +2,36 @@ import { StyleSheet, View, ImageBackground, Image, TouchableOpacity } from 'reac
 import { Link } from 'expo-router';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { useAuth } from '@/app/modules/shared/context/auth-context';
+import { useRouter } from 'expo-router';
 
+WebBrowser.maybeCompleteAuthSession();
 
 export default function WelcomeScreen() {
+    const { login, isLoading } = useAuth();
+    const router = useRouter();
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+        iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+        androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    });
+    const handleGoogleLogin = async () => {
+        try {
+            const result = await promptAsync();
+            if (result?.type === 'success') {
+                const { authentication } = result;
+                if (!authentication?.accessToken) {
+                    throw new Error('No se pudo obtener el token de acceso de Google');
+                }
+                await login('', '', authentication.accessToken);
+            }
+        } catch (err) {
+            // Puedes mostrar un error si quieres
+        }
+    };
     return (
         <BackgroundWrapper>
             <View style={styles.content}>
@@ -38,17 +65,11 @@ export default function WelcomeScreen() {
                                 <ThemedText style={styles.buttonTextWhite}>Email</ThemedText>
                             </TouchableOpacity>
                         </Link>
-                        <TouchableOpacity style={styles.loginButtonRow}>
+                        <TouchableOpacity style={styles.loginButtonRow} onPress={handleGoogleLogin} disabled={isLoading}>
                             <ThemedText style={styles.buttonTextWhite}>Google</ThemedText>
                             <Image source={require('@/assets/images/gmail_icon2.png')} style={styles.gmailIcon} />
                         </TouchableOpacity>
                     </View>
-
-                    <TouchableOpacity style={styles.forgotPassword}>
-                        <ThemedText style={styles.forgotPasswordText}>
-                            ¿Olvidaste tu contraseña?
-                        </ThemedText>
-                    </TouchableOpacity>
                 </View>
 
                 {/* Divider con líneas y texto para registro */}
@@ -158,17 +179,6 @@ const styles = StyleSheet.create({
         height: 12.75,
         marginLeft: 8,
         resizeMode: 'contain',
-    },
-    forgotPassword: {
-        alignItems: 'center',
-        marginTop: 0,
-    },
-    forgotPasswordText: {
-        color: '#1A365D',
-        fontSize: 14,
-        fontWeight: 'bold',
-        fontFamily: 'Inter',
-        paddingTop: 12,
     },
     registerSection: {
         alignItems: 'center',
