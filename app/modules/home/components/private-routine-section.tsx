@@ -3,15 +3,14 @@ import { StyleSheet, View, TouchableOpacity, Text, ScrollView } from 'react-nati
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import ThemedView from '@/app/modules/shared/components/themed-view';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import usePrivateRoutinesApi from '@/app/modules/private-routines/hooks/use-private-routines-api';
-import { PrivateRoutineBlock } from '@/app/modules/private-routines/api/private-routine-block-api';
+import usePrivateRoutinesData from '@/app/modules/private-routines/hooks/use-private-routines-data';
 import { router } from 'expo-router';
 import PrivateRoutineList from './private-routine-list';
 import colors from '../../shared/theme/theme';
 
 export default function PrivateRoutineSection() {
-    const { todayData, todayLoading } = usePrivateRoutinesApi();
-
+    const { todayData, todayLoading } = usePrivateRoutinesData();
+    console.log(todayData);
     const blocks = todayData?.blocks || [];
 
     return (
