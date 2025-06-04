@@ -25,7 +25,6 @@ export default function DreamSection() {
     };
 
     const handleAddDream = () => {
-        // Open the modal with a form to create a new dream
         openModal(
             <CreateDreamForm />
         );
@@ -69,8 +68,8 @@ export default function DreamSection() {
                             onPress={handleAddDream}
                         >
                             <View style={styles.addDreamButtonInner}>
-                                <Ionicons name="add" size={32} color={theme.colors.light.primary.main} />
-                                <Text style={[styles.addDreamText, { color: theme.colors.light.primary.main }]}>Añadir sueño</Text>
+                                <Ionicons name="add" style={[styles.addDreamIcon]} />
+                                <Text style={[styles.addDreamText]}>Añadir sueño</Text>
                             </View>
                         </TouchableOpacity>
                     );
@@ -121,6 +120,11 @@ const styles = StyleSheet.create({
     addDreamText: {
         marginTop: 8,
         fontSize: 16,
-        fontWeight: '600'
+        fontWeight: '600',
+        color: colors.light.palette.blue[500]
+    },
+    addDreamIcon: {
+        fontSize: 32,
+        color: colors.light.palette.blue[500]
     }
 }); 

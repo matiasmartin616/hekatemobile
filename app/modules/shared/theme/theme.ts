@@ -1,7 +1,7 @@
 export const colors = {
   light:{
     primary: {
-      main: '#000000',
+      main: '#1A365D',
       light: '#80D1F0',
       dark: '#0076A3',
     },
@@ -68,7 +68,7 @@ export const colors = {
         20: '#fbfcff',
         50: '#F5FAFF',
         100: '#CEEDFF',
-        200: '##90CDF4',
+        200: '#90CDF4',
         300: '#63B3ED',
         400: '#4299E1',
         500: '#3182CE',
