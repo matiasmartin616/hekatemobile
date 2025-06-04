@@ -18,7 +18,10 @@ export default function DreamSection() {
     const { openModal } = useModal();
 
     const handleSeeDreamDetail = (dreamId: string) => {
-        router.push(`/dreams/${dreamId}`);
+        router.push({
+            pathname: "/(routes)/(private)/dreams/[id]",
+            params: { id: dreamId }
+        });
     };
 
     const handleAddDream = () => {

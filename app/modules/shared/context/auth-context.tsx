@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { authApi, RegisterRequest } from '@modules/auth/api/auth-api';
+import { queryClient } from '../services/query-client';
 
 export interface User {
     id: string;
@@ -52,6 +53,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const register = async (userData: RegisterRequest) => {
         setIsLoading(true);
         try {
+            // Clear all query cache first
+            queryClient.clear();
+
             const profile = await authApi.register(userData);
             await AsyncStorage.setItem('auth_token', profile.token);
             setToken(profile.token);
@@ -69,6 +73,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = async (email: string, password: string, googleToken?: string) => {
         setIsLoading(true);
         try {
+            // Clear all query cache first
+            queryClient.clear();
+
             let profile;
             if (googleToken) {
                 profile = await authApi.loginWithGoogle(googleToken);
@@ -91,6 +98,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = async () => {
         try {
+            // Clear all query cache on logout as well
+            queryClient.clear();
+
             await AsyncStorage.removeItem('auth_token');
             await AsyncStorage.removeItem('user_data');
 

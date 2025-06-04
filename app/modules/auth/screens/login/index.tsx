@@ -46,19 +46,19 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-              <Image
-                  source={require('@/assets/images/logo-hekate-circle.png')}
-                  style={styles.logo}
-                  resizeMode="contain"
-              />
-              <ThemedText style={styles.logoText}>Hekate</ThemedText>
+            <Image
+              source={require('@/assets/images/logo-hekate-circle.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <ThemedText style={styles.logoText}>Hekate</ThemedText>
           </View>
 
           <View style={styles.titleContainerAdjusted}>
-              <ThemedText style={styles.title}>Inicio de sesión</ThemedText>
-              <ThemedText style={styles.subtitle}>
-                  Inicia tu camino indicando tu email y contraseña
-              </ThemedText>
+            <ThemedText style={styles.title}>Inicio de sesión</ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Inicia tu camino indicando tu email y contraseña
+            </ThemedText>
           </View>
 
           {error ? (
@@ -74,9 +74,9 @@ export default function LoginScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            
+
             <View style={styles.spacer} />
-            
+
             <FormTextInput
               name="password"
               control={control}
@@ -87,14 +87,14 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(routes)/(public)/auth/forgot-password')}>
-              <ThemedText style={styles.forgotPasswordText}>
-                  ¿Olvidaste tu contraseña?
-              </ThemedText>
+            <ThemedText style={styles.forgotPasswordText}>
+              ¿Olvidaste tu contraseña?
+            </ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
-              styles.button, 
+              styles.button,
               (!isValid || !isDirty || isLoading) && styles.buttonDisabled
             ]}
             onPress={handleSubmit(handleLogin)}
@@ -148,16 +148,17 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   forgotPasswordText: {
-      color: '#1A365D',
-      fontSize: 14,
-      fontWeight: 'bold',
-      fontFamily: 'Inter',
+    color: '#1A365D',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: 'Inter',
   },
   button: {
     backgroundColor: '#1A365D',
-    padding: 15,
+    padding: 10,
     borderRadius: 24,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 60,
     height: 48,
   },
@@ -166,6 +167,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     fontFamily: 'Inter',
+    textAlign: 'center',
+    alignContent: 'center',
   },
   linkButton: {
     marginTop: 24,
@@ -202,8 +205,8 @@ const styles = StyleSheet.create({
     width: '95%',
     paddingHorizontal: 10,
     justifyContent: 'center',
-},
-title: {
+  },
+  title: {
     fontSize: 36,
     color: '#171923',
     fontWeight: '700',
@@ -211,8 +214,8 @@ title: {
     textAlign: 'center',
     lineHeight: 36,
     fontFamily: 'Inter',
-},
-subtitle: {
+  },
+  subtitle: {
     fontSize: 19,
     color: '#171923',
     textAlign: 'center',
@@ -220,5 +223,5 @@ subtitle: {
     fontFamily: 'Inter',
     lineHeight: 30,
     fontWeight: '400',
-},
+  },
 });
