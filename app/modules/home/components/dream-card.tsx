@@ -17,6 +17,7 @@ import useDreamsApi from '../../dreams/hooks/use-dreams-api';
 import useDreamImagesApi from '../../dreams/hooks/use-dream-images-api';
 import { useQueryClient } from '@tanstack/react-query';
 import ImageCarousel from '@/app/modules/shared/components/image-carousel';
+import ThemedButton from '@/app/modules/shared/components/themed-button';
 
 export interface DreamCardProps {
     id: string;
@@ -223,43 +224,26 @@ export default function DreamCard({
             />
 
             {/* Botón Visualizar */}
-            <TouchableOpacity
-                style={[
-                    styles.visualizeBtn,
-                    isVisualized && styles.visualizedBtn,
-                    isVisualizing && styles.visualizingBtn
-                ]}
+            <ThemedButton
+                title={isVisualizing ? "Cargando..." : (isVisualized ? "Visualizado" : "Visualizar")}
                 onPress={handleVisualize}
                 disabled={isVisualized || isVisualizing}
-            >
-                {isVisualizing ? (
-                    <>
-                        <ActivityIndicator
-                            size="small"
-                            color={colors.light.palette.blue[500]}
-                            style={{ marginRight: 6 }}
-                        />
-                        <Text style={styles.visualizeText}>
-                            Cargando...
-                        </Text>
-                    </>
-                ) : (
-                    <>
-                        <Ionicons
-                            name={isVisualized ? "checkmark" : "eye-outline"}
-                            size={18}
-                            color={isVisualized ? colors.light.palette.blue[700] : colors.light.palette.blue[500]}
-                            style={{ marginRight: 6 }}
-                        />
-                        <Text style={[
-                            styles.visualizeText,
-                            isVisualized && styles.visualizedText
-                        ]}>
-                            {isVisualized ? "Visualizado" : "Visualizar"}
-                        </Text>
-                    </>
-                )}
-            </TouchableOpacity>
+                loading={isVisualizing}
+                variant="outline"
+                radius="pill"
+                style={[
+                    styles.visualizeBtn,
+                    isVisualized && styles.visualizedBtn
+                ]}
+                textStyle={isVisualized ? styles.visualizedText : styles.visualizeText}
+                icon={!isVisualizing ? (
+                    <Ionicons
+                        name={isVisualized ? "checkmark" : "eye-outline"}
+                        size={20}
+                        color={isVisualized ? colors.light.palette.blue[700] : colors.light.palette.blue[500]}
+                    />
+                ) : undefined}
+            />
         </View>
     );
 }
@@ -308,13 +292,9 @@ const styles = StyleSheet.create({
         maxHeight: THUMB_SIZE,
     },
     visualizeBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.light.palette.blue[500],
-        borderRadius: 20,
         paddingVertical: 6,
-        justifyContent: 'center',
     },
     visualizeText: {
         color: colors.light.palette.blue[500],
@@ -327,9 +307,5 @@ const styles = StyleSheet.create({
     },
     visualizedText: {
         color: colors.light.palette.blue[700],
-    },
-    visualizingBtn: {
-        borderColor: colors.light.palette.blue[300],
-        backgroundColor: colors.light.palette.blue[50],
     },
 });
