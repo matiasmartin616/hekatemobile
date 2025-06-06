@@ -16,6 +16,7 @@ export const colors = {
       secondary: "#F5FAFF", //light blue
       tertiary: "#CEEDFF", // darker blue
       quaternary: "#90CDF4", //darker darker blue
+      lightYellow: "#FFFDF5",
     },
     // Neutral colors
     neutral: {

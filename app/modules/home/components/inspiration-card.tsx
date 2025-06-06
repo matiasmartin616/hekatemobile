@@ -12,7 +12,7 @@ interface InspirationCardProps {
 
 export default function InspirationCard({ message, date, onShare }: InspirationCardProps) {
     return (
-        <ThemedView style={styles.container}>
+        <ThemedView style={styles.container} variant="lightYellow">
             <View style={styles.contentRow}>
                 <View style={styles.sunIcon}>
                     <Ionicons name="partly-sunny-outline" size={40} color="#FFE066" />
@@ -33,7 +33,6 @@ export default function InspirationCard({ message, date, onShare }: InspirationC
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.light.palette.yellow[50],
         borderRadius: 12,
         padding: 12,
         marginBottom: 16,
