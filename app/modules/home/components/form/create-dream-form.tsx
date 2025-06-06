@@ -61,13 +61,16 @@ export default function CreateDreamForm() {
                 label="Imágenes"
                 name="images"
                 control={control}
-                maxImages={5}
+                maxImages={2}
                 thumbSize={80}
             />
 
-            <FormButton formState={formState} handleSubmit={handleSubmit(onSubmit)}>
-                <ThemedText style={{ color: colors.light.neutral.white }}>Crear sueño</ThemedText>
-            </FormButton>
+            <FormButton
+                formState={formState}
+                handleSubmit={handleSubmit(onSubmit)}
+                title="Crear sueño"
+                variant="primary"
+            />
         </View>
     );
 }

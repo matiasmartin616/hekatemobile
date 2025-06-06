@@ -4,21 +4,19 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Image,
-    ActivityIndicator,
-    Dimensions,
     Alert,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as ImagePicker from 'expo-image-picker';
 import colors from '@/app/modules/shared/theme/theme';
-import { useModal } from '../../shared/context/modal-context';
-import useDreamsApi from '../../dreams/hooks/use-dreams-api';
 import useDreamImagesApi from '../../dreams/hooks/use-dream-images-api';
-import { useQueryClient } from '@tanstack/react-query';
 import ImageCarousel from '@/app/modules/shared/components/image-carousel';
 import ThemedButton from '@/app/modules/shared/components/themed-button';
-
+import useDreamCardSeeDetail from '../hooks/use-dream-card-see-detail';
+import useDreamImageCreate from '../hooks/use-dream-image-create';
+import useDreamImageDetail from '../hooks/use-dream-image-detail';
+import useDreamVisualize from '../hooks/use-dream-visualize';
+import ThemedText from '../../shared/components/themed-text';
+import ThemedView from '../../shared/components/themed-view';
 export interface DreamCardProps {
     id: string;
     title: string;
@@ -34,199 +32,50 @@ export default function DreamCard({
     description,
     canVisualize,
     slotVisualized,
-    onViewComplete,
 }: DreamCardProps) {
-    const { openModal } = useModal();
-    const { visualizeDream, refetch } = useDreamsApi();
-    const { uploadDreamImage } = useDreamImagesApi(id);
-    const queryClient = useQueryClient();
-    const [isVisualizing, setIsVisualizing] = useState(false);
-    const [isUploadingImage, setIsUploadingImage] = useState(false);
     const { images } = useDreamImagesApi(id);
-    // Determine if the dream is visualized from props
     const isVisualized = !canVisualize || slotVisualized;
-
-    const handleAddImage = () => {
-        if (isUploadingImage) return;
-
-        // Show options to take photo or choose from gallery
-        Alert.alert(
-            'Añadir imagen',
-            'Selecciona una opción',
-            [
-                {
-                    text: 'Tomar foto',
-                    onPress: () => takePhoto(),
-                },
-                {
-                    text: 'Galería',
-                    onPress: () => pickImage(),
-                },
-                {
-                    text: 'Cancelar',
-                    style: 'cancel',
-                },
-            ],
-            { cancelable: true }
-        );
-    };
-
-    const pickImage = async () => {
-        try {
-            // Request permissions
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permiso denegado', 'Necesitamos permisos para acceder a tu galería de fotos');
-                return;
-            }
-
-            // Open image picker
-            const result = await ImagePicker.launchImageLibraryAsync({
-                quality: 0.8,
-                allowsEditing: true,
-                aspect: [4, 3],
-            });
-
-            if (!result.canceled) {
-                const selectedUri = result.assets[0].uri;
-                await uploadImage(selectedUri);
-            }
-        } catch (error) {
-            console.error('Error selecting image:', error);
-            Alert.alert('Error', 'Ocurrió un error al seleccionar la imagen');
-        }
-    };
-
-    const takePhoto = async () => {
-        try {
-            // Request camera permissions
-            const { status } = await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permiso denegado', 'Necesitamos permisos para acceder a tu cámara');
-                return;
-            }
-
-            // Launch camera
-            const result = await ImagePicker.launchCameraAsync({
-                quality: 0.8,
-                allowsEditing: true,
-                aspect: [4, 3],
-            });
-
-            if (!result.canceled) {
-                const selectedUri = result.assets[0].uri;
-                await uploadImage(selectedUri);
-            }
-        } catch (error) {
-            console.error('Error taking photo:', error);
-            Alert.alert('Error', 'Ocurrió un error al tomar la foto');
-        }
-    };
-
-    const uploadImage = async (imageUri: string) => {
-        try {
-            setIsUploadingImage(true);
-
-            await uploadDreamImage.mutateAsync({
-                dreamId: id,
-                image: imageUri
-            });
-
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            Alert.alert('Error', 'Ocurrió un error al subir la imagen');
-        } finally {
-            setIsUploadingImage(false);
-        }
-    };
-
-    const handleImagePress = (imageUri: string) => {
-        const screenWidth = Dimensions.get('window').width;
-        const imageSize = screenWidth * 0.8; // 80% del ancho de pantalla
-
-        openModal(
-            <Image
-                source={{ uri: imageUri }}
-                style={{ width: imageSize, height: imageSize }}
-                resizeMode="contain"
-            />,
-            true
-        );
-    };
-
-    const handleVisualize = async () => {
-        if (isVisualized || isVisualizing) return;
-
-        setIsVisualizing(true);
-
-        // Perform optimistic update
-        queryClient.setQueryData(['dreams', false], (oldData: any) => {
-            if (!oldData) return oldData;
-
-            return oldData.map((dream: any) =>
-                dream.id === id
-                    ? { ...dream, slotVisualized: true, canVisualize: false }
-                    : dream
-            );
-        });
-
-        visualizeDream.mutate(
-            { dreamId: id },
-            {
-                onSuccess: () => {
-                    setIsVisualizing(false);
-                    // Forzar una actualización limpia del contador
-                    queryClient.resetQueries({ queryKey: ['visualizations-history'] });
-                },
-                onError: () => {
-                    // Revert the optimistic update on error
-                    queryClient.setQueryData(['dreams', false], (oldData: any) => {
-                        if (!oldData) return oldData;
-
-                        return oldData.map((dream: any) =>
-                            dream.id === id
-                                ? { ...dream, slotVisualized: false, canVisualize: true }
-                                : dream
-                        );
-                    });
-
-                    setIsVisualizing(false);
-                    Alert.alert('Error', 'No se pudo visualizar el sueño. Inténtalo de nuevo.');
-                }
-            }
-        );
-    };
+    const { handleSeeDreamDetail } = useDreamCardSeeDetail();
+    const { handleAddImage, isUploadingImage } = useDreamImageCreate(id);
+    const { handleImagePress } = useDreamImageDetail(id);
+    const { handleDreamVisualize, isVisualizing } = useDreamVisualize(id, isVisualized);
 
     return (
-        <View style={styles.card}>
-            <View style={styles.headerRow}>
-                <Text style={styles.title}>{title}</Text>
-                <TouchableOpacity onPress={onViewComplete}>
-                    <Text style={styles.viewComplete}>
-                        Ver completo{' '}
-                        <Ionicons name="arrow-forward" size={14} color="#1253AA" />
-                    </Text>
-                </TouchableOpacity>
-            </View>
+        <ThemedView style={styles.card} variant="secondary">
+            <ThemedView style={styles.headerRow} variant="secondary">
+                <ThemedText style={styles.title}>{title}</ThemedText>
+                <ThemedButton
+                    onPress={() => handleSeeDreamDetail(id)}
+                    title="Más"
+                    icon={<Ionicons name="arrow-forward" size={14} color={colors.light.palette.blue[500]} />}
+                    iconPosition="right"
+                    variant="plainLink"
+                    size="xs"
+                    style={styles.moreButton}
+                    textStyle={styles.viewComplete}
+                    iconOnly={false}
+                    gap={2}
+                />
+            </ThemedView>
 
-            <Text style={styles.description} numberOfLines={2}>
+            <ThemedText style={styles.description} numberOfLines={2}>
                 {description}
-            </Text>
+            </ThemedText>
 
             <ImageCarousel
                 images={images?.map(image => image.signedUrl || image.storageUrl) || []}
                 onImagePress={handleImagePress}
                 onAddPress={handleAddImage}
-                maxImages={7}
+                maxImages={2}
                 thumbSize={64}
                 style={styles.imageList}
                 isLoading={isUploadingImage}
             />
 
-            {/* Botón Visualizar */}
+            {/* Visualize Button */}
             <ThemedButton
                 title={isVisualizing ? "Cargando..." : (isVisualized ? "Visualizado" : "Visualizar")}
-                onPress={handleVisualize}
+                onPress={handleDreamVisualize}
                 disabled={isVisualized || isVisualizing}
                 loading={isVisualizing}
                 variant="outline"
@@ -244,7 +93,7 @@ export default function DreamCard({
                     />
                 ) : undefined}
             />
-        </View>
+        </ThemedView>
     );
 }
 
@@ -252,7 +101,6 @@ const THUMB_SIZE = 64;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.light.palette.blue[50],
         borderRadius: 16,
         padding: 14,
         marginRight: 16,
@@ -278,7 +126,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     viewComplete: {
-        color: colors.light.neutral.black,
+        color: colors.light.primary.mainBlue,
         fontWeight: '600',
         fontSize: 13,
     },
@@ -307,5 +155,10 @@ const styles = StyleSheet.create({
     },
     visualizedText: {
         color: colors.light.palette.blue[700],
+    },
+    moreButton: {
+        padding: 0,
+        minWidth: 0,
+        backgroundColor: 'transparent',
     },
 });

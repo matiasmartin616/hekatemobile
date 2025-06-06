@@ -45,9 +45,20 @@ export default function useDreamImagesApi(dreamId: string) {
     },
   });
 
+  const deleteDreamImage = useMutation({
+    mutationFn: (imageId: string) => {
+      return dreamImagesApi.deleteDreamImage(imageId);
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: specificQueryKey });
+    },
+  });
+
   return {
     uploadDreamImage,
     uploadDreamImages,
     images,
+    deleteDreamImage,
   };
 } 

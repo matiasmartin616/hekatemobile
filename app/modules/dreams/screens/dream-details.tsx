@@ -30,7 +30,7 @@ export default function DreamDetailsScreen() {
             </View>
         );
     }
-    
+
     const { openModal, closeModal } = useModal();
 
     const handleEditDream = () => {
@@ -111,7 +111,7 @@ export default function DreamDetailsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.light.palette.blue[100],
+        backgroundColor: colors.light.background.main,
     },
     header: {
         marginTop: 80,

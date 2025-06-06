@@ -1,10 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, Text, StyleProp, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, StyleProp, ViewStyle, TextStyle, ActivityIndicator, View } from 'react-native';
 import colors from '../theme/theme';
 import ThemedText from './themed-text';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'warning' | 'info' | 'light' | 'dark' | 'link';
-export type ButtonSize = 'small' | 'medium' | 'large' | 'xlarge';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'warning' | 'info' | 'light' | 'dark' | 'link' | 'plainLink';
+export type ButtonSize = 'xs' | 'small' | 'medium' | 'large' | 'xlarge';
 export type ButtonRadius = 'none' | 'small' | 'medium' | 'large' | 'pill';
 
 interface ThemedButtonProps {
@@ -20,6 +20,8 @@ interface ThemedButtonProps {
     icon?: React.ReactNode;
     iconPosition?: 'left' | 'right';
     fullWidth?: boolean;
+    iconOnly?: boolean;
+    gap?: number;
 }
 
 /**
@@ -38,6 +40,8 @@ export default function ThemedButton({
     icon,
     iconPosition = 'left',
     fullWidth = false,
+    iconOnly = false,
+    gap,
 }: ThemedButtonProps) {
     const getButtonStyle = (): StyleProp<ViewStyle>[] => {
         const buttonStyle: StyleProp<ViewStyle>[] = [
@@ -45,6 +49,12 @@ export default function ThemedButton({
             styles[`${size}Button`],
             styles[`${radius}Radius`]
         ];
+
+        if (iconOnly) {
+            buttonStyle.push(styles.iconOnlyButton);
+
+            buttonStyle.push(styles[`${size}IconOnlyButton`]);
+        }
 
         switch (variant) {
             case 'primary':
@@ -76,6 +86,9 @@ export default function ThemedButton({
                 break;
             case 'link':
                 buttonStyle.push(styles.linkButton);
+                break;
+            case 'plainLink':
+                buttonStyle.push(styles.plainLinkButton);
                 break;
         }
 
@@ -127,6 +140,9 @@ export default function ThemedButton({
             case 'link':
                 textStyleArray.push(styles.linkText);
                 break;
+            case 'plainLink':
+                textStyleArray.push(styles.plainLinkText);
+                break;
         }
 
         if (disabled) {
@@ -134,6 +150,13 @@ export default function ThemedButton({
         }
 
         return textStyleArray;
+    };
+
+    const containerStyle: ViewStyle = {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: gap !== undefined ? gap : (iconOnly ? 0 : 8),
     };
 
     return (
@@ -149,13 +172,15 @@ export default function ThemedButton({
                     color={getLoadingColor(variant)}
                 />
             ) : (
-                <>
+                <View style={containerStyle}>
                     {icon && iconPosition === 'left' && icon}
-                    <ThemedText style={[...getTextStyle(), textStyle]}>
-                        {title}
-                    </ThemedText>
+                    {!iconOnly && (
+                        <ThemedText style={[...getTextStyle(), textStyle]}>
+                            {title}
+                        </ThemedText>
+                    )}
                     {icon && iconPosition === 'right' && icon}
-                </>
+                </View>
             )}
         </TouchableOpacity>
     );
@@ -166,6 +191,7 @@ const getLoadingColor = (variant: ButtonVariant): string => {
         case 'outline':
         case 'light':
         case 'link':
+        case 'plainLink':
             return colors.light.primary.main;
         default:
             return '#fff';
@@ -178,6 +204,36 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
+    },
+    iconOnlyButton: {
+        gap: 0,
+        padding: 0,
+        minWidth: 0,
+    },
+    xsIconOnlyButton: {
+        padding: 4,
+        minWidth: 0,
+    },
+    smallIconOnlyButton: {
+        padding: 8,
+        minWidth: 0,
+    },
+    mediumIconOnlyButton: {
+        padding: 10,
+        minWidth: 0,
+    },
+    largeIconOnlyButton: {
+        padding: 12,
+        minWidth: 0,
+    },
+    xlargeIconOnlyButton: {
+        padding: 14,
+        minWidth: 0,
+    },
+    xsButton: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        minWidth: 60,
     },
     smallButton: {
         paddingVertical: 6,
@@ -248,6 +304,9 @@ const styles = StyleSheet.create({
     linkButton: {
         backgroundColor: 'transparent',
     },
+    plainLinkButton: {
+        backgroundColor: 'transparent',
+    },
     disabledButton: {
         opacity: 0.6,
     },
@@ -257,6 +316,9 @@ const styles = StyleSheet.create({
     buttonText: {
         fontWeight: '500',
         color: colors.light.primary.mainBlue,
+    },
+    xsText: {
+        fontSize: 10,
     },
     smallText: {
         fontSize: 12,
@@ -300,6 +362,9 @@ const styles = StyleSheet.create({
     linkText: {
         color: colors.light.primary.main,
         textDecorationLine: 'underline',
+    },
+    plainLinkText: {
+        color: colors.light.primary.main,
     },
     disabledText: {
         opacity: 0.8,
