@@ -14,6 +14,7 @@ interface FormButtonProps {
     icon?: React.ReactNode;
     iconPosition?: 'left' | 'right';
     fullWidth?: boolean;
+    loading?: boolean;
 }
 
 export default function FormButton({
@@ -27,17 +28,19 @@ export default function FormButton({
     textStyle,
     icon,
     iconPosition,
-    fullWidth = true
+    fullWidth = true,
+    loading
 }: FormButtonProps) {
     const { isValid, isDirty, isSubmitting } = formState;
-    const isDisabled = !isValid || !isDirty || isSubmitting;
+    const isLoading = loading !== undefined ? loading : isSubmitting;
+    const isDisabled = !isValid || !isDirty || isLoading;
 
     return (
         <ThemedButton
-            title={title}
+            title={isLoading ? "Guardando..." : title}
             onPress={handleSubmit}
             disabled={isDisabled}
-            loading={isSubmitting}
+            loading={isLoading}
             variant={variant}
             size={size}
             radius={radius}

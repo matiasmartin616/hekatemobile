@@ -2,9 +2,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
-    ScrollView,
     TouchableOpacity,
     Platform,
+    Text,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,9 +18,10 @@ import Animated, {
 } from 'react-native-reanimated';
 
 // ---- Shared / theme imports ----
-import colors from '@/app/modules/shared/theme/theme';
+import colors, { spacing } from '@/app/modules/shared/theme/theme';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
 import ThemedText from '@/app/modules/shared/components/themed-text';
+import ThemedButton from '@/app/modules/shared/components/themed-button';
 import ThemedDropdown, {
     DropdownOption,
 } from '@/app/modules/shared/components/themed-dropdown';
@@ -28,14 +29,11 @@ import { useModal } from '../../shared/context/modal-context';
 
 // ---- Feature hooks ----
 import useDreamsApi from '../hooks/use-dreams-api';
-import useDreamImagesApi from '../hooks/use-dream-images-api';
-import useDreamImageCreate from '../../home/hooks/use-dream-image-create';
-import useDreamImageDetail from '../../home/hooks/use-dream-image-detail';
-import useDreamVisualize from '../../home/hooks/use-dream-visualize';
+import useDreamComplete from '../hooks/use-dream-complete';
 
 // ---- Feature components ----
-import EditDreamForm from '../components/edit-dream-form';
 import ThreeDDreamCard from '../components/3d-dream-card';
+import CelebrationAnimation from '@/app/modules/shared/components/celebration-animation';
 
 // Star component
 const Star = ({ style, size }: { style: any; size: number }) => {
@@ -89,7 +87,7 @@ export default function DreamDetailsScreen() {
     // ---- Navigation & params ----
     const { id } = useLocalSearchParams();
     const router = useRouter();
-
+    const [isCelebrating, setIsCelebrating] = useState(false);
     // ---- Theme & API ----
     useTheme();
     const { dreams, isLoading, deleteDream } = useDreamsApi();
@@ -98,57 +96,140 @@ export default function DreamDetailsScreen() {
     // ---- Modal helpers ----
     const { openModal, closeModal } = useModal();
 
-    const isVisualized = dream?.todayVisualizations
-        ? dream.todayVisualizations > 0
-        : false;
-    const { handleDreamVisualize } = useDreamVisualize(
-        id as string,
-        isVisualized
-    );
+    // ---- Dream completion ----
+    const {
+        completeDream,
+        isCompleting,
+        showCelebration,
+        hideCelebration
+    } = useDreamComplete();
 
-    // ---- Scroll control ----
-    const [scrollEnabled, setScrollEnabled] = useState(true);
-    const scrollViewRef = useRef<ScrollView>(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     // ---- Stars ----
     const [stars] = useState(() => generateStars(80));
 
-    // ---- Dropdown actions ----
-    const handleDreamAction = (opt: DropdownOption) => {
-        switch (opt.value) {
-            case 'edit':
-                openModal(<EditDreamForm dream={dream!} />);
-                break;
-            case 'delete':
-                openModal(
-                    <View>
-                        <ThemedText>¿Eliminar este sueño?</ThemedText>
+    const handleDreamEdit = () => {
+        setIsEditing(true);
+    };
+
+    const handleDreamDelete = () => {
+        openModal(
+            <View style={{ alignItems: 'center', padding: 10 }}>
+                <Text style={{
+                    marginBottom: 20,
+                    textAlign: 'center',
+                    fontSize: 16,
+                    color: '#333'
+                }}>
+                    ¿Eliminar este sueño?
+                </Text>
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: '#ef4444',
+                        paddingHorizontal: 20,
+                        paddingVertical: 10,
+                        borderRadius: 8,
+                    }}
+                    onPress={() => {
+                        console.log('Delete confirmed');
+                        deleteDream.mutate(dream!.id, {
+                            onSuccess: () => {
+                                console.log('Dream deleted successfully');
+                                closeModal();
+                                router.back();
+                            },
+                            onError: (error) => {
+                                console.log('Delete error:', error);
+                                closeModal();
+                            }
+                        });
+                    }}>
+                    <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                        Eliminar
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+    const handleCompleteDream = () => {
+        if (dream && !isCompleting) {
+            openModal(
+                <View style={{ alignItems: 'center', padding: 10 }}>
+                    <Text style={{
+                        marginTop: 20,
+                        marginBottom: 20,
+                        textAlign: 'center',
+                        fontSize: 16,
+                        color: '#333'
+                    }}>
+                        ¿Estás seguro de querer completar este sueño?
+                    </Text>
+                    <View style={{ flexDirection: 'row', gap: 30, marginTop: 30 }}>
                         <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() =>
-                                deleteDream.mutate(dream!.id, {
-                                    onSuccess: () => {
-                                        closeModal();
-                                        router.back();
-                                    },
-                                })
-                            }>
-                            <ThemedText style={styles.deleteButtonText}>
-                                Eliminar
-                            </ThemedText>
+                            style={{
+                                backgroundColor: colors.light.palette.blue[500],
+                                paddingHorizontal: 20,
+                                paddingVertical: 10,
+                                borderRadius: 8,
+                            }}
+                            onPress={() => {
+                                closeModal();
+                                setIsCelebrating(true);
+                                completeDream(dream.id, {
+                                    completedAt: new Date().toISOString(),
+                                    notes: 'Sueño completado por el usuario'
+                                });
+                            }}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                Completar
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: colors.light.neutral.gray[200],
+                                paddingHorizontal: 20,
+                                paddingVertical: 10,
+                                borderRadius: 8,
+                            }}
+                            onPress={() => {
+                                closeModal();
+                            }}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                Cancelar
+                            </Text>
                         </TouchableOpacity>
                     </View>
-                );
-                break;
-            case 'complete':
-                handleDreamVisualize();
-                break;
+                </View>
+            );
+
+        }
+    };
+
+    const handleCelebrationComplete = () => {
+        hideCelebration();
+        // Navigate back after celebration
+        router.back();
+    };
+
+    // ---- Dropdown actions ----
+    const handleDreamAction = (opt: DropdownOption) => {
+
+        const mappedOptions = {
+            edit: handleDreamEdit,
+            delete: handleDreamDelete,
+            complete: handleCompleteDream,
+        };
+
+        const functionToCall = mappedOptions[opt.value as keyof typeof mappedOptions];
+        if (functionToCall) {
+            functionToCall();
         }
     };
 
     const actionOptions: DropdownOption[] = [
         { label: 'Editar', value: 'edit', icon: 'pencil' },
-        { label: 'Visualizar', value: 'complete', icon: 'eye-outline' },
         { label: 'Eliminar', value: 'delete', icon: 'trash' },
     ];
 
@@ -200,36 +281,83 @@ export default function DreamDetailsScreen() {
                     />
                 ))}
 
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => router.back()}>
-                        <Ionicons
-                            name="arrow-back"
-                            size={24}
-                            color="white"
-                        />
-                    </TouchableOpacity>
-                    <ThemedDropdown
-                        options={actionOptions}
-                        onSelect={handleDreamAction}
-                        placeholder=""
-                        variant="main"
-                        width={40}
-                        dropdownWidth={160}
-                        customTrigger={menuTrigger}
-                        hideDefaultButton
-                        overlayColor="transparent"
-                    />
-                </View>
+                {!isCelebrating && (
+                    /* Header */
+                    <View style={styles.header}>
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() => router.back()}>
+                            <Ionicons
+                                name="arrow-back"
+                                size={24}
+                                color="white"
+                            />
+                        </TouchableOpacity>
 
-                {/* Content */}
-                <View style={styles.contentContainer}>
-                    <ThreeDDreamCard
-                        dream={dream}
-                    />
-                </View>
+                        {isEditing ? (
+                            <TouchableOpacity
+                                style={styles.menuButton}
+                                onPress={() => setIsEditing(false)}>
+                                <Ionicons
+                                    name="close"
+                                    size={24}
+                                    color="white"
+                                />
+                            </TouchableOpacity>
+                        ) : (
+                            <ThemedDropdown
+                                options={actionOptions}
+                                onSelect={handleDreamAction}
+                                placeholder=""
+                                variant="main"
+                                width={40}
+                                dropdownWidth={160}
+                                customTrigger={menuTrigger}
+                                hideDefaultButton
+                                overlayColor="transparent"
+                            />
+                        )}
+                    </View>
+                )}
+
+                {!isCelebrating && (
+                    /* Content */
+                    <View style={styles.contentContainer}>
+                        <ThreeDDreamCard
+                            dream={dream}
+                            isEditing={isEditing}
+                            setIsEditing={setIsEditing}
+                        />
+
+                        {!isEditing && (
+                            <View style={styles.actionButtonContainer}>
+                                <ThemedButton
+                                    title="Completar sueño"
+                                    onPress={handleCompleteDream}
+                                    variant="primary"
+                                    radius="pill"
+                                    style={styles.completeButton}
+                                    textStyle={styles.completeButtonText}
+                                    icon={
+                                        <Ionicons
+                                            name="checkmark-circle"
+                                            size={20}
+                                            color={colors.light.palette.blue[50]}
+                                        />
+                                    }
+                                    iconPosition="left"
+                                    size="medium"
+                                />
+                            </View>
+                        )}
+                    </View>
+                )}
+
+                {/* Celebration Animation */}
+                <CelebrationAnimation
+                    isVisible={showCelebration}
+                    onAnimationComplete={handleCelebrationComplete}
+                />
             </LinearGradient>
         </View>
     );
@@ -258,7 +386,6 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
         alignItems: 'center',
-        paddingVertical: 15,
     },
     header: {
         flexDirection: 'row',
@@ -291,5 +418,22 @@ const styles = StyleSheet.create({
     },
     deleteButtonText: {
         color: colors.light.neutral.white,
+    },
+    actionButtonContainer: {
+        marginTop: 20,
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        width: '100%',
+    },
+    completeButton: {
+        borderWidth: 2,
+        borderColor: colors.light.palette.blue[200],
+        paddingVertical: 12,
+        width: '90%',
+    },
+    completeButtonText: {
+        color: colors.light.primary.lightBlue,
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 }); 

@@ -8,7 +8,7 @@ type StylePropWithoutBackground = StyleProp<ViewStyleWithoutBackground>;
 export type ThemedViewProps = Omit<ViewProps, 'style'> & {
   lightColor?: string;
   darkColor?: string;
-  variant?: 'main' | 'secondary' | 'tertiary' | 'quaternary' | 'lightYellow';
+  variant?: 'main' | 'secondary' | 'tertiary' | 'quaternary' | 'lightYellow' | 'transparent';
   style?: StylePropWithoutBackground;
 };
 

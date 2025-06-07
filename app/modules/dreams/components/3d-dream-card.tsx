@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -14,14 +14,15 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Dream } from '../api/dreams';
 // Theme imports
-import colors, { shadows, spacing } from '@/app/modules/shared/theme/theme';
+import colors, { spacing } from '@/app/modules/shared/theme/theme';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 
 // Components
-import DreamCardImageCarousel from './3d-dream-card-image-carousel';
 import useDreamImagesApi from '../hooks/use-dream-images-api';
 import LoadingSpinner from '@/app/modules/shared/components/loading-spinner';
 import { useCardFlip } from '../hooks/use-card-flip';
+import ReadDream from './read-dream';
+import EditDreamForm from './edit-dream-form';
 
 // Constants
 const { width } = Dimensions.get('window');
@@ -32,14 +33,18 @@ const INSPIRATIONAL_QUOTE = "Los sueños son el camino hacia tu verdadero ser";
 
 interface ThreeDDreamCardProps {
     dream: Dream;
+    isEditing: boolean;
+    setIsEditing: (isEditing: boolean) => void;
 }
 
 export default function ThreeDDreamCard({
     dream,
+    isEditing,
+    setIsEditing,
 }: ThreeDDreamCardProps) {
     const { images, loading: loadingImages } = useDreamImagesApi(dream.id);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
-    const { flipProgress, flipCard, flipInstructionOpacity } = useCardFlip(isImageLoaded);
+    const { flipProgress, flipCard, flipInstructionOpacity } = useCardFlip(isImageLoaded, isEditing);
 
     useEffect(() => {
         if (images && images.length > 0 && !loadingImages) {
@@ -47,20 +52,8 @@ export default function ThreeDDreamCard({
         }
     }, [images, loadingImages]);
 
-    const formattedDate = useMemo(() =>
-        new Date(dream?.createdAt || Date.now()).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        }), [dream?.createdAt]
-    );
-
-    const visualizationCount = useMemo(() =>
-        dream?.visualizations ? dream.visualizations.length : 0,
-        [dream?.visualizations]
-    );
-
     const panGesture = Gesture.Pan()
+        .enabled(!isEditing)
         .onEnd((event) => {
             if (Math.abs(event.translationX) > 50) {
                 runOnJS(flipCard)();
@@ -110,36 +103,11 @@ export default function ThreeDDreamCard({
                     <View style={styles.shadowWrapper}>
                         {/* FRONT SIDE */}
                         <Animated.View style={[styles.cardFrontSide, frontAnimatedStyle]}>
-                            <ThemedText style={styles.title}>{dream?.title}</ThemedText>
-                            <View style={styles.cardFrontSideBody}>
-                                <DreamCardImageCarousel images={images || []} />
-
-                                <ThemedText style={styles.sectionTitle}>Descripción</ThemedText>
-                                <ThemedText style={styles.description} numberOfLines={4}>
-                                    {dream?.text}
-                                </ThemedText>
-
-                                <ThemedText style={styles.sectionTitle}>Estadísticas</ThemedText>
-                                <View style={styles.statsContainer}>
-                                    <View style={styles.statItem}>
-                                        <View style={styles.statIconWrapper}>
-                                            <Ionicons name="eye-outline" size={20} color={colors.light.palette.blue[600]} />
-                                        </View>
-                                        <ThemedText style={styles.statValue}>{visualizationCount}</ThemedText>
-                                        <ThemedText style={styles.statLabel}>Visualizaciones</ThemedText>
-                                    </View>
-
-                                    <View style={styles.statDivider} />
-
-                                    <View style={styles.statItem}>
-                                        <View style={styles.statIconWrapper}>
-                                            <Ionicons name="calendar-outline" size={20} color={colors.light.palette.blue[600]} />
-                                        </View>
-                                        <ThemedText style={styles.statValue}>{formattedDate}</ThemedText>
-                                        <ThemedText style={styles.statLabel}>Creado el</ThemedText>
-                                    </View>
-                                </View>
-                            </View>
+                            {isEditing ? (
+                                <EditDreamForm dream={dream} setIsEditing={setIsEditing} />
+                            ) : (
+                                <ReadDream dream={dream} images={images || []} />
+                            )}
                         </Animated.View>
 
                         {/* BACK SIDE */}
@@ -209,7 +177,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: '100%',
         height: '100%',
-        backgroundColor: colors.light.neutral.white,
+        backgroundColor: colors.light.background.main,
         borderRadius: 20,
         borderWidth: 4,
         borderColor: colors.light.palette.blue[200],
@@ -227,7 +195,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: '100%',
         height: '100%',
-        backgroundColor: colors.light.neutral.white,
+        backgroundColor: colors.light.background.main,
         borderRadius: 20,
         borderWidth: 4,
         borderColor: colors.light.palette.blue[200],
@@ -238,71 +206,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.6,
         shadowRadius: 4,
         elevation: 8,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.light.palette.blue[700],
-        textAlign: 'center',
-        marginBottom: spacing.sm,
-        backgroundColor: colors.light.palette.blue[50],
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingVertical: spacing.md,
-    },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: colors.light.palette.blue[700],
-        marginTop: spacing.sm,
-        marginBottom: spacing.xs,
-    },
-    description: {
-        fontSize: 14,
-        color: colors.light.neutral.gray[700],
-        lineHeight: 20,
-        marginBottom: spacing.sm,
-    },
-    statsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        marginTop: spacing.sm,
-        marginHorizontal: -spacing.xs,
-        paddingVertical: spacing.sm,
-        backgroundColor: 'rgba(59, 130, 246, 0.03)',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.light.palette.blue[100],
-    },
-    statItem: {
-        alignItems: 'center',
-        gap: 6,
-    },
-    statIconWrapper: {
-        width: 32,
-        height: 32,
-        backgroundColor: colors.light.palette.blue[100],
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    statValue: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: colors.light.palette.blue[700],
-        marginTop: 4,
-    },
-    statLabel: {
-        fontSize: 11,
-        color: colors.light.palette.blue[500],
-        fontWeight: '500',
-        textAlign: 'center',
-    },
-    statDivider: {
-        width: 1,
-        height: 40,
-        backgroundColor: colors.light.palette.blue[200],
     },
     cardBack: {
         flex: 1,

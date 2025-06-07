@@ -102,8 +102,17 @@ export default function ThemedDropdown({
     };
 
     const handleSelect = (option: DropdownOption) => {
-        onSelect(option);
-        closeDropdown();
+        Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+        }).start(() => {
+            setIsOpen(false);
+            // Wait for modal to fully close before calling onSelect
+            setTimeout(() => {
+                onSelect(option);
+            }, 50);
+        });
     };
 
     useEffect(() => {
@@ -164,69 +173,70 @@ export default function ThemedDropdown({
         };
 
         return (
-            <Modal
-                visible={isOpen}
-                transparent
-                animationType="none"
-                onRequestClose={closeDropdown}
-            >
-                <TouchableOpacity
-                    style={[styles.overlay, { backgroundColor: overlayColor }]}
-                    activeOpacity={1}
-                    onPress={closeDropdown}
+            isOpen && (
+                <Modal
+                    transparent
+                    animationType="none"
+                    onRequestClose={closeDropdown}
                 >
-                    <Animated.View
-                        style={[
-                            styles.dropdown,
-                            dropdownStyle,
-                            { opacity: fadeAnim }
-                        ]}
+                    <TouchableOpacity
+                        style={[styles.overlay, { backgroundColor: overlayColor }]}
+                        activeOpacity={1}
+                        onPress={closeDropdown}
                     >
-                        <ThemedView variant="main" style={styles.dropdownContent}>
-                            <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-                                {options.map((option) => (
-                                    <TouchableOpacity
-                                        key={option.value.toString()}
-                                        style={[
-                                            styles.option,
-                                            selectedValue === option.value && styles.selectedOption
-                                        ]}
-                                        onPress={() => handleSelect(option)}
-                                    >
-                                        {option.icon && (
-                                            <Ionicons
-                                                name={option.icon as any}
-                                                size={18}
-                                                color={
-                                                    selectedValue === option.value
-                                                        ? colors.light.primary.main
-                                                        : colors.light.neutral.gray[700]
-                                                }
-                                                style={styles.iconLeft}
-                                            />
-                                        )}
-                                        <ThemedText
+                        <Animated.View
+                            style={[
+                                styles.dropdown,
+                                dropdownStyle,
+                                { opacity: fadeAnim }
+                            ]}
+                        >
+                            <ThemedView variant="main" style={styles.dropdownContent}>
+                                <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+                                    {options.map((option) => (
+                                        <TouchableOpacity
+                                            key={option.value.toString()}
                                             style={[
-                                                styles.optionText,
-                                                selectedValue === option.value && styles.selectedOptionText
+                                                styles.option,
+                                                selectedValue === option.value && styles.selectedOption
                                             ]}
+                                            onPress={() => handleSelect(option)}
                                         >
-                                            {option.label}
-                                        </ThemedText>
-                                        {selectedValue === option.value && (
-                                            <Ionicons
-                                                name="checkmark"
-                                                size={18}
-                                                color={colors.light.primary.main}
-                                            />
-                                        )}
-                                    </TouchableOpacity>
-                                ))}
-                            </ScrollView>
-                        </ThemedView>
-                    </Animated.View>
-                </TouchableOpacity>
-            </Modal>
+                                            {option.icon && (
+                                                <Ionicons
+                                                    name={option.icon as any}
+                                                    size={18}
+                                                    color={
+                                                        selectedValue === option.value
+                                                            ? colors.light.primary.main
+                                                            : colors.light.neutral.gray[700]
+                                                    }
+                                                    style={styles.iconLeft}
+                                                />
+                                            )}
+                                            <ThemedText
+                                                style={[
+                                                    styles.optionText,
+                                                    selectedValue === option.value && styles.selectedOptionText
+                                                ]}
+                                            >
+                                                {option.label}
+                                            </ThemedText>
+                                            {selectedValue === option.value && (
+                                                <Ionicons
+                                                    name="checkmark"
+                                                    size={18}
+                                                    color={colors.light.primary.main}
+                                                />
+                                            )}
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </ThemedView>
+                        </Animated.View>
+                    </TouchableOpacity>
+                </Modal>
+            )
         );
     };
 

@@ -3,6 +3,7 @@ export const colors = {
     primary: {
       main: "#000000",
       mainBlue: "#3182CE",
+      lightBlue: "#F5FAFF",
       light: "#80D1F0",
       dark: "#0076A3",
     },
@@ -17,6 +18,7 @@ export const colors = {
       tertiary: "#CEEDFF", // darker blue
       quaternary: "#90CDF4", //darker darker blue
       lightYellow: "#FFFDF5",
+      transparent: "transparent",
     },
     // Neutral colors
     neutral: {
