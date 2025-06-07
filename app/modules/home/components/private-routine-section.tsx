@@ -10,7 +10,6 @@ import colors from '../../shared/theme/theme';
 
 export default function PrivateRoutineSection() {
     const { todayData, todayLoading } = usePrivateRoutinesData();
-    console.log(todayData);
     const blocks = todayData?.blocks || [];
 
     return (

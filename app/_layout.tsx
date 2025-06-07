@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Asset } from 'expo-asset';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './modules/shared/services/query-client';
+import ToastProvider from './modules/shared/context/toast-context';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -70,17 +71,11 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
           <ThemeProvider value={colorScheme.mode === 'dark' ? DarkTheme : DefaultTheme}>
             <ModalProvider>
-              <Stack
-                screenOptions={{ headerShown: false }}
-                linking={{
-                  prefixes: ['hekate://'],
-                  config: {
-                    screens: {
-                      '(routes)/(public)/auth/reset-password': 'reset-password',
-                    },
-                  },
-                }}
-              />
+              <ToastProvider>
+                <Stack
+                  screenOptions={{ headerShown: false }}
+                />
+              </ToastProvider>
             </ModalProvider>
           </ThemeProvider>
         </GestureHandlerRootView>

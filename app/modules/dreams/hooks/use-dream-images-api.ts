@@ -7,8 +7,12 @@ import dreamImagesApi from "../api/dream-images-api";
 export default function useDreamImagesApi(dreamId: string) {
   const queryClient = useQueryClient();
   const specificQueryKey = [`dreams-images-${dreamId}`];
-  
-  const { data: images } = useQuery({
+
+  const {
+    data: images,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: specificQueryKey,
     queryFn: () => dreamImagesApi.getDreamImages(dreamId),
   });
@@ -30,7 +34,13 @@ export default function useDreamImagesApi(dreamId: string) {
    * Mutation to upload multiple images to a dream
    */
   const uploadDreamImages = useMutation({
-    mutationFn: async ({ dreamId, imageUris }: { dreamId: string; imageUris: string[] }) => {
+    mutationFn: async ({
+      dreamId,
+      imageUris,
+    }: {
+      dreamId: string;
+      imageUris: string[];
+    }) => {
       // Process each image sequentially to avoid overwhelming the server
       const results = [];
       for (const imageUri of imageUris) {
@@ -60,5 +70,7 @@ export default function useDreamImagesApi(dreamId: string) {
     uploadDreamImages,
     images,
     deleteDreamImage,
+    loading: isLoading,
+    error: isError,
   };
-} 
+}
