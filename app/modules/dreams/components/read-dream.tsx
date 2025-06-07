@@ -9,6 +9,8 @@ import { useMemo } from "react";
 import { spacing } from "../../shared/theme/theme";
 import { LinearGradient } from 'expo-linear-gradient';
 import ThemedView from "../../shared/components/themed-view";
+import useDreamHistory from "../hooks/use-dream-history";
+import LoadingSpinner from "../../shared/components/loading-spinner";
 
 interface ReadDreamProps {
     dream: Dream;
@@ -24,11 +26,7 @@ export default function ReadDream({ dream, images }: ReadDreamProps) {
             day: 'numeric',
         }), [dream?.createdAt]
     );
-
-    const visualizationCount = useMemo(() =>
-        dream?.visualizations ? dream.visualizations.length : 0,
-        [dream?.visualizations]
-    );
+    const { dreamHistory, isLoadingDreamHistory } = useDreamHistory(dream.id);
 
     return (
         <>
@@ -60,7 +58,11 @@ export default function ReadDream({ dream, images }: ReadDreamProps) {
                     <View style={styles.statsContainer}>
                         <View style={styles.statItem}>
                             <Ionicons name="eye-outline" size={18} color={colors.light.palette.blue[500]} />
-                            <ThemedText style={styles.statText}>{visualizationCount} visualizaciones</ThemedText>
+                            {isLoadingDreamHistory ? (
+                                <LoadingSpinner style={{ width: 5, height: 5, marginHorizontal: spacing.xs }} size="small" />
+                            ) : (
+                                <ThemedText style={styles.statText}>{dreamHistory?.length} visualizaciones</ThemedText>
+                            )}
                         </View>
 
                         <View style={styles.statItem}>

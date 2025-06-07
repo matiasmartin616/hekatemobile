@@ -1,5 +1,6 @@
-import { api } from '@shared/services/api';
-import { DreamImage } from './dream-images-api';
+import { api } from "@shared/services/api";
+import { DreamImage } from "./dream-images-api";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface Dream {
   id: string;
@@ -38,17 +39,7 @@ export interface Visualization {
   createdAt: string;
 }
 
-export interface ArchiveDreamRequest {
-  reason?: string;
-  archivedAt?: string;
-  // otros campos relevantes para archivar
-}
-
-export interface VisualizeDreamRequest {
-  duration?: number;
-  notes?: string;
-  // otros campos relevantes para la visualización
-}
+export type DreamVisualizationHistory = Visualization[];
 
 export const dreamsApi = {
   /**
@@ -61,7 +52,7 @@ export const dreamsApi = {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al obtener los sueños');
+      throw new Error("Error al obtener los sueños");
     }
   },
 
@@ -72,156 +63,167 @@ export const dreamsApi = {
     try {
       // Handle with or without images
       if (!dream.images || dream.images.length === 0) {
-        return await api.post<Dream>('/dreams', dream);
+        return await api.post<Dream>("/dreams", dream);
       }
-      
+
       // Create FormData for multipart request with images
       const formData = new FormData();
-      formData.append('title', dream.title);
-      formData.append('text', dream.text);
-      
+      formData.append("title", dream.title);
+      formData.append("text", dream.text);
+
       // Add each image to form data
       dream.images.forEach((image) => {
-        if (typeof image === 'string') {
+        if (typeof image === "string") {
           // Handle image URI (React Native)
-          const fileName = image.split('/').pop() || 'image.jpg';
+          const fileName = image.split("/").pop() || "image.jpg";
           const match = /\.(\w+)$/.exec(fileName);
-          const type = match ? `image/${match[1]}` : 'image/jpeg';
-          
-          formData.append('images', {
+          const type = match ? `image/${match[1]}` : "image/jpeg";
+
+          formData.append("images", {
             uri: image,
             name: fileName,
             type,
           } as any);
         }
       });
-      
-      return await api.post<Dream>('/dreams', formData, {
+
+      return await api.post<Dream>("/dreams", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al crear el sueño');
+      throw new Error("Error al crear el sueño");
     }
   },
 
   /**
    * Update an existing dream
    */
-  updateDream: async (dreamId: string, dream: UpdateDreamRequest): Promise<Dream> => {
+  updateDream: async (
+    dreamId: string,
+    dream: UpdateDreamRequest
+  ): Promise<Dream> => {
     try {
       // Handle with or without images
       if (!dream.images || dream.images.length === 0) {
         // If we have images to keep but no new images to upload
-        if ('keepImageIds' in dream && Array.isArray(dream.keepImageIds) && dream.keepImageIds.length > 0) {
+        if (
+          "keepImageIds" in dream &&
+          Array.isArray(dream.keepImageIds) &&
+          dream.keepImageIds.length > 0
+        ) {
           // Create FormData to pass the keepImageIds
           const formData = new FormData();
-          if (dream.title) formData.append('title', dream.title);
-          if (dream.text) formData.append('text', dream.text);
-          
+          if (dream.title) formData.append("title", dream.title);
+          if (dream.text) formData.append("text", dream.text);
+
           // Add image IDs to keep
           dream.keepImageIds.forEach((imageId) => {
-            formData.append('keepImageIds', imageId);
+            formData.append("keepImageIds", imageId);
           });
-          
+
           return await api.patch<Dream>(`/dreams/${dreamId}`, formData, {
             headers: {
-              'Content-Type': 'multipart/form-data',
+              "Content-Type": "multipart/form-data",
             },
           });
         }
-        
+
         // No images to upload or keep, just update text fields
         return await api.patch<Dream>(`/dreams/${dreamId}`, dream);
       }
-      
+
       // Create FormData for multipart request with images
       const formData = new FormData();
-      if (dream.title) formData.append('title', dream.title);
-      if (dream.text) formData.append('text', dream.text);
-      
+      if (dream.title) formData.append("title", dream.title);
+      if (dream.text) formData.append("text", dream.text);
+
       // Add existing image IDs to keep
-      if ('keepImageIds' in dream && Array.isArray(dream.keepImageIds)) {
+      if ("keepImageIds" in dream && Array.isArray(dream.keepImageIds)) {
         dream.keepImageIds.forEach((imageId) => {
-          formData.append('keepImageIds', imageId);
+          formData.append("keepImageIds", imageId);
         });
       }
-      
+
       // Add each new image to form data
       dream.images.forEach((image) => {
-        if (typeof image === 'string') {
+        if (typeof image === "string") {
           // Handle image URI (React Native)
-          const fileName = image.split('/').pop() || 'image.jpg';
+          const fileName = image.split("/").pop() || "image.jpg";
           const match = /\.(\w+)$/.exec(fileName);
-          const type = match ? `image/${match[1]}` : 'image/jpeg';
-          
-          formData.append('images', {
+          const type = match ? `image/${match[1]}` : "image/jpeg";
+
+          formData.append("images", {
             uri: image,
             name: fileName,
             type,
           } as any);
         } else {
           // Handle File object (Web)
-          formData.append('images', image);
+          formData.append("images", image);
         }
       });
-      
+
       return await api.patch<Dream>(`/dreams/${dreamId}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al actualizar el sueño');
+      throw new Error("Error al actualizar el sueño");
     }
   },
 
   /**
    * Archive a dream
    */
-  archiveDream: async (dreamId: string, data?: ArchiveDreamRequest): Promise<Dream> => {
+  archiveDream: async (dreamId: string): Promise<Dream> => {
     try {
-      return await api.post<Dream>(`/dreams/${dreamId}/archive`, data || {});
+      return await api.post<Dream>(`/dreams/${dreamId}/archive`, {});
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al archivar el sueño');
+      throw new Error("Error al archivar el sueño");
     }
   },
 
   /**
    * Visualize a dream
    */
-  visualizeDream: async (dreamId: string, data?: VisualizeDreamRequest): Promise<Visualization> => {
+  visualizeDream: async (dreamId: string): Promise<Visualization> => {
     try {
-      return await api.post<Visualization>(`/dreams/${dreamId}/visualize`, data || {});
+      return await api.post<Visualization>(`/dreams/${dreamId}/visualize`, {});
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al visualizar el sueño');
+      throw new Error("Error al visualizar el sueño");
     }
   },
 
   /**
    * Get visualization history for a specific dream
    */
-  getDreamHistory: async (dreamId: string): Promise<Visualization[]> => {
+  getDreamHistory: async (
+    dreamId: string
+  ): Promise<DreamVisualizationHistory> => {
     try {
-      return await api.get<Visualization[]>(`/dreams/${dreamId}/history`);
+      return await api.get<DreamVisualizationHistory>(
+        `/dreams/${dreamId}/history`
+      );
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al obtener el historial del sueño');
+      throw new Error("Error al obtener el historial del sueño");
     }
   },
 
@@ -230,12 +232,12 @@ export const dreamsApi = {
    */
   getAllVisualizationsHistory: async (): Promise<Visualization[]> => {
     try {
-      return await api.get<Visualization[]>('/dreams/visualizations/history');
+      return await api.get<Visualization[]>("/dreams/visualizations/history");
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al obtener el historial de visualizaciones');
+      throw new Error("Error al obtener el historial de visualizaciones");
     }
   },
 
@@ -246,13 +248,24 @@ export const dreamsApi = {
     try {
       await api.post(`/dreams/${dreamId}/archive`, {});
     } catch (error) {
-      console.error('API Delete Error:', error);
+      console.error("API Delete Error:", error);
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al eliminar el sueño');
+      throw new Error("Error al eliminar el sueño");
     }
-  }
+  },
+
+  completeDream: async (dreamId: string): Promise<Dream> => {
+    try {
+      return await api.post<Dream>(`/dreams/${dreamId}/complete`, {});
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Error al completar el sueño");
+    }
+  },
 };
 
 export default dreamsApi;

@@ -21,10 +21,10 @@ export default function ThemedView({ style, lightColor, darkColor, variant, ...o
     try {
       const flattenedStyle = StyleSheet.flatten(style);
       if (flattenedStyle && 'backgroundColor' in flattenedStyle) {
-        console.warn(
+        /* console.warn(
           'ThemedView: backgroundColor detected in style prop. ' +
           'This will be ignored. Use variant prop instead to set background color.'
-        );
+        ); */
       }
     } catch (e) {
       //ignore error

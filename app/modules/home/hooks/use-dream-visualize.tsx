@@ -32,7 +32,8 @@ export default function useDreamVisualize(id: string, isVisualized: boolean) {
           // Forzar una actualización limpia del contador
           queryClient.resetQueries({ queryKey: ["visualizations-history"] });
         },
-        onError: () => {
+        onError: (error) => {
+          console.log("Error al visualizar el sueño", error);
           // Revert the optimistic update on error
           queryClient.setQueryData(["dreams", false], (oldData: any) => {
             if (!oldData) return oldData;

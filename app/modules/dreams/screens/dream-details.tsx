@@ -175,12 +175,9 @@ export default function DreamDetailsScreen() {
                                 borderRadius: 8,
                             }}
                             onPress={() => {
-                                closeModal();
+                                closeModal();   
                                 setIsCelebrating(true);
-                                completeDream(dream.id, {
-                                    completedAt: new Date().toISOString(),
-                                    notes: 'Sueño completado por el usuario'
-                                });
+                                completeDream(dream.id);
                             }}>
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>
                                 Completar

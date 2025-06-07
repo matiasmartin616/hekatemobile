@@ -15,23 +15,8 @@ export default function useDreamComplete() {
   const queryClient = useQueryClient();
 
   const completeDreamMutation = useMutation({
-    mutationFn: async ({
-      dreamId,
-      data,
-    }: {
-      dreamId: string;
-      data?: CompleteDreamRequest;
-    }) => {
-      // For testing - just simulate a successful completion without API call
-      return Promise.resolve({ id: dreamId, completed: true });
-
-      // For now, we'll use the archive functionality as "complete"
-      // In the future, you might want to add a specific complete endpoint
-      /* return await dreamsApi.archiveDream(dreamId, {
-        reason: "completed",
-        archivedAt: new Date().toISOString(),
-        ...data,
-      }); */
+    mutationFn: async ({ dreamId }: { dreamId: string }) => {
+      return await dreamsApi.completeDream(dreamId);
     },
     onSuccess: () => {
       // Invalidate dreams query to refresh the list
@@ -56,9 +41,9 @@ export default function useDreamComplete() {
     },
   });
 
-  const completeDream = (dreamId: string, data?: CompleteDreamRequest) => {
+  const completeDream = (dreamId: string) => {
     setIsCompleting(true);
-    completeDreamMutation.mutate({ dreamId, data });
+    completeDreamMutation.mutate({ dreamId });
   };
 
   const hideCelebration = () => {
