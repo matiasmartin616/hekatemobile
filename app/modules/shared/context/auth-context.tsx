@@ -3,16 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { authApi, RegisterRequest } from '@modules/auth/api/auth-api';
 import { queryClient } from '../services/query-client';
-
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-}
-
+import userApi, { User } from '@modules/user/api/user-api';
+import useUserProfile from '../../user/hooks/use-user-profile';
 export interface AuthContextType {
     token: string | null;
-    user: User | null;
+    user: User | undefined;
     isLoading: boolean;
     login: (email: string, password: string, googleToken?: string) => Promise<void>;
     register: (userData: RegisterRequest) => Promise<void>;
@@ -24,8 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [token, setToken] = useState<string | null>(null);
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { data: userProfile, isLoading } = useUserProfile();
 
     useEffect(() => {
         const loadAuthData = async () => {
@@ -34,15 +28,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                 if (storedToken) {
                     // Verify token and get fresh user data
-                    const profile = await authApi.getProfile();
                     setToken(storedToken);
-                    setUser(profile);
                 }
             } catch (error) {
                 console.error('Error loading auth data:', error);
                 await AsyncStorage.removeItem('auth_token');
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -51,7 +41,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
     const register = async (userData: RegisterRequest) => {
-        setIsLoading(true);
         try {
             // Clear all query cache first
             queryClient.clear();
@@ -59,19 +48,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const profile = await authApi.register(userData);
             await AsyncStorage.setItem('auth_token', profile.token);
             setToken(profile.token);
-            setUser(profile.user);
 
             router.replace('/(routes)/(private)/(tabs)');
         } catch (error) {
             console.error('Error during register:', error);
             throw error;
-        } finally {
-            setIsLoading(false);
         }
     }
 
     const login = async (email: string, password: string, googleToken?: string) => {
-        setIsLoading(true);
         try {
             // Clear all query cache first
             queryClient.clear();
@@ -85,14 +70,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             await AsyncStorage.setItem('auth_token', profile.token);
             setToken(profile.token);
-            setUser(profile.user);
 
             router.replace('/(routes)/(private)/(tabs)');
         } catch (error) {
             console.error('Error during login:', error);
             throw error;
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -105,7 +87,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await AsyncStorage.removeItem('user_data');
 
             setToken(null);
-            setUser(null);
 
             // Redirigir al login después de cerrar sesión
             router.replace('/(routes)/(public)/auth/welcome');
@@ -119,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         <AuthContext.Provider
             value={{
                 token,
-                user,
+                user: userProfile,
                 isLoading,
                 login,
                 logout,

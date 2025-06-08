@@ -7,6 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "hekate",
     "userInterfaceStyle": "automatic",
+    "jsEngine": "hermes",
     "splash": {
       "image": "./assets/images/hekate-logo.png",
       "resizeMode": "contain",
@@ -18,28 +19,14 @@
         "UIAppFonts": [
           "./assets/fonts/SpaceMono-Regular.ttf"
         ]
-      },
-      "bundleIdentifier": "com.tuempresa.hekate"
+      }
     },
     "android": {
       "package": "com.hekate.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": {
-            "scheme": "hekate",
-            "host": "reset-password"
-          },
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ]
+      }
     },
     "plugins": [
       "expo-router",
@@ -51,25 +38,12 @@
           ]
         }
       ],
-      "expo-asset",
-      "expo-web-browser"
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
     },
-    "newArchEnabled": true,
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "7c0250d5-145e-44a8-a9ff-9be1bf52326a"
-      }
-    },
-    "owner": "thewitxer"
+    "newArchEnabled": true
   }
 }

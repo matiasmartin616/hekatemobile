@@ -5,10 +5,12 @@ type ViewStyleWithoutBackground = Omit<ViewStyle, 'backgroundColor'>;
 
 type StylePropWithoutBackground = StyleProp<ViewStyleWithoutBackground>;
 
+export type VariantType = 'main' | 'secondary' | 'tertiary' | 'quaternary' | 'lightYellow' | 'transparent';
+
 export type ThemedViewProps = Omit<ViewProps, 'style'> & {
   lightColor?: string;
   darkColor?: string;
-  variant?: 'main' | 'secondary' | 'tertiary' | 'quaternary' | 'lightYellow' | 'transparent';
+  variant?: VariantType;
   style?: StylePropWithoutBackground;
 };
 

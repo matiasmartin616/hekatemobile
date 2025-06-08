@@ -34,6 +34,7 @@ import useDreamComplete from '../hooks/use-dream-complete';
 // ---- Feature components ----
 import ThreeDDreamCard from '../components/3d-dream-card';
 import CelebrationAnimation from '@/app/modules/shared/components/celebration-animation';
+import SimpleScreenHeader from '../../shared/components/navigation/simple-screen-header';
 
 // Star component
 const Star = ({ style, size }: { style: any; size: number }) => {
@@ -175,7 +176,7 @@ export default function DreamDetailsScreen() {
                                 borderRadius: 8,
                             }}
                             onPress={() => {
-                                closeModal();   
+                                closeModal();
                                 setIsCelebrating(true);
                                 completeDream(dream.id);
                             }}>
@@ -280,17 +281,7 @@ export default function DreamDetailsScreen() {
 
                 {!isCelebrating && (
                     /* Header */
-                    <View style={styles.header}>
-                        <TouchableOpacity
-                            style={styles.backButton}
-                            onPress={() => router.back()}>
-                            <Ionicons
-                                name="arrow-back"
-                                size={24}
-                                color="white"
-                            />
-                        </TouchableOpacity>
-
+                    <SimpleScreenHeader variant="transparent">
                         {isEditing ? (
                             <TouchableOpacity
                                 style={styles.menuButton}
@@ -314,7 +305,7 @@ export default function DreamDetailsScreen() {
                                 overlayColor="transparent"
                             />
                         )}
-                    </View>
+                    </SimpleScreenHeader>
                 )}
 
                 {!isCelebrating && (
@@ -367,7 +358,6 @@ const styles = StyleSheet.create({
     },
     gradientContainer: {
         flex: 1,
-        paddingTop: Platform.OS === 'ios' ? 45 : 25,
         position: 'relative',
     },
     loadingContainer: {
