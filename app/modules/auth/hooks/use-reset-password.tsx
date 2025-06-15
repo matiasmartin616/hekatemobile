@@ -1,6 +1,6 @@
-
 import { useMutation } from "@tanstack/react-query";
 import authApi from "../api/auth-api";
+
 export default function useResetPassword() {
     const resetPasswordMutation = useMutation({
         mutationFn: authApi.resetPassword,
@@ -11,7 +11,7 @@ export default function useResetPassword() {
     });
 
     const requestPasswordResetCodeMutation = useMutation({
-        mutationFn: authApi.requestPasswordResetCode,
+        mutationFn: (email: string) => authApi.requestPasswordResetCode(email),
     });
 
     return {

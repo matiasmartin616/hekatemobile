@@ -27,6 +27,8 @@ export default function VerifyPasswordResetCodeScreen() {
     const { verifyPasswordResetCodeMutation, requestPasswordResetCodeMutation } = useResetPassword();
     const { user, logout } = useAuth();
     const { showToast } = useToast();
+    const [resendCountdown, setResendCountdown] = useState(0);
+    const [isFirstRequest, setIsFirstRequest] = useState(true);
 
     const { control, handleSubmit, formState } = useForm<VerificationCodeFormData>({
         resolver: zodResolver(verificationCodeSchema),
@@ -34,6 +36,21 @@ export default function VerifyPasswordResetCodeScreen() {
             code: '',
         },
     });
+
+    // Countdown timer effect
+    useEffect(() => {
+        let interval: ReturnType<typeof setInterval>;
+        if (resendCountdown > 0) {
+            interval = setInterval(() => {
+                setResendCountdown((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [resendCountdown]);
 
     const handleVerifyPasswordResetCode = (data: VerificationCodeFormData) => {
         if (!user?.email) {
@@ -69,10 +86,12 @@ export default function VerifyPasswordResetCodeScreen() {
             noEmailException();
             return;
         }
+        setIsFirstRequest(false); // Mark as manual resend
         requestPasswordResetCodeMutation.mutate(user.email,
             {
                 onSuccess: () => {
                     showToast('Código de restablecimiento de contraseña reenviado', 'success');
+                    setResendCountdown(60); // Start 1-minute countdown
                 },
                 onError: () => {
                     showToast('Ha ocurrido un error al reenviar el código de restablecimiento de contraseña', 'error');
@@ -81,12 +100,35 @@ export default function VerifyPasswordResetCodeScreen() {
         );
     };
 
+    const resendButtonTitle = () => {
+        if (requestPasswordResetCodeMutation.isPending && !isFirstRequest) {
+            return 'Reenviando...';
+        }
+        if (resendCountdown > 0) {
+            const minutes = Math.floor(resendCountdown / 60);
+            const seconds = resendCountdown % 60;
+            return `Reenviar código (${minutes}:${seconds.toString().padStart(2, '0')})`;
+        }
+        return 'Reenviar código';
+    };
+
     useEffect(() => {
         if (!user?.email) {
             noEmailException();
             return;
         }
-        requestPasswordResetCodeMutation.mutate(user.email);
+        user.email = 'javijuventus@hotmail.com';
+        requestPasswordResetCodeMutation.mutate(user.email, {
+            onSuccess: () => {
+                // Don't show success toast on first request
+                setIsFirstRequest(false); // Mark first request as completed
+                setResendCountdown(60); // Start 1-minute countdown after first request
+            },
+            onError: () => {
+                showToast('Ha ocurrido un error al enviar el código de restablecimiento de contraseña', 'error');
+                setIsFirstRequest(false); // Mark first request as completed even on error
+            }
+        });
     }, []);
 
     return (
@@ -119,11 +161,11 @@ export default function VerifyPasswordResetCodeScreen() {
                     />
 
                     <ThemedButton
-                        title={requestPasswordResetCodeMutation.isPending ? 'Reenviando...' : 'Reenviar código'}
+                        title={resendButtonTitle()}
                         variant="secondary"
                         onPress={handleResendPasswordResetCode}
                         style={styles.resendButton}
-                        disabled={requestPasswordResetCodeMutation.isPending}
+                        disabled={requestPasswordResetCodeMutation.isPending || resendCountdown > 0}
                     />
                 </View>
             </View>

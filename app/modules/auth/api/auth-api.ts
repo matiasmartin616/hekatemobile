@@ -98,38 +98,18 @@ export const authApi = {
   verifyPasswordResetCode: async (
     request: VerifyPasswordResetCodeRequest
   ): Promise<VerifyPasswordResetCodeResponse> => {
-    try {
-      return await api.post<VerifyPasswordResetCodeResponse>(
-        "/auth/verify-reset-code",
-        request
-      );
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error(
-        "Error al verificar el código de restablecimiento de contraseña"
-      );
-    }
+    return await api.post<VerifyPasswordResetCodeResponse>(
+      "/auth/verify-reset-code",
+      request
+    );
   },
 
   requestPasswordResetCode: async (email: string): Promise<void> => {
-    try {
-      await api.post("/auth/request-password-reset-code", { email });
-    } catch (error) {
-      throw new Error(
-        "Error al solicitar el código de restablecimiento de contraseña"
-      );
-    }
+    return await api.post("/auth/forgot-password", { email });
   },
 
   resetPassword: async (request: ResetPasswordRequest): Promise<void> => {
-    try {
-      await api.post("/auth/reset-password", request);
-    } catch (error) {
-      console.log(error);
-      throw new Error("Error al restablecer la contraseña");
-    }
+    return await api.post("/auth/reset-password", request);
   },
 };
 

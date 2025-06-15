@@ -40,15 +40,12 @@ export default function ResetPasswordScreen({ email, code }: { email: string, co
     const onSubmit = async (data: ResetPasswordFormData) => {
         resetPasswordMutation.mutate({ email, code, newPassword: data.newPassword },
             {
-                onSuccess: (data: VerifyPasswordResetCodeResponse) => {
-                    if (data.valid) {
+                onSuccess: () => {
                         showToast('Contraseña restablecida correctamente', 'success');
                         setTimeout(() => {
                             router.replace('/(routes)/(private)/(tabs)');
                         }, 1000);
-                    } else {
-                        showToast('El token ha caducado, o es inválido', 'error');
-                    }
+                    
                 },
                 onError: (error) => {
                     showToast('Password reset failed', 'error');
