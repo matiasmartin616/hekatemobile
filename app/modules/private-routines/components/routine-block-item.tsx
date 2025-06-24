@@ -10,7 +10,6 @@ import { useRouter } from 'expo-router';
 interface RoutineBlockItemProps {
   block: any;
   showEditButton?: boolean;
-  onEdit?: (block: any) => void;
   stateIconCentered?: boolean;
 }
 
@@ -65,7 +64,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const RoutineBlockItem = ({ block, showEditButton = true, onEdit, stateIconCentered = false }: RoutineBlockItemProps) => {
+const RoutineBlockItem = ({ block, showEditButton = true, stateIconCentered = false }: RoutineBlockItemProps) => {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -135,8 +134,16 @@ const RoutineBlockItem = ({ block, showEditButton = true, onEdit, stateIconCente
             )}
           </TouchableOpacity>
           {showEditButton && (
-            <TouchableOpacity onPress={() => router.push({ pathname: '/modules/private-routines/screens/edit-routine', params: { blockId: block.id } })} style={styles.iconButton}>
-              <Ionicons name={"pencil-outline" as const} size={22} color={style.iconColor} />
+            <TouchableOpacity onPress={() => router.push({ 
+              pathname: '/(routes)/(private)/private-routine/block-detail', 
+              params: { 
+                blockId: block.id,
+                routineDayId: block.routineDayId,
+                weekDay: block.weekDay,
+                order: block.order
+              }
+            })} style={styles.iconButton}>
+              <Ionicons name="pencil-outline" size={22} color={style.iconColor} />
             </TouchableOpacity>
           )}
         </View>

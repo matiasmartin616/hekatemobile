@@ -1,11 +1,5 @@
-import { api } from '@shared/services/api';
-
-// Types for authentication
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { api } from "@shared/services/api";
+import { User } from "@modules/user/api/user-api";
 
 export interface AuthResponse {
   user: User;
@@ -30,6 +24,22 @@ export interface AuthError {
   message?: string;
 }
 
+export interface VerifyPasswordResetCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface VerifyPasswordResetCodeResponse {
+  valid: boolean;
+  message: string;
+}
+
 // Authentication API functions
 export const authApi = {
   /**
@@ -37,12 +47,32 @@ export const authApi = {
    */
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      return await api.post<AuthResponse>('/auth/login', credentials, { authenticated: false });
+      return await api.post<AuthResponse>("/auth/login", credentials, {
+        authenticated: false,
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al intentar iniciar sesión');
+      throw new Error("Error al intentar iniciar sesión");
+    }
+  },
+
+  /**
+   * Login with Google token
+   */
+  loginWithGoogle: async (googleToken: string): Promise<AuthResponse> => {
+    try {
+      return await api.post<AuthResponse>(
+        "/auth/google",
+        { token: googleToken },
+        { authenticated: false }
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Error al intentar iniciar sesión con Google");
     }
   },
 
@@ -65,28 +95,36 @@ export const authApi = {
    */
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      return await api.post<AuthResponse>('/auth/register', userData, { authenticated: false });
+      return await api.post<AuthResponse>("/auth/register", userData, {
+        authenticated: false,
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Error al intentar registrarse');
+      throw new Error("Error al intentar registrarse");
     }
   },
 
   /**
-   * Get current user profile data
+   * Verify password reset code
    */
-  getProfile: async (): Promise<User> => {
-    try {
-      return await api.get<User>('/auth/profile');
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Error al obtener el perfil de usuario');
-    }
-  }
+  verifyPasswordResetCode: async (
+    request: VerifyPasswordResetCodeRequest
+  ): Promise<VerifyPasswordResetCodeResponse> => {
+    return await api.post<VerifyPasswordResetCodeResponse>(
+      "/auth/verify-reset-code",
+      request
+    );
+  },
+
+  requestPasswordResetCode: async (email: string): Promise<void> => {
+    return await api.post("/auth/forgot-password", { email });
+  },
+
+  resetPassword: async (request: ResetPasswordRequest): Promise<void> => {
+    return await api.post("/auth/reset-password", request);
+  },
 };
 
 export default authApi;

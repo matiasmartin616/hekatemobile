@@ -3,22 +3,22 @@ import { Link } from 'expo-router';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
+/* import * as Google from 'expo-auth-session/providers/google'; */
 import { useAuth } from '@/app/modules/shared/context/auth-context';
 import { useRouter } from 'expo-router';
 
-WebBrowser.maybeCompleteAuthSession();
-
+/* WebBrowser.maybeCompleteAuthSession();
+ */
 export default function WelcomeScreen() {
     const { login, isLoading } = useAuth();
     const router = useRouter();
-    const [request, response, promptAsync] = Google.useAuthRequest({
+    /* const [request, response, promptAsync] = Google.useAuthRequest({
         clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
         iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
         androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
         webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    });
-    const handleGoogleLogin = async () => {
+    }); */
+    /* const handleGoogleLogin = async () => {
         try {
             const result = await promptAsync();
             if (result?.type === 'success') {
@@ -31,7 +31,7 @@ export default function WelcomeScreen() {
         } catch (err) {
             // Puedes mostrar un error si quieres
         }
-    };
+    }; */
     return (
         <BackgroundWrapper>
             <View style={styles.content}>
@@ -65,7 +65,7 @@ export default function WelcomeScreen() {
                                 <ThemedText style={styles.buttonTextWhite}>Email</ThemedText>
                             </TouchableOpacity>
                         </Link>
-                        <TouchableOpacity style={styles.loginButtonRow} onPress={handleGoogleLogin} disabled={isLoading}>
+                        <TouchableOpacity style={styles.loginButtonRow} onPress={() => { }} disabled={isLoading}>
                             <ThemedText style={styles.buttonTextWhite}>Google</ThemedText>
                             <Image source={require('@/assets/images/gmail_icon2.png')} style={styles.gmailIcon} />
                         </TouchableOpacity>

@@ -1,39 +1,54 @@
-import { TouchableOpacity } from "react-native";
-import { StyleSheet } from "react-native";
-import colors from "../../theme/theme";
 import { FormState } from "react-hook-form";
+import ThemedButton, { ButtonVariant, ButtonSize, ButtonRadius } from "../themed-button";
+import { StyleProp, ViewStyle, TextStyle } from "react-native";
+
 interface FormButtonProps {
     formState: FormState<any>;
-    handleSubmit: (data: any) => void;
-    children: React.ReactNode;
+    handleSubmit: () => void;
+    title: string;
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    radius?: ButtonRadius;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: StyleProp<TextStyle>;
+    icon?: React.ReactNode;
+    iconPosition?: 'left' | 'right';
+    fullWidth?: boolean;
+    loading?: boolean;
 }
 
-export default function FormButton({ formState, handleSubmit, children }: FormButtonProps) {
+export default function FormButton({
+    formState,
+    handleSubmit,
+    title,
+    variant = 'primary',
+    size = 'medium',
+    radius = 'pill',
+    style,
+    textStyle,
+    icon,
+    iconPosition,
+    fullWidth = true,
+    loading
+}: FormButtonProps) {
     const { isValid, isDirty, isSubmitting } = formState;
+    const isLoading = loading !== undefined ? loading : isSubmitting;
+    const isDisabled = !isValid || !isDirty || isLoading;
 
     return (
-        <TouchableOpacity
-            style={[
-                styles.button,
-                (!isValid || !isDirty || isSubmitting) && styles.buttonDisabled
-            ]}
+        <ThemedButton
+            title={isLoading ? "Guardando..." : title}
             onPress={handleSubmit}
-            disabled={!isValid || !isDirty || isSubmitting}
-        >
-            {children}
-        </TouchableOpacity>
-    )
+            disabled={isDisabled}
+            loading={isLoading}
+            variant={variant}
+            size={size}
+            radius={radius}
+            style={style}
+            textStyle={textStyle}
+            icon={icon}
+            iconPosition={iconPosition}
+            fullWidth={fullWidth}
+        />
+    );
 }
-
-const styles = StyleSheet.create({
-    button: {
-        backgroundColor: colors.light.palette.blue[500],
-        paddingVertical: 12,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonDisabled: {
-        opacity: 0.7,
-    },
-});

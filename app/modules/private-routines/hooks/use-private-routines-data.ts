@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import privateRoutinesApi from "../api/private-routines-api";
-import { PrivateRoutine } from "../api/private-routine-api";
+import { PrivateRoutine } from "../api/private-routines-api";
 
-export default function usePrivateRoutinesApi() {
-  const { data, isLoading, error } = useQuery<PrivateRoutine>({
+/**
+ * Hook para obtener datos de rutinas privadas
+ */
+export default function usePrivateRoutinesData() {
+  const { data, isLoading, error, refetch } = useQuery<PrivateRoutine>({
     queryKey: ['private-routines'],
     queryFn: async () => {
       try {
@@ -15,7 +18,7 @@ export default function usePrivateRoutinesApi() {
     },
   });
 
-  const { data: todayData, isLoading: todayLoading, error: todayError } = useQuery({
+  const { data: todayData, isLoading: todayLoading, error: todayError, refetch: refetchToday } = useQuery({
     queryKey: ['today-private-routine'],
     queryFn: async () => {
       try {
@@ -27,6 +30,15 @@ export default function usePrivateRoutinesApi() {
     },
   });
 
-  return { data, isLoading, error, todayData, todayLoading, todayError };
+  return { 
+    data, 
+    isLoading, 
+    error, 
+    refetch,
+    todayData, 
+    todayLoading, 
+    todayError,
+    refetchToday
+  };
 }
 

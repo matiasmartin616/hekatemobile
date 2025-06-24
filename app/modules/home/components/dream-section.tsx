@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import { StyleSheet, Alert, FlatList, TouchableOpacity, View, Text } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View, Text } from 'react-native';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import useDreamsApi from '../../dreams/hooks/use-dreams-api';
 import DreamCard from './dream-card';
 import { useTheme } from '@/app/modules/shared/theme/useTheme';
-import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useModal } from '@/app/modules/shared/context/modal-context';
 import colors from '@/app/modules/shared/theme/theme';
@@ -13,28 +11,13 @@ import EditDreamForm from '@/app/modules/dreams/components/edit-dream-form';
 
 export default function DreamSection() {
     const theme = useTheme();
-    const router = useRouter();
-    const { dreams, isLoading, refetch, createDream } = useDreamsApi();
+    const { dreams, isLoading } = useDreamsApi();
     const { openModal } = useModal();
 
-    const handleSeeDreamDetail = (dreamId: string) => {
-        router.push(`/dreams/${dreamId}`);
-    };
-
-    const handleAddDream = () => {
-        // Open the modal with a form to create a new dream
+    const handleCreateDream = () => {
         openModal(
             <CreateDreamForm />
         );
-    };
-
-    const handleEditDream = (dreamId: string) => {
-        const dreamToEdit = dreams?.find(d => d.id === dreamId);
-        if (dreamToEdit) {
-            openModal(
-                <EditDreamForm dream={dreamToEdit} />
-            );
-        }
     };
 
     if (isLoading) {
@@ -63,11 +46,11 @@ export default function DreamSection() {
                     return (
                         <TouchableOpacity
                             style={styles.addDreamButton}
-                            onPress={handleAddDream}
+                            onPress={handleCreateDream}
                         >
                             <View style={styles.addDreamButtonInner}>
-                                <Ionicons name="add" size={32} color={theme.colors.light.primary.main} />
-                                <Text style={[styles.addDreamText, { color: theme.colors.light.primary.main }]}>Añadir sueño</Text>
+                                <Ionicons name="add" style={[styles.addDreamIcon]} />
+                                <Text style={[styles.addDreamText]}>Añadir sueño</Text>
                             </View>
                         </TouchableOpacity>
                     );
@@ -81,7 +64,6 @@ export default function DreamSection() {
                         description={item.text}
                         canVisualize={item.canVisualize}
                         slotVisualized={item.slotVisualized}
-                        onViewComplete={() => handleSeeDreamDetail(item.id)}
                     />
                 );
             }}
@@ -118,6 +100,11 @@ const styles = StyleSheet.create({
     addDreamText: {
         marginTop: 8,
         fontSize: 16,
-        fontWeight: '600'
+        fontWeight: '600',
+        color: colors.light.palette.blue[500]
+    },
+    addDreamIcon: {
+        fontSize: 32,
+        color: colors.light.palette.blue[500]
     }
 }); 

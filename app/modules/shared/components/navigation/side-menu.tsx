@@ -54,14 +54,10 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
 
                 {/* Profile Section */}
                 <View style={styles.profileSection}>
-                    <Image
-                        source={require('@/assets/images/default-avatar.png')} // Asegúrate de tener esta imagen o usa una URL
-                        style={styles.profileImage}
-                    />
                     <View style={styles.profileInfo}>
                         <ThemedText style={styles.profileName}>{user?.name}</ThemedText>
                         <ThemedText style={styles.profileEmail}>{user?.email}</ThemedText>
-                        <TouchableOpacity style={styles.editProfileButton}>
+                        <TouchableOpacity style={styles.editProfileButton} onPress={() => router.push('/(routes)/(private)/user/edit-profile')}>
                             <ThemedText style={styles.editProfileText}>Editar perfil</ThemedText>
                         </TouchableOpacity>
                     </View>
@@ -74,7 +70,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                         <ThemedText style={styles.menuItemText}>Suscripción</ThemedText>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.menuItem}>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(routes)/(private)/config/config')}>
                         <Ionicons name="settings-outline" size={20} color="#1A365D" />
                         <ThemedText style={styles.menuItemText}>Configuración</ThemedText>
                     </TouchableOpacity>

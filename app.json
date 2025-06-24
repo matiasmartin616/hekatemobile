@@ -7,6 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "hekate",
     "userInterfaceStyle": "automatic",
+    "jsEngine": "hermes",
     "splash": {
       "image": "./assets/images/hekate-logo.png",
       "resizeMode": "contain",

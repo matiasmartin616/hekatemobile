@@ -1,8 +1,8 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import privateRoutineBlockApi from "../api/private-routine-block-api";
 import { UpdateBlockStatusRequest } from "../api/private-routine-block-api";
 
-export default function usePrivateRoutineBlockApi() {
+export default function usePrivateRoutineBlockStatus() {
   const updateStatusMutation = useMutation({
     mutationFn: (request: UpdateBlockStatusRequest) => privateRoutineBlockApi.updateBlockStatus(request),
   });

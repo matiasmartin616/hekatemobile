@@ -6,7 +6,7 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import { routineStateStyles } from '../../shared/utils/routine-state-styles';
 import colors from '../../shared/theme/theme';
 import { useQueryClient } from '@tanstack/react-query';
-import usePrivateRoutineBlockApi from '../../private-routines/hooks/use-private-routine-block-api';
+import usePrivateRoutineBlockApi from '../../private-routines/hooks/use-private-routine-block-status';
 import PrivateRoutineItem from './private-routine-item';
 import { BlockStatus } from '../../private-routines/api/private-routine-block-api';
 

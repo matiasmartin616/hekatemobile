@@ -22,6 +22,19 @@ export interface UpdateBlockStatusRequest {
   status: BlockStatus;
 }
 
+export interface UpdateBlockRequest {
+  blockId: string;
+  title?: string;
+  description?: string;
+  order?: number;
+}
+
+export interface CreateBlockRequest {
+  title: string;
+  description: string;
+  order: number;
+}
+
 export const privateRoutineBlockApi = {
   /**
    * Get all dreams with optional archived filter
@@ -37,6 +50,24 @@ export const privateRoutineBlockApi = {
       throw new Error('Error al actualizar el estado del bloque');
     }
   },
+
+  deleteBlock: async (blockId: string): Promise<void> => {
+    await api.delete(`/private-routines/blocks/${blockId}`);
+  },
+
+
+  createBlock: async (routineDayId: string, block: Omit<PrivateRoutineBlock, 'id'>): Promise<PrivateRoutineBlock> => {
+      return await api.post<PrivateRoutineBlock>(`/private-routines/blocks/${routineDayId}`, block);
+  },
+
+  updateBlock: async (blockId: string, data: Partial<PrivateRoutineBlock>): Promise<PrivateRoutineBlock> => {
+      // Ensure status is sent as a string value
+      const updateData = {
+          ...data,
+          status: data.status ? data.status.toString() : BlockStatus.NULL.toString()
+      };
+      return await api.put<PrivateRoutineBlock>(`/private-routines/blocks/${blockId}`, updateData);
+  }
 };
 
 export default privateRoutineBlockApi;
