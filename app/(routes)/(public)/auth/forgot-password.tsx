@@ -3,6 +3,7 @@ import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from 'expo-router';
 import ThemedText from '@/app/modules/shared/components/themed-text';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 import BackButton from '@/app/modules/shared/components/form/back-button';
@@ -42,7 +43,14 @@ export default function ForgotPasswordScreen() {
       if (!res.ok) {
         throw new Error(responseData.message || 'Error al enviar el correo');
       }
-      setError('success:Correo enviado. Revisa tu correo electrónico para recuperar tu contraseña');
+      
+      // Navigate to verification code screen
+      router.push({
+        pathname: '/(routes)/(public)/auth/verify-code',
+        params: {
+          email: data.email,
+        }
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo enviar el correo');
     } finally {

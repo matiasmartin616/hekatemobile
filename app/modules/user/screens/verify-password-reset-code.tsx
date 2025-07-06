@@ -16,9 +16,8 @@ import { router } from "expo-router";
 
 const verificationCodeSchema = z.object({
     code: z.string()
-        .min(3, 'The verification code must be at least 3 characters')
-        .max(10, 'The verification code cannot exceed 10 characters')
-        .regex(/^[0-9]+$/, 'The verification code must contain only numbers'),
+        .length(5, 'El código de verificación debe tener exactamente 5 caracteres')
+        .regex(/^[0-9]+$/, 'El código de verificación debe contener solo números'),
 });
 
 type VerificationCodeFormData = z.infer<typeof verificationCodeSchema>;
@@ -144,11 +143,11 @@ export default function VerifyPasswordResetCodeScreen() {
                     <FormTextInput
                         control={control}
                         name="code"
-                        placeholder="123456"
+                        placeholder="12345"
                         label="Código de verificación"
                         required
                         keyboardType="numeric"
-                        maxLength={10}
+                        maxLength={5}
                         textContentType="oneTimeCode"
                         autoComplete="sms-otp"
                     />
