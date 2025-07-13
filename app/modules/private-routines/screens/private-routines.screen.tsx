@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import ThemedText from "@/app/modules/shared/components/themed-text";
 import ThemedView from "@/app/modules/shared/components/themed-view";
@@ -13,6 +13,10 @@ import { PrivateRoutineBlock } from '../api/private-routine-block-api';
 import {
     useQueryClient,
 } from '@tanstack/react-query';
+import DuplicateDayModal from '@modules/private-routines/components/duplicate-day-modal';
+import usePrivateRoutineDayDuplicate from '@modules/private-routines/hooks/use-private-routine-day-duplicate';
+import { useModal } from '@/app/modules/shared/context/modal-context';
+import { useToast } from '@/app/modules/shared/context/toast-context';
 
 const weekDayNames: Record<string, string> = {
     'MONDAY': 'Lunes',
@@ -47,8 +51,12 @@ export default function PrivateRoutinesScreen() {
     const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
     const [dayBlocks, setDayBlocks] = useState<PrivateRoutineBlock[]>([]);
     const queryClient = useQueryClient();
+    const dayScrollViewRef = useRef<ScrollView>(null);
+    const { openModal, closeModal } = useModal();
+    const { showToast } = useToast();
 
     const reorderBlocksMutation = usePrivateRoutineBlockReorder();
+    const { duplicateDayMutation, duplicateMultipleDaysMutation } = usePrivateRoutineDayDuplicate();
 
     // Initialize selectedDayId when data loads - defaults to today's routine or first available day
     useEffect(() => {
@@ -62,6 +70,30 @@ export default function PrivateRoutinesScreen() {
             }
         }
     }, [data, selectedDayId]);
+
+    // Auto-scroll to selected day when it changes
+    useEffect(() => {
+        if (selectedDayId && data?.days && dayScrollViewRef.current) {
+            const routineDays = data.days || [];
+            const sortedRoutineDays = [...routineDays].sort((a, b) => {
+                const weekDayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+                return weekDayOrder.indexOf(a.weekDay) - weekDayOrder.indexOf(b.weekDay);
+            });
+
+            const selectedIndex = sortedRoutineDays.findIndex(day => day.id === selectedDayId);
+            if (selectedIndex >= 0) {
+                const buttonWidth = 90 + 8; // minWidth + marginRight
+                const scrollPosition = selectedIndex * buttonWidth;
+
+                setTimeout(() => {
+                    dayScrollViewRef.current?.scrollTo({
+                        x: scrollPosition,
+                        animated: true
+                    });
+                }, 100);
+            }
+        }
+    }, [selectedDayId, data]);
 
     // Update dayBlocks when user switches to a different day
     useEffect(() => {
@@ -109,6 +141,59 @@ export default function PrivateRoutinesScreen() {
         });
     };
 
+    const handleDuplicateDay = (targetDayIds: string[]) => {
+        if (!selectedDayId) {
+            showToast('No hay día seleccionado', 'error');
+            return;
+        }
+
+        const sourceDay = data?.days?.find(day => day.id === selectedDayId);
+
+        if (!sourceDay) {
+            showToast('No se pudo encontrar el día origen', 'error');
+            return;
+        }
+
+        const sortedBlocks = [...sourceDay.blocks].sort((a, b) => a.order - b.order);
+
+        duplicateMultipleDaysMutation.mutate({
+            sourceDayId: selectedDayId,
+            targetDayIds,
+            sourceBlocks: sortedBlocks,
+            routineDays: data?.days || []
+        }, {
+            onSuccess: (results) => {
+                closeModal();
+
+                const successfulDuplications = results.filter(result => result.status === 'fulfilled');
+                const failedDuplications = results.filter(result => result.status === 'rejected');
+
+                const successCount = successfulDuplications.length;
+                const errorCount = failedDuplications.length;
+                const totalTargets = targetDayIds.length;
+
+                if (successCount === totalTargets) {
+                    showToast(
+                        `Las rutinas se han duplicado correctamente en ${successCount} día${successCount === 1 ? '' : 's'}.`,
+                        'success'
+                    );
+                } else if (successCount > 0) {
+                    showToast(
+                        `Se duplicaron ${successCount} de ${totalTargets} días correctamente. ${errorCount} duplicaciones fallaron.`,
+                        'warning'
+                    );
+                } else {
+                    showToast('No se pudo duplicar la rutina en ningún día. Intenta nuevamente.', 'error');
+                }
+            },
+            onError: (error) => {
+                console.error('Error duplicating days:', error);
+                closeModal();
+                showToast('No se pudo duplicar la rutina. Intenta nuevamente.', 'error');
+            }
+        });
+    };
+
     if (isLoading) {
         return (
             <ThemedView style={styles.loadingContainer}>
@@ -142,42 +227,72 @@ export default function PrivateRoutinesScreen() {
                     </View>
                 )}
                 ListHeaderComponent={
-                    <View style={styles.daySelectorContainer}>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.daySelector}
-                        >
-                            {sortedRoutineDays.map((routineDay) => {
-                                const isSelected = routineDay.id === selectedDayId;
-                                const routineCount = routineDay.blocks ? routineDay.blocks.length : 0;
-                                return (
-                                    <TouchableOpacity
-                                        key={routineDay.id}
-                                        style={[
-                                            styles.dayButton,
-                                            isSelected && styles.selectedDayButton
-                                        ]}
-                                        onPress={() => setSelectedDayId(routineDay.id)}
-                                    >
-                                        <ThemedText
+                    <View>
+                        <View style={styles.daySelectorContainer}>
+                            <ScrollView
+                                ref={dayScrollViewRef}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.daySelector}
+                            >
+                                {sortedRoutineDays.map((routineDay) => {
+                                    const isSelected = routineDay.id === selectedDayId;
+                                    const routineCount = routineDay.blocks ? routineDay.blocks.length : 0;
+                                    return (
+                                        <TouchableOpacity
+                                            key={routineDay.id}
                                             style={[
-                                                styles.dayButtonText,
-                                                isSelected && styles.selectedDayButtonText
+                                                styles.dayButton,
+                                                isSelected && styles.selectedDayButton
                                             ]}
+                                            onPress={() => setSelectedDayId(routineDay.id)}
                                         >
-                                            {weekDayNames[routineDay.weekDay]}
-                                        </ThemedText>
-                                        <ThemedText style={[
-                                            styles.dayButtonSubText,
-                                            isSelected && styles.selectedDayButtonSubText
-                                        ]}>
-                                            {routineCount} Bloque{routineCount === 1 ? '' : 's'}
-                                        </ThemedText>
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </ScrollView>
+                                            <ThemedText
+                                                style={[
+                                                    styles.dayButtonText,
+                                                    isSelected && styles.selectedDayButtonText
+                                                ]}
+                                            >
+                                                {weekDayNames[routineDay.weekDay]}
+                                            </ThemedText>
+                                            <ThemedText style={[
+                                                styles.dayButtonSubText,
+                                                isSelected && styles.selectedDayButtonSubText
+                                            ]}>
+                                                {routineCount} Bloque{routineCount === 1 ? '' : 's'}
+                                            </ThemedText>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </ScrollView>
+                        </View>
+
+                        {selectedDay && (
+                            <View style={styles.topButtonsContainer}>
+                                <TouchableOpacity
+                                    style={styles.editButton}
+                                    onPress={handleCreateBlock}
+                                >
+                                    <Ionicons name="add-outline" size={16} color="#1A365D" />
+                                    <ThemedText style={styles.editButtonText}>Añadir</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.duplicateButton}
+                                    onPress={() => openModal(
+                                        <DuplicateDayModal
+                                            onClose={closeModal}
+                                            routineDays={data?.days || []}
+                                            currentDayId={selectedDayId}
+                                            onDuplicate={handleDuplicateDay}
+                                            isLoading={duplicateMultipleDaysMutation.isPending}
+                                        />
+                                    )}
+                                >
+                                    <MaterialCommunityIcons name="content-duplicate" size={16} color="#1A365D" />
+                                    <ThemedText style={styles.duplicateButtonText}>Duplicar</ThemedText>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 }
                 ListEmptyComponent={
@@ -192,17 +307,6 @@ export default function PrivateRoutinesScreen() {
                                 No hay actividades para este día
                             </ThemedText>
                         </View>
-                    )
-                }
-                ListFooterComponent={
-                    selectedDay && (
-                        <TouchableOpacity
-                            style={styles.editButton}
-                            onPress={handleCreateBlock}
-                        >
-                            <Ionicons name="add-outline" size={24} color="#1A365D" />
-                            <ThemedText style={styles.editButtonText}>Añadir Bloque</ThemedText>
-                        </TouchableOpacity>
                     )
                 }
                 contentContainerStyle={styles.contentContainer}
@@ -286,7 +390,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        paddingBottom: 40,
+        paddingBottom: 100,
     },
     blocksContainer: {
         marginBottom: 0,
@@ -339,25 +443,53 @@ const styles = StyleSheet.create({
         marginTop: 12,
         textAlign: 'center',
     },
+    footerContainer: {
+        paddingHorizontal: 16,
+        gap: 8,
+    },
     editButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        width: '90%',
-        alignSelf: 'center',
+        justifyContent: 'flex-start',
         borderRadius: 999,
         borderWidth: 2,
         borderColor: '#1A365D',
         backgroundColor: 'transparent',
-        paddingVertical: 6,
-        marginTop: 8,
+        paddingVertical: 4,
+        paddingHorizontal: 12,
         marginBottom: 8,
     },
     editButtonText: {
-        fontSize: 14,
+        fontSize: 11,
         fontWeight: 'bold',
         color: '#1A365D',
-        marginLeft: 8,
+        marginLeft: 6,
+        fontFamily: 'Inter',
+    },
+    topButtonsContainer: {
+        paddingHorizontal: 16,
+        marginBottom: 16,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        gap: 12,
+    },
+    duplicateButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        borderRadius: 999,
+        borderWidth: 2,
+        borderColor: '#1A365D',
+        backgroundColor: 'transparent',
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+        marginBottom: 8,
+    },
+    duplicateButtonText: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#1A365D',
+        marginLeft: 6,
         fontFamily: 'Inter',
     },
 });

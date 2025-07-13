@@ -9,7 +9,7 @@ import usePrivateRoutinesData from '../hooks/use-private-routines-data';
 import usePrivateRoutineCreate from '../hooks/use-private-routine-block-create';
 import usePrivateRoutineUpdate from '../hooks/use-private-routine-block-update';
 import usePrivateRoutineDelete from '../hooks/use-private-routine-block-delete';
-import BlockCreateEditForm from '../components/block-create-edit-form';
+import BlockCreateEditForm from '../components/forms/block-create-edit-form';
 import LoadingOverlay from '../components/loading-overlay';
 
 export default function BlockDetailScreen() {

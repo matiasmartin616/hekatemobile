@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import ThemedText from '@/app/modules/shared/components/themed-text';
-import { PrivateRoutineBlock, BlockStatus } from '../api/private-routine-block-api';
-import BlockDeleteButton from './block-delete-button';
-import colors from '../../shared/theme/theme';
+import { PrivateRoutineBlock, BlockStatus } from '@/app/modules/private-routines/api/private-routine-block-api';
+import BlockDeleteButton from '@modules/private-routines/components/block-delete-button';
+import colors from '@/app/modules/shared/theme/theme';
 
 interface BlockCreateEditFormProps {
     initialBlock: PrivateRoutineBlock;
@@ -37,6 +37,17 @@ export default function BlockCreateEditForm({
         SATURDAY: 'sábado',
         SUNDAY: 'domingo',
     };
+
+    // Check if the block corresponds to today
+    const isToday = () => {
+        const today = new Date();
+        const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const currentDayName = dayNames[today.getDay()];
+        return block.weekDay === currentDayName;
+    };
+
+    // Can only modify status if block is for today
+    const canModifyStatus = isToday();
 
     return (
         <>
@@ -80,15 +91,29 @@ export default function BlockCreateEditForm({
                     ].map(option => (
                         <TouchableOpacity
                             key={option.value}
-                            style={[styles.statusPill, block.status === option.value && styles.statusPillSelected]}
-                            onPress={() => setBlock({ ...block, status: option.value })}
+                            style={[
+                                styles.statusPill,
+                                block.status === option.value && styles.statusPillSelected,
+                                !canModifyStatus && styles.statusPillDisabled
+                            ]}
+                            onPress={() => canModifyStatus && setBlock({ ...block, status: option.value })}
+                            disabled={!canModifyStatus}
                         >
-                            <ThemedText style={[styles.statusPillText, block.status === option.value && styles.statusPillTextSelected]}>
+                            <ThemedText style={[
+                                styles.statusPillText,
+                                block.status === option.value && styles.statusPillTextSelected,
+                                !canModifyStatus && styles.statusPillTextDisabled
+                            ]}>
                                 {option.label}
                             </ThemedText>
                         </TouchableOpacity>
                     ))}
                 </View>
+                {!canModifyStatus && (
+                    <ThemedText style={styles.statusDisabledHint}>
+                        Solo puedes modificar el estado de la rutina del día actual
+                    </ThemedText>
+                )}
                 {mode !== 'add' && onDelete && (
                     <BlockDeleteButton
                         block={block}
@@ -185,6 +210,10 @@ const styles = StyleSheet.create({
     statusPillSelected: {
         backgroundColor: '#1A365D',
     },
+    statusPillDisabled: {
+        borderColor: '#ccc',
+        backgroundColor: '#f5f5f5',
+    },
     statusPillText: {
         color: '#1A365D',
         fontFamily: 'Inter',
@@ -193,6 +222,16 @@ const styles = StyleSheet.create({
     },
     statusPillTextSelected: {
         color: '#fff',
+    },
+    statusPillTextDisabled: {
+        color: '#999',
+    },
+    statusDisabledHint: {
+        fontSize: 12,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 16,
+        fontStyle: 'italic',
     },
     descriptionHint: {
         fontSize: 12,
