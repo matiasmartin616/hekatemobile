@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -95,74 +102,76 @@ export default function ResetPasswordScreen() {
 
   return (
     <BackgroundWrapper>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('@/assets/images/logo-hekate-circle.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <ThemedText style={styles.logoText}>Hekate</ThemedText>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('@/assets/images/logo-hekate-circle.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+              <ThemedText style={styles.logoText}>Hekate</ThemedText>
+            </View>
+
+            <View style={styles.titleContainer}>
+              <ThemedText style={styles.title}>Nueva contraseña</ThemedText>
+              <ThemedText style={styles.subtitle}>
+                Ingresa tu nueva contraseña para {email}
+              </ThemedText>
+            </View>
+
+            {error ? (
+              <ThemedText style={[styles.message, styles.errorMessage]}>
+                {error}
+              </ThemedText>
+            ) : null}
+
+            {success ? (
+              <ThemedText style={[styles.message, styles.successMessage]}>
+                {success}
+              </ThemedText>
+            ) : null}
+
+            <View style={styles.inputsContainer}>
+              <FormTextInput
+                name="newPassword"
+                control={control}
+                placeholder="Nueva contraseña"
+                required
+                secureTextEntry
+                autoCapitalize="none"
+                textContentType="newPassword"
+              />
+
+              <FormTextInput
+                name="confirmPassword"
+                control={control}
+                placeholder="Confirmar contraseña"
+                required
+                secureTextEntry
+                autoCapitalize="none"
+                textContentType="newPassword"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.button, 
+                (!isValid || !isDirty || isLoading) && styles.buttonDisabled
+              ]}
+              onPress={handleSubmit(handleResetPassword)}
+              disabled={!isValid || !isDirty || isLoading}
+            >
+              <ThemedText style={styles.buttonText}>
+                {isLoading ? 'Restableciendo...' : 'Restablecer contraseña'}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <BackButton route="/(routes)/(public)/auth/verify-code" style={styles.backButtonContainer} />
           </View>
-
-          <View style={styles.titleContainer}>
-            <ThemedText style={styles.title}>Nueva contraseña</ThemedText>
-            <ThemedText style={styles.subtitle}>
-              Ingresa tu nueva contraseña para {email}
-            </ThemedText>
-          </View>
-
-          {error ? (
-            <ThemedText style={[styles.message, styles.errorMessage]}>
-              {error}
-            </ThemedText>
-          ) : null}
-
-          {success ? (
-            <ThemedText style={[styles.message, styles.successMessage]}>
-              {success}
-            </ThemedText>
-          ) : null}
-
-          <View style={styles.inputsContainer}>
-            <FormTextInput
-              name="newPassword"
-              control={control}
-              placeholder="Nueva contraseña"
-              required
-              secureTextEntry
-              autoCapitalize="none"
-              textContentType="newPassword"
-            />
-
-            <FormTextInput
-              name="confirmPassword"
-              control={control}
-              placeholder="Confirmar contraseña"
-              required
-              secureTextEntry
-              autoCapitalize="none"
-              textContentType="newPassword"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.button, 
-              (!isValid || !isDirty || isLoading) && styles.buttonDisabled
-            ]}
-            onPress={handleSubmit(handleResetPassword)}
-            disabled={!isValid || !isDirty || isLoading}
-          >
-            <ThemedText style={styles.buttonText}>
-              {isLoading ? 'Restableciendo...' : 'Restablecer contraseña'}
-            </ThemedText>
-          </TouchableOpacity>
-
-          <BackButton route="/(routes)/(public)/auth/verify-code" style={styles.backButtonContainer} />
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </BackgroundWrapper>
   );
 }

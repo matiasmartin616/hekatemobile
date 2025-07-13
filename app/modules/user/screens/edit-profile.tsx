@@ -1,21 +1,22 @@
 import SimpleScreenHeader from "../../shared/components/navigation/simple-screen-header";
 import ThemedText from "../../shared/components/themed-text";
 import ThemedView from "../../shared/components/themed-view";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableWithoutFeedback, Keyboard } from "react-native";
 import EditProfileForm from "../components/edit-profile-form";
 import { colors } from "../../shared/theme/theme";
 
 export default function EditProfileScreen() {
     return (
-        <ThemedView style={styles.container}>
-            <SimpleScreenHeader variant="tertiary" />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <ThemedView style={styles.container}>
+                <SimpleScreenHeader variant="tertiary" />
 
-            <ThemedView variant="main" style={styles.container}>
-                <ThemedText style={styles.title}>Edit Profile</ThemedText>
-                <EditProfileForm />
+                <ThemedView variant="main" style={styles.container}>
+                    <ThemedText style={styles.title}>Edit Profile</ThemedText>
+                    <EditProfileForm />
+                </ThemedView>
             </ThemedView>
-
-        </ThemedView>
+        </TouchableWithoutFeedback>
     );
 }
 

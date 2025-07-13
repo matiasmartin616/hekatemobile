@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -59,78 +66,80 @@ export default function RegisterScreen() {
 
     return (
         <BackgroundWrapper>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.logoContainer}>
-                        <Image
-                            source={require('@/assets/images/logo-hekate-circle.png')}
-                            style={styles.logo}
-                            resizeMode="contain"
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.container}>
+                    <View style={styles.content}>
+                        <View style={styles.logoContainer}>
+                            <Image
+                                source={require('@/assets/images/logo-hekate-circle.png')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
+                            <ThemedText style={styles.logoText}>Hekate</ThemedText>
+                        </View>
+
+                        <ThemedText type="title" style={styles.title}>¡Conecta con un nuevo comienzo!</ThemedText>
+                        <ThemedText style={styles.subtitle}>Empieza a visualizar el futuro que sueñas.</ThemedText>
+
+                        {error ? (
+                            <ThemedText style={styles.error}>{error}</ThemedText>
+                        ) : null}
+
+                        <FormTextInput
+                            name="name"
+                            control={control}
+                            placeholder="Nombre completo"
+                            required
                         />
-                        <ThemedText style={styles.logoText}>Hekate</ThemedText>
+
+                        <FormTextInput
+                            name="email"
+                            control={control}
+                            placeholder="Correo electrónico"
+                            required
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                        />
+
+                        <FormTextInput
+                            name="password"
+                            control={control}
+                            placeholder="Contraseña"
+                            required
+                            isPassword
+                        />
+
+                        {/*  <View style={styles.passwordRequirements}>
+                            <ThemedText style={styles.requirementText}>-Mínimo 8 caracteres.</ThemedText>
+                            <ThemedText style={styles.requirementText}>-Utiliza caracteres en mayúscula y minúscula.</ThemedText>
+                            <ThemedText style={styles.requirementText}>-Al menos un carácter especial.</ThemedText>
+                        </View> */}
+
+                        <FormTextInput
+                            name="confirmPassword"
+                            control={control}
+                            placeholder="Repite la contraseña"
+                            required
+                            isPassword
+                        />
+
+                        <TouchableOpacity
+                            style={[
+                                styles.validateButton,
+                                (!isValid || !isDirty || loading) && styles.buttonDisabled
+                            ]}
+                            onPress={handleSubmit(handleRegister)}
+                            disabled={!isValid || !isDirty || loading}
+                        >
+                            <ThemedText style={styles.validateButtonText}>
+                                Registrarte
+                            </ThemedText>
+                        </TouchableOpacity>
+
+                        <BackButton route="/(routes)/(public)/auth/welcome" />
                     </View>
-
-                    <ThemedText type="title" style={styles.title}>¡Conecta con un nuevo comienzo!</ThemedText>
-                    <ThemedText style={styles.subtitle}>Empieza a visualizar el futuro que sueñas.</ThemedText>
-
-                    {error ? (
-                        <ThemedText style={styles.error}>{error}</ThemedText>
-                    ) : null}
-
-                    <FormTextInput
-                        name="name"
-                        control={control}
-                        placeholder="Nombre completo"
-                        required
-                    />
-
-                    <FormTextInput
-                        name="email"
-                        control={control}
-                        placeholder="Correo electrónico"
-                        required
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                    />
-
-                    <FormTextInput
-                        name="password"
-                        control={control}
-                        placeholder="Contraseña"
-                        required
-                        isPassword
-                    />
-
-                    {/*  <View style={styles.passwordRequirements}>
-                        <ThemedText style={styles.requirementText}>-Mínimo 8 caracteres.</ThemedText>
-                        <ThemedText style={styles.requirementText}>-Utiliza caracteres en mayúscula y minúscula.</ThemedText>
-                        <ThemedText style={styles.requirementText}>-Al menos un carácter especial.</ThemedText>
-                    </View> */}
-
-                    <FormTextInput
-                        name="confirmPassword"
-                        control={control}
-                        placeholder="Repite la contraseña"
-                        required
-                        isPassword
-                    />
-
-                    <TouchableOpacity
-                        style={[
-                            styles.validateButton,
-                            (!isValid || !isDirty || loading) && styles.buttonDisabled
-                        ]}
-                        onPress={handleSubmit(handleRegister)}
-                        disabled={!isValid || !isDirty || loading}
-                    >
-                        <ThemedText style={styles.validateButtonText}>
-                            Registrarte
-                        </ThemedText>
-                    </TouchableOpacity>
-
-                    <BackButton route="/(routes)/(public)/auth/welcome" />
                 </View>
-            </View>
+            </TouchableWithoutFeedback>
         </BackgroundWrapper>
     );
 }

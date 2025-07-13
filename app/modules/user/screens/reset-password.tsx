@@ -1,5 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -62,49 +68,51 @@ export default function ResetPasswordScreen({ email, code }: { email: string, co
     }
 
     return (
-        <ThemedView style={styles.container}>
-            <View style={styles.header}>
-                <ThemedText style={styles.title}>Reset Password</ThemedText>
-                <ThemedText style={styles.subtitle}>
-                    Enter your new password for the account below
-                </ThemedText>
-            </View>
-
-            <View style={styles.form}>
-                <View style={styles.emailContainer}>
-                    <ThemedText style={styles.emailLabel}>Email Account</ThemedText>
-                    <ThemedText style={styles.emailValue}>{email || 'No email provided'}</ThemedText>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <ThemedView style={styles.container}>
+                <View style={styles.header}>
+                    <ThemedText style={styles.title}>Reset Password</ThemedText>
+                    <ThemedText style={styles.subtitle}>
+                        Enter your new password for the account below
+                    </ThemedText>
                 </View>
 
-                <FormTextInput
-                    control={control}
-                    name="newPassword"
-                    placeholder="New Password"
-                    label="New Password"
-                    required
-                    isPassword
-                    secureTextEntry
-                />
+                <View style={styles.form}>
+                    <View style={styles.emailContainer}>
+                        <ThemedText style={styles.emailLabel}>Email Account</ThemedText>
+                        <ThemedText style={styles.emailValue}>{email || 'No email provided'}</ThemedText>
+                    </View>
 
-                <FormTextInput
-                    control={control}
-                    name="confirmPassword"
-                    placeholder="Confirm New Password"
-                    label="Confirm Password"
-                    required
-                    isPassword
-                    secureTextEntry
-                />
-
-                <View style={styles.buttonContainer}>
-                    <FormButton
-                        title="Reset Password"
-                        formState={formState}
-                        handleSubmit={handleSubmit(onSubmit)}
+                    <FormTextInput
+                        control={control}
+                        name="newPassword"
+                        placeholder="New Password"
+                        label="New Password"
+                        required
+                        isPassword
+                        secureTextEntry
                     />
+
+                    <FormTextInput
+                        control={control}
+                        name="confirmPassword"
+                        placeholder="Confirm New Password"
+                        label="Confirm Password"
+                        required
+                        isPassword
+                        secureTextEntry
+                    />
+
+                    <View style={styles.buttonContainer}>
+                        <FormButton
+                            title="Reset Password"
+                            formState={formState}
+                            handleSubmit={handleSubmit(onSubmit)}
+                        />
+                    </View>
                 </View>
-            </View>
-        </ThemedView>
+            </ThemedView>
+        </TouchableWithoutFeedback>
     );
 }
 

@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -43,71 +50,73 @@ export default function LoginScreen() {
 
   return (
     <BackgroundWrapper>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('@/assets/images/logo-hekate-circle.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <ThemedText style={styles.logoText}>Hekate</ThemedText>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('@/assets/images/logo-hekate-circle.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+              <ThemedText style={styles.logoText}>Hekate</ThemedText>
+            </View>
+
+            <View style={styles.titleContainerAdjusted}>
+              <ThemedText style={styles.title}>Inicio de sesión</ThemedText>
+              <ThemedText style={styles.subtitle}>
+                Inicia tu camino indicando tu email y contraseña
+              </ThemedText>
+            </View>
+
+            {error ? (
+              <ThemedText style={styles.error}>{error}</ThemedText>
+            ) : null}
+
+            <View style={styles.inputsContainer}>
+              <FormTextInput
+                name="email"
+                control={control}
+                placeholder="Correo electrónico"
+                required
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <View style={styles.spacer} />
+
+              <FormTextInput
+                name="password"
+                control={control}
+                placeholder="Contraseña"
+                required
+                isPassword
+              />
+            </View>
+
+            <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(routes)/(public)/auth/forgot-password')}>
+              <ThemedText style={styles.forgotPasswordText}>
+                ¿Olvidaste tu contraseña?
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (!isValid || !isDirty || isLoading) && styles.buttonDisabled
+              ]}
+              onPress={handleSubmit(handleLogin)}
+              disabled={!isValid || !isDirty || isLoading}
+            >
+              <ThemedText style={styles.buttonText}>
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <BackButton route="/(routes)/(public)/auth/welcome" style={styles.backButtonContainer} />
           </View>
-
-          <View style={styles.titleContainerAdjusted}>
-            <ThemedText style={styles.title}>Inicio de sesión</ThemedText>
-            <ThemedText style={styles.subtitle}>
-              Inicia tu camino indicando tu email y contraseña
-            </ThemedText>
-          </View>
-
-          {error ? (
-            <ThemedText style={styles.error}>{error}</ThemedText>
-          ) : null}
-
-          <View style={styles.inputsContainer}>
-            <FormTextInput
-              name="email"
-              control={control}
-              placeholder="Correo electrónico"
-              required
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-
-            <View style={styles.spacer} />
-
-            <FormTextInput
-              name="password"
-              control={control}
-              placeholder="Contraseña"
-              required
-              isPassword
-            />
-          </View>
-
-          <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/(routes)/(public)/auth/forgot-password')}>
-            <ThemedText style={styles.forgotPasswordText}>
-              ¿Olvidaste tu contraseña?
-            </ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              (!isValid || !isDirty || isLoading) && styles.buttonDisabled
-            ]}
-            onPress={handleSubmit(handleLogin)}
-            disabled={!isValid || !isDirty || isLoading}
-          >
-            <ThemedText style={styles.buttonText}>
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-            </ThemedText>
-          </TouchableOpacity>
-
-          <BackButton route="/(routes)/(public)/auth/welcome" style={styles.backButtonContainer} />
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </BackgroundWrapper>
   );
 }
