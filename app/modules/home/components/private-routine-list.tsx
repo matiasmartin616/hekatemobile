@@ -1,6 +1,6 @@
 import { ScrollView, View, StyleSheet } from "react-native";
 import { PrivateRoutineBlock } from "../../private-routines/api/private-routine-block-api";
-import RoutineBlockItem from '@/app/modules/private-routines/components/routine-block-item';
+import RoutineBlockItem from '@/app/modules/home/components/private-routine-block-home';
 import colors from "../../shared/theme/theme";
 
 interface RoutineListProps {

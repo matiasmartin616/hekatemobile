@@ -7,6 +7,12 @@ import colors from '../../shared/theme/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import RoutineBlockItem from '../components/routine-block-item';
+import ReorderableList, { reorderItems } from 'react-native-reorderable-list';
+import usePrivateRoutineBlockReorder from '../hooks/use-private-routine-block-reorder';
+import { PrivateRoutineBlock } from '../api/private-routine-block-api';
+import {
+    useQueryClient,
+} from '@tanstack/react-query';
 
 const weekDayNames: Record<string, string> = {
     'MONDAY': 'Lunes',
@@ -39,9 +45,14 @@ const getTodayWeekDay = () => {
 export default function PrivateRoutinesScreen() {
     const { data, isLoading } = usePrivateRoutinesData();
     const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
+    const [dayBlocks, setDayBlocks] = useState<PrivateRoutineBlock[]>([]);
+    const queryClient = useQueryClient();
 
+    const reorderBlocksMutation = usePrivateRoutineBlockReorder();
+
+    // Initialize selectedDayId when data loads - defaults to today's routine or first available day
     useEffect(() => {
-        if (data && data.days && data.days.length > 0) {
+        if (data && data.days && data.days.length > 0 && !selectedDayId) {
             const todayWeekDay = getTodayWeekDay();
             const todayRoutine = data.days.find(day => day.weekDay === todayWeekDay);
             if (todayRoutine) {
@@ -50,10 +61,21 @@ export default function PrivateRoutinesScreen() {
                 setSelectedDayId(data.days[0].id);
             }
         }
-    }, [data]);
+    }, [data, selectedDayId]);
 
+    // Update dayBlocks when user switches to a different day
+    useEffect(() => {
+        if (selectedDayId && data) {
+            const selectedDay = data.days?.find(day => day.id === selectedDayId) || null;
+            const sortedBlocks = selectedDay?.blocks
+                ? [...selectedDay.blocks].sort((a, b) => a.order - b.order)
+                : [];
+            setDayBlocks(sortedBlocks);
+        }
+    }, [selectedDayId]);
 
     const handleCreateBlock = () => {
+        const selectedDay = data?.days?.find(day => day.id === selectedDayId);
         if (!selectedDay) return;
 
         router.push({
@@ -65,7 +87,29 @@ export default function PrivateRoutinesScreen() {
         });
     };
 
-    if (isLoading || !data) {
+    const handleReorder = ({ from, to }: { from: number; to: number }) => {
+        if (!selectedDayId) return;
+
+        const originalBlocks = dayBlocks;
+        const reorderedBlocks = reorderItems(dayBlocks, from, to);
+        const reorderedBlocksWithOrder = reorderedBlocks.map((block, index) => ({
+            ...block,
+            order: index,
+        }));
+
+        setDayBlocks(reorderedBlocksWithOrder);
+
+        reorderBlocksMutation.mutate({
+            routineDayId: selectedDayId,
+            reorderedBlocks: reorderedBlocksWithOrder,
+        }, {
+            onError: () => {
+                setDayBlocks(originalBlocks);
+            },
+        });
+    };
+
+    if (isLoading) {
         return (
             <ThemedView style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.light.palette.blue[500]} />
@@ -74,7 +118,7 @@ export default function PrivateRoutinesScreen() {
         );
     }
 
-    const routineDays = data.days || [];
+    const routineDays = data?.days || [];
     const sortedRoutineDays = [...routineDays].sort((a, b) => {
         const weekDayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
         return weekDayOrder.indexOf(a.weekDay) - weekDayOrder.indexOf(b.weekDay);
@@ -82,87 +126,87 @@ export default function PrivateRoutinesScreen() {
 
     const selectedDay = routineDays.find(day => day.id === selectedDayId) || null;
 
-    const sortedBlocks = selectedDay?.blocks
-        ? [...selectedDay.blocks].sort((a, b) => a.order - b.order)
-        : [];
-
     return (
         <ThemedView style={styles.container}>
-            <ScrollView
-                style={styles.content}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-            >
-                <View style={styles.daySelectorContainer}>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.daySelector}
-                    >
-                        {sortedRoutineDays.map((routineDay) => {
-                            const isSelected = routineDay.id === selectedDayId;
-                            const routineCount = routineDay.blocks ? routineDay.blocks.length : 0;
-                            return (
-                                <TouchableOpacity
-                                    key={routineDay.id}
-                                    style={[
-                                        styles.dayButton,
-                                        isSelected && styles.selectedDayButton
-                                    ]}
-                                    onPress={() => setSelectedDayId(routineDay.id)}
-                                >
-                                    <ThemedText
-                                        style={[
-                                            styles.dayButtonText,
-                                            isSelected && styles.selectedDayButtonText
-                                        ]}
-                                    >
-                                        {weekDayNames[routineDay.weekDay]}
-                                    </ThemedText>
-                                    <ThemedText style={[
-                                        styles.dayButtonSubText,
-                                        isSelected && styles.selectedDayButtonSubText
-                                    ]}>
-                                        {routineCount} Bloque{routineCount === 1 ? '' : 's'}
-                                    </ThemedText>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </ScrollView>
-                </View>
-                {selectedDay && (
-                    <>
-                        <View style={styles.blocksContainer}>
-                            {sortedBlocks.length > 0 ? (
-                                <>
-                                    {sortedBlocks.map((block) => (
-                                        <RoutineBlockItem key={block.id} block={block} showEditButton={true} />
-                                    ))}
-                                </>
-                            ) : (
-                                <View style={styles.emptyContainer}>
-                                    <MaterialCommunityIcons
-                                        name="calendar-blank-outline"
-                                        size={64}
-                                        color={colors.light.palette.blue[200]}
-                                    />
-                                    <ThemedText style={styles.emptyText}>
-                                        No hay actividades para este día
-                                    </ThemedText>
-                                </View>
-                            )}
-                        </View>
-                    </>
+            <ReorderableList
+                data={dayBlocks}
+                onReorder={handleReorder}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <View style={styles.blocksContainer}>
+                        <RoutineBlockItem
+                            key={item.id}
+                            block={item}
+                            showEditButton={true}
+                        />
+                    </View>
                 )}
-
-                <TouchableOpacity
-                    style={styles.editButton}
-                    onPress={handleCreateBlock}
-                >
-                    <Ionicons name="add-outline" size={24} color="#1A365D" />
-                    <ThemedText style={styles.editButtonText}>Añadir Bloque</ThemedText>
-                </TouchableOpacity>
-            </ScrollView>
+                ListHeaderComponent={
+                    <View style={styles.daySelectorContainer}>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.daySelector}
+                        >
+                            {sortedRoutineDays.map((routineDay) => {
+                                const isSelected = routineDay.id === selectedDayId;
+                                const routineCount = routineDay.blocks ? routineDay.blocks.length : 0;
+                                return (
+                                    <TouchableOpacity
+                                        key={routineDay.id}
+                                        style={[
+                                            styles.dayButton,
+                                            isSelected && styles.selectedDayButton
+                                        ]}
+                                        onPress={() => setSelectedDayId(routineDay.id)}
+                                    >
+                                        <ThemedText
+                                            style={[
+                                                styles.dayButtonText,
+                                                isSelected && styles.selectedDayButtonText
+                                            ]}
+                                        >
+                                            {weekDayNames[routineDay.weekDay]}
+                                        </ThemedText>
+                                        <ThemedText style={[
+                                            styles.dayButtonSubText,
+                                            isSelected && styles.selectedDayButtonSubText
+                                        ]}>
+                                            {routineCount} Bloque{routineCount === 1 ? '' : 's'}
+                                        </ThemedText>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </ScrollView>
+                    </View>
+                }
+                ListEmptyComponent={
+                    selectedDay && (
+                        <View style={styles.emptyContainer}>
+                            <MaterialCommunityIcons
+                                name="calendar-blank-outline"
+                                size={64}
+                                color={colors.light.palette.blue[200]}
+                            />
+                            <ThemedText style={styles.emptyText}>
+                                No hay actividades para este día
+                            </ThemedText>
+                        </View>
+                    )
+                }
+                ListFooterComponent={
+                    selectedDay && (
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            onPress={handleCreateBlock}
+                        >
+                            <Ionicons name="add-outline" size={24} color="#1A365D" />
+                            <ThemedText style={styles.editButtonText}>Añadir Bloque</ThemedText>
+                        </TouchableOpacity>
+                    )
+                }
+                contentContainerStyle={styles.contentContainer}
+            />
         </ThemedView>
     );
 }
@@ -245,7 +289,7 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     blocksContainer: {
-        marginBottom: 20,
+        marginBottom: 0,
         paddingHorizontal: 16,
     },
     routineCard: {

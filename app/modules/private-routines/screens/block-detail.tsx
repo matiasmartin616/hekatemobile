@@ -77,11 +77,12 @@ export default function BlockDetailScreen() {
         }
       });
     } else {
-      updateBlockMutation.mutate({
-        blockId: updatedBlock.id,
+      createBlockMutation.mutate({
         title: updatedBlock.title,
         description: updatedBlock.description,
-        order: updatedBlock.order
+        order: updatedBlock.order,
+        routineDayId: routineDayId as string,
+        weekDay: weekDay as string
       }, {
         onSuccess: () => {
           router.back();
