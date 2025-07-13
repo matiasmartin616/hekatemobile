@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +15,7 @@ import ThemedText from '@/app/modules/shared/components/themed-text';
 import BackgroundWrapper from '@/app/modules/shared/components/background-wrapper';
 import BackButton from '@/app/modules/shared/components/form/back-button';
 import FormTextInput from '@/app/modules/shared/components/form/text-input';
+import { useToast } from '@/app/modules/shared/context/toast-context';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -19,40 +27,47 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordScreen() {
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
-  const { control, handleSubmit, formState: { isValid, isDirty } } = useForm<ForgotPasswordFormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid, isDirty },
+  } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: ''
+      email: '',
     },
-    mode: 'onChange'
+    mode: 'onChange',
   });
 
   const handleForgotPassword = async (data: ForgotPasswordFormData) => {
     try {
       setIsLoading(true);
-      setError('');
       const res = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: data.email }),
       });
       const responseData = await res.json();
-      if (!res.ok) {
-        throw new Error(responseData.message || 'Error al enviar el correo');
-      }
-      
-      // Navigate to verification code screen
+
+      // We always show the generic message from the backend.
+      showToast(responseData.message, 'info');
+
+      // Always navigate to the verification code screen to prevent email enumeration.
       router.push({
         pathname: '/(routes)/(public)/auth/verify-code',
         params: {
           email: data.email,
-        }
+        },
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo enviar el correo');
+      // Show a generic error toast for unexpected issues (e.g., network error).
+      showToast(
+        'No se pudo completar la solicitud. Por favor, intenta de nuevo.',
+        'error',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -60,60 +75,56 @@ export default function ForgotPasswordScreen() {
 
   return (
     <BackgroundWrapper>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('@/assets/images/logo-hekate-circle.png')}
-              style={styles.logo}
-              resizeMode="contain"
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('@/assets/images/logo-hekate-circle.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+              <ThemedText style={styles.logoText}>Hekate</ThemedText>
+            </View>
+
+            <View style={styles.titleContainerAdjusted}>
+              <ThemedText style={styles.title}>¿Olvidaste tu contraseña?</ThemedText>
+              <ThemedText style={styles.subtitle}>
+                Ingresa tu correo electrónico y te enviaremos instrucciones para recuperarla
+              </ThemedText>
+            </View>
+
+            <View style={styles.inputsContainer}>
+              <FormTextInput
+                name="email"
+                control={control}
+                placeholder="Correo electrónico"
+                required
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.button, 
+                (!isValid || !isDirty || isLoading) && styles.buttonDisabled
+              ]}
+              onPress={handleSubmit(handleForgotPassword)}
+              disabled={!isValid || !isDirty || isLoading}
+            >
+              <ThemedText style={styles.buttonText}>
+                {isLoading ? 'Enviando...' : 'Enviar instrucciones'}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <BackButton
+              route="/(routes)/(public)/auth/login"
+              style={styles.backButtonContainer}
             />
-            <ThemedText style={styles.logoText}>Hekate</ThemedText>
           </View>
-
-          <View style={styles.titleContainerAdjusted}>
-            <ThemedText style={styles.title}>¿Olvidaste tu contraseña?</ThemedText>
-            <ThemedText style={styles.subtitle}>
-              Ingresa tu correo electrónico y te enviaremos instrucciones para recuperarla
-            </ThemedText>
-          </View>
-
-          {error ? (
-            <ThemedText style={[
-              styles.message,
-              error.startsWith('success:') ? styles.successMessage : styles.errorMessage
-            ]}>
-              {error.startsWith('success:') ? error.replace('success:', '') : error}
-            </ThemedText>
-          ) : null}
-
-          <View style={styles.inputsContainer}>
-            <FormTextInput
-              name="email"
-              control={control}
-              placeholder="Correo electrónico"
-              required
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.button, 
-              (!isValid || !isDirty || isLoading) && styles.buttonDisabled
-            ]}
-            onPress={handleSubmit(handleForgotPassword)}
-            disabled={!isValid || !isDirty || isLoading}
-          >
-            <ThemedText style={styles.buttonText}>
-              {isLoading ? 'Enviando...' : 'Enviar instrucciones'}
-            </ThemedText>
-          </TouchableOpacity>
-
-          <BackButton route="/(routes)/(public)/auth/login" style={styles.backButtonContainer} />
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </BackgroundWrapper>
   );
 }
