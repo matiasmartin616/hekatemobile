@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { StyleSheet, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import ThemedText from "@/app/modules/shared/components/themed-text";
 import BackgroundWrapper from "@/app/modules/shared/components/background-wrapper";
@@ -145,79 +152,84 @@ export default function VerifyCodeScreen() {
 
     return (
         <BackgroundWrapper>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.logoContainer}>
-                        <Image
-                            source={require('@/assets/images/logo-hekate-circle.png')}
-                            style={styles.logo}
-                            resizeMode="contain"
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.container}>
+                    <View style={styles.content}>
+                        <View style={styles.logoContainer}>
+                            <Image
+                                source={require('@/assets/images/logo-hekate-circle.png')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
+                            <ThemedText style={styles.logoText}>Hekate</ThemedText>
+                        </View>
+
+                        <View style={styles.titleContainer}>
+                            <ThemedText style={styles.title}>Verificar código</ThemedText>
+                            <ThemedText style={styles.subtitle}>
+                                Introduce el código de verificación enviado a {email}
+                            </ThemedText>
+                        </View>
+
+                        {error ? (
+                            <ThemedText style={[styles.message, styles.errorMessage]}>
+                                {error}
+                            </ThemedText>
+                        ) : null}
+
+                        {success ? (
+                            <ThemedText style={[styles.message, styles.successMessage]}>
+                                {success}
+                            </ThemedText>
+                        ) : null}
+
+                        <View style={styles.inputsContainer}>
+                            <FormTextInput
+                                name="code"
+                                control={control}
+                                placeholder="12345"
+                                required
+                                keyboardType="numeric"
+                                maxLength={5}
+                                textContentType="oneTimeCode"
+                                autoComplete="sms-otp"
+                                autoFocus
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.button, 
+                                (!isValid || !isDirty || isLoading) && styles.buttonDisabled
+                            ]}
+                            onPress={handleSubmit(handleVerifyCode)}
+                            disabled={!isValid || !isDirty || isLoading}
+                        >
+                            <ThemedText style={styles.buttonText}>
+                                {isLoading ? 'Verificando...' : 'Verificar código'}
+                            </ThemedText>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.resendButton,
+                                (isResending || resendCountdown > 0) && styles.buttonDisabled
+                            ]}
+                            onPress={handleResendCode}
+                            disabled={isResending || resendCountdown > 0}
+                        >
+                            <ThemedText style={styles.resendButtonText}>
+                                {resendButtonTitle()}
+                            </ThemedText>
+                        </TouchableOpacity>
+
+                        <BackButton
+                            route="/(routes)/(public)/auth/forgot-password"
+                            style={styles.backButtonContainer}
                         />
-                        <ThemedText style={styles.logoText}>Hekate</ThemedText>
                     </View>
-
-                    <View style={styles.titleContainer}>
-                        <ThemedText style={styles.title}>Verificar código</ThemedText>
-                        <ThemedText style={styles.subtitle}>
-                            Introduce el código de verificación enviado a {email}
-                        </ThemedText>
-                    </View>
-
-                    {error ? (
-                        <ThemedText style={[styles.message, styles.errorMessage]}>
-                            {error}
-                        </ThemedText>
-                    ) : null}
-
-                    {success ? (
-                        <ThemedText style={[styles.message, styles.successMessage]}>
-                            {success}
-                        </ThemedText>
-                    ) : null}
-
-                    <View style={styles.inputsContainer}>
-                        <FormTextInput
-                            name="code"
-                            control={control}
-                            placeholder="12345"
-                            required
-                            keyboardType="numeric"
-                            maxLength={5}
-                            textContentType="oneTimeCode"
-                            autoComplete="sms-otp"
-                            autoFocus
-                        />
-                    </View>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.button, 
-                            (!isValid || !isDirty || isLoading) && styles.buttonDisabled
-                        ]}
-                        onPress={handleSubmit(handleVerifyCode)}
-                        disabled={!isValid || !isDirty || isLoading}
-                    >
-                        <ThemedText style={styles.buttonText}>
-                            {isLoading ? 'Verificando...' : 'Verificar código'}
-                        </ThemedText>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[
-                            styles.resendButton,
-                            (isResending || resendCountdown > 0) && styles.buttonDisabled
-                        ]}
-                        onPress={handleResendCode}
-                        disabled={isResending || resendCountdown > 0}
-                    >
-                        <ThemedText style={styles.resendButtonText}>
-                            {resendButtonTitle()}
-                        </ThemedText>
-                    </TouchableOpacity>
-
-                    <BackButton route="/(routes)/(public)/auth/forgot-password" style={styles.backButtonContainer} />
                 </View>
-            </View>
+            </TouchableWithoutFeedback>
         </BackgroundWrapper>
     );
 }

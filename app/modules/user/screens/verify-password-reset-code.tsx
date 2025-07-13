@@ -8,7 +8,7 @@ import ThemedView from "../../shared/components/themed-view";
 import SimpleScreenHeader from "@modules/shared/components/navigation/simple-screen-header";
 import FormTextInput from "@modules/shared/components/form/text-input";
 import FormButton from "@modules/shared/components/form/form-button";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, TouchableWithoutFeedback, Keyboard } from "react-native";
 import useResetPassword from "../../auth/hooks/use-reset-password";
 import { useAuth } from "../../shared/context/auth-context";
 import { useToast } from "../../shared/context/toast-context";
@@ -131,44 +131,46 @@ export default function VerifyPasswordResetCodeScreen() {
     }, []);
 
     return (
-        <ThemedView style={styles.container}>
-            <SimpleScreenHeader variant="tertiary" />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <ThemedView style={styles.container}>
+                <SimpleScreenHeader variant="tertiary" />
 
-            <View style={styles.content}>
-                <ThemedText style={styles.instruction}>
-                    Introduce el código de verificación enviado a tu correo electrónico
-                </ThemedText>
+                <View style={styles.content}>
+                    <ThemedText style={styles.instruction}>
+                        Introduce el código de verificación enviado a tu correo electrónico
+                    </ThemedText>
 
-                <View style={styles.form}>
-                    <FormTextInput
-                        control={control}
-                        name="code"
-                        placeholder="12345"
-                        label="Código de verificación"
-                        required
-                        keyboardType="numeric"
-                        maxLength={5}
-                        textContentType="oneTimeCode"
-                        autoComplete="sms-otp"
-                    />
+                    <View style={styles.form}>
+                        <FormTextInput
+                            control={control}
+                            name="code"
+                            placeholder="12345"
+                            label="Código de verificación"
+                            required
+                            keyboardType="numeric"
+                            maxLength={5}
+                            textContentType="oneTimeCode"
+                            autoComplete="sms-otp"
+                        />
 
-                    <FormButton
-                        title={verifyPasswordResetCodeMutation.isPending ? 'Verificando...' : 'Verificar'}
-                        formState={formState}
-                        handleSubmit={handleSubmit(handleVerifyPasswordResetCode)}
-                        loading={verifyPasswordResetCodeMutation.isPending}
-                    />
+                        <FormButton
+                            title={verifyPasswordResetCodeMutation.isPending ? 'Verificando...' : 'Verificar'}
+                            formState={formState}
+                            handleSubmit={handleSubmit(handleVerifyPasswordResetCode)}
+                            loading={verifyPasswordResetCodeMutation.isPending}
+                        />
 
-                    <ThemedButton
-                        title={resendButtonTitle()}
-                        variant="secondary"
-                        onPress={handleResendPasswordResetCode}
-                        style={styles.resendButton}
-                        disabled={requestPasswordResetCodeMutation.isPending || resendCountdown > 0}
-                    />
+                        <ThemedButton
+                            title={resendButtonTitle()}
+                            variant="secondary"
+                            onPress={handleResendPasswordResetCode}
+                            style={styles.resendButton}
+                            disabled={requestPasswordResetCodeMutation.isPending || resendCountdown > 0}
+                        />
+                    </View>
                 </View>
-            </View>
-        </ThemedView>
+            </ThemedView>
+        </TouchableWithoutFeedback>
     );
 }
 
